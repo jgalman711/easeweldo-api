@@ -30,7 +30,7 @@ class TimeRecordController extends Controller
             $latestTimeRecord = $this->timeRecordService->create($employee);
         }
         $latestTimeRecord->employee_id = $employee->id;
-        $latestTimeRecord->clock_in = now();
+        $latestTimeRecord->clock_in = now()->format('H:i:s');
         $latestTimeRecord->save();
         return $this->sendResponse(new BaseResource($latestTimeRecord), 'Clock in successful.');
     }
@@ -42,7 +42,7 @@ class TimeRecordController extends Controller
         if ($latestTimeRecord && $latestTimeRecord->clock_out || !$latestTimeRecord) {
             return $this->sendError('Employee is already clocked out');
         }
-        $latestTimeRecord->clock_out = now();
+        $latestTimeRecord->clock_out = now()->format('H:i:s');
         $latestTimeRecord->save();
         return $this->sendResponse(new BaseResource($latestTimeRecord), 'Clock out successful.');
     }

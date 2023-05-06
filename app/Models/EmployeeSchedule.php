@@ -16,16 +16,6 @@ class EmployeeSchedule extends Model
         'start_date'
     ];
 
-    // public function employee()
-    // {
-    //     return $this->belongsTo(Employee::class);
-    // }
-
-    // public function workSchedule()
-    // {
-    //     return $this->belongsTo(WorkSchedule::class);
-    // }
-
     public function employee()
     {
         return $this->belongsTo(Employee::class);

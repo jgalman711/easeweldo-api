@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('employees', function (Blueprint $table) {
@@ -21,10 +18,14 @@ return new class extends Migration
             $table->date('date_of_hire');
             $table->date('date_of_birth');
             $table->string('contact_number');
-            $table->string('social_security_number')->unique();
             $table->string('address');
+            $table->string('sss_number');
+            $table->string('pagibig_number');
+            $table->string('philhealth_number');
+            $table->string('tax_identification_number');
             $table->string('bank_account_number');
-            $table->decimal('pay_rate', 10, 2);
+            $table->integer('sick_leaves');
+            $table->integer('vacation_leaves');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -33,9 +34,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {

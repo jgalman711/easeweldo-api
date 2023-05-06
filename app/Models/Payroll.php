@@ -4,23 +4,34 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payroll extends Model
 {
-    use HasFactory;
-
+    use HasFactory, SoftDeletes;
+    
     protected $fillable = [
         'employee_id',
         'period_id',
-        'total_earnings',
-        'overtime',
-        'total_hours_worked',
-        'night_diff',
-        'total_deductions',
-        'pag_ibig',
-        'philhealth',
-        'sss',
-        'net_pay',
+        'basic_salary',
+        'total_late_minutes',
+        'total_late_deductions',
+        'total_absent_days',
+        'total_absent_deductions',
+        'total_overtime_minutes',
+        'total_overtime_pay',
+        'total_undertime_minutes',
+        'total_undertime_deductions',
+        'sss_contribution',
+        'philhealth_contribution',
+        'pagibig_contribution',
+        'total_contributions',
+        'taxable_income',
+        'base_tax',
+        'compensation_level',
+        'tax_rate',
+        'net_salary',
+        'status'
     ];
 
     public function employee()

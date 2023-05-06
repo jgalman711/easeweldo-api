@@ -16,10 +16,6 @@ return new class extends Migration
             $table->float('night_diff_rate');
             $table->float('regular_holiday_rate');
             $table->float('special_holiday_rate');
-            $table->float('tax_rate');
-            $table->float('sss_contribution')->nullable();
-            $table->float('pagibig_contribution')->nullable();
-            $table->float('philhealth_contribution')->nullable();
             $table->timestamps();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
         });

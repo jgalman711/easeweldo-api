@@ -10,10 +10,8 @@ class PeriodRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name' => 'string|max:255',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-            'status' => Rule::in(Period::getStatusOptions())
+            'type' => Rule::in(Period::TYPES),
+            'salary_date' => self::REQUIRED_DATE
         ];
     }
 }

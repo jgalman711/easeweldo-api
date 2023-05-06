@@ -24,9 +24,13 @@ class Employee extends Model
         'date_of_birth',
         'contact_number',
         'address',
-        'social_security_number',
+        'sss_number',
+        'pagibig_number',
+        'philhealth_number',
+        'tax_identification_number',
         'bank_account_number',
-        'pay_rate'
+        'sick_leaves',
+        'vacation_leaves'
     ];
 
     public function company(): BelongsTo

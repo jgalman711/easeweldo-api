@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PayrollRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
-use App\Models\Employee;
-use App\Models\Payroll;
 use App\Services\PayrollService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -20,9 +18,9 @@ class PayrollController extends Controller
         $this->payrollService = $payrollService;
     }
 
-    public function index(Employee $employee): JsonResponse
+    public function index(Company $company): JsonResponse
     {
-        $payrolls = $employee->payrolls;
+        $payrolls = $company->payrolls;
         return $this->sendResponse(BaseResource::collection($payrolls), 'Payrolls retrieved successfully.');
     }
     
@@ -33,40 +31,37 @@ class PayrollController extends Controller
         $failedPayroll = [];
         foreach ($company->employees as $employee) {
             try {
-                $payroll = $this->payrollService->compute($employee, $request->period_id);
+                $period = $company->getPeriodById($request->period_id);
+                $payroll = $this->payrollService->compute($employee, $period);
                 array_push($successPayroll, $payroll);
             } catch (Exception $e) {
                 array_push($failedPayroll, $e->getMessage());
             }
         }
-        return $this->sendResponse(BaseResource::collection($failedPayroll), 'Payrolls retrieved successfully.');
+        return $this->sendResponse([
+            $successPayroll,
+            $failedPayroll
+        ], 'Payrolls retrieved successfully.');
     }
 
-    public function show(Employee $employee, Payroll $payroll): JsonResponse
+    public function show(Company $company, int $payrollId): JsonResponse
     {
-        if ($employee->id != $payroll->employee_id) {
-            return $this->sendError("Payroll does not belong to the user.");
-        }
+        $payroll = $company->payrolls->where('id', $payrollId)->first();
         return $this->sendResponse(new BaseResource($payroll), 'Payroll retrieved successfully');
     }
 
-    // Payroll should not be updated.
-    public function update(PayrollRequest $request, Employee $employee, Payroll $payroll): JsonResponse
+    // Payroll should not be updated I think. But will do this feature next.
+    public function update(PayrollRequest $request, Company $company, int $payrollId): JsonResponse
     {
-        if ($employee->id != $payroll->employee_id) {
-            return $this->sendError("Payroll does not belong to the user.");
-        }
+        $payroll = $company->payrolls->where('id', $payrollId)->first();
         $input = $request->validated();
-        $input['employee_id'] = $employee->id;
         $payroll->update($input);
         return $this->sendResponse(new BaseResource($payroll), 'Payroll updated successfully.');
     }
 
-    public function destroy(Employee $employee, Payroll $payroll): JsonResponse
+    public function destroy(Company $company, int $payrollId): JsonResponse
     {
-        if ($employee->id != $payroll->employee_id) {
-            return $this->sendError("Payroll does not belong to the user.");
-        }
+        $payroll = $company->payrolls->where('id', $payrollId)->first();
         return $this->sendResponse(new BaseResource($payroll), 'Payroll deleted successfully');
     }
 }

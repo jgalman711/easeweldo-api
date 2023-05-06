@@ -27,7 +27,7 @@ class RegisterController extends BaseController
         $input = $request->all();
         $input['password'] = bcrypt($input['password']);
         $user = User::create($input);
-        $success['token'] =  $user->createToken('MyApp')->plainTextToken;
+        $success['token'] =  $user->createToken('SweldoNaPH')->plainTextToken;
         $success['name'] =  $user->fullName;
         return $this->sendResponse($success, 'User register successfully.');
     }

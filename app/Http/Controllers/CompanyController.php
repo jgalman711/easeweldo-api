@@ -18,6 +18,7 @@ class CompanyController extends Controller
     public function store(CompanyRequest $request): JsonResponse
     {
         $input = $request->validated();
+        $input['slug'] = strtolower(str_replace(' ', '-', $input['name']));
         $input['status'] = Company::STATUS_ACTIVE;
         $company = Company::create($input);
         return $this->sendResponse(new BaseResource($company), 'Company created successfully.');
@@ -31,6 +32,7 @@ class CompanyController extends Controller
     public function update(CompanyRequest $request, Company $company): JsonResponse
     {
         $input = $request->validated();
+        $input['slug'] = strtolower(str_replace(' ', '-', $input['name']));
         $company->update($input);
         return $this->sendResponse(new BaseResource($company), 'Company updated successfully.');
     }
