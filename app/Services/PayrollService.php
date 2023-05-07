@@ -20,6 +20,9 @@ class PayrollService
     protected $sss;
     protected $tax;
 
+    public const FREQUENCY_SEMI_MONTHLY = 2;
+    public const FREQUENCY_WEEKLY = 4.33;
+
     public function __construct(PagIbig $pagIbig, PhilHealth $philHealth, SSS $sss, TaxService $tax)
     {
         $this->pagibig = $pagIbig;
@@ -69,23 +72,25 @@ class PayrollService
         $totalUnderTimeDeductions = round($hourlyRate * ($totalUnderTime / 60), 2);
         $totalOverTimePay = round($totalOvertime / 60 * $hourlyRate * $employee->salaryComputation->overtime_rate, 2);
         
+        $basicSalary = $employee->salaryComputation->basic_salary;
+        $grossPay = $basicSalary + $totalOverTimePay - $totalLateDeductions - $totalUnderTimeDeductions;
         //$totalNightDiffPay = TBD
 
-        if ($period->type == Period::TYPE_MONTHLY) {
-            $basicSalary = $employee->salaryComputation->basic_salary;
-        } elseif ($period->type == Period::TYPE_SEMI_MONTHLY) {
-            $basicSalary = $employee->salaryComputation->basic_salary / 2;
+        $sssContribution = $this->sss->compute($basicSalary);
+        $pagIbigContribution = $this->pagibig->compute($basicSalary);
+        $philHealthContribution = $this->philhealth->compute($basicSalary);
+
+        if ($period->type == Period::TYPE_SEMI_MONTHLY) {
+            $basicSalary = $basicSalary / self::FREQUENCY_SEMI_MONTHLY;
+            $sssContribution = $sssContribution / self::FREQUENCY_SEMI_MONTHLY;
+            $pagIbigContribution = $pagIbigContribution / self::FREQUENCY_SEMI_MONTHLY;
+            $philHealthContribution = $philHealthContribution / self::FREQUENCY_SEMI_MONTHLY;
         } elseif ($period->type == Period::TYPE_WEEKLY) {
-            $basicSalary = $employee->salaryComputation->basic_salary / 4.33;
-        } else {
-            throw new Exception("Invalid period type: " . $period->type);
+            $basicSalary = $basicSalary / self::FREQUENCY_WEEKLY;
+            $sssContribution = $sssContribution / self::FREQUENCY_WEEKLY;
+            $pagIbigContribution = $pagIbigContribution / self::FREQUENCY_WEEKLY;
+            $philHealthContribution = $philHealthContribution / self::FREQUENCY_WEEKLY;
         }
-
-        $grossPay = $basicSalary + $totalOverTimePay - $totalLateDeductions - $totalUnderTimeDeductions;
-
-        $pagIbigContribution = $this->pagibig->compute($grossPay);
-        $philHealthContribution = $this->philhealth->compute($grossPay);
-        $sssContribution = $this->sss->compute($grossPay);
 
         $totalContributions = $pagIbigContribution + $philHealthContribution + $sssContribution;
 
