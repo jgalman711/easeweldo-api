@@ -31,6 +31,7 @@ return new class extends Migration
             $table->decimal('base_tax', 8, 2);
             $table->decimal('compensation_level', 8, 2);
             $table->decimal('tax_rate', 8, 2);
+            $table->decimal('income_tax', 8, 2);
             $table->decimal('net_salary', 8, 2);
             $table->enum('status', ['pending', 'processing', 'approved', 'rejected', 'completed'])->default('pending');
             $table->timestamps();

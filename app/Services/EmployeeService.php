@@ -22,6 +22,7 @@ class EmployeeService
             if ($this->isRoleBusinessAdmin($data)) {
                 $role = Role::where('name', self::BUSINESS_ADMIN_ROLE)->first();
                 $temporaryPassword = Str::random(10);
+                $input['mobile_number'] = $data['contact_number'];
                 $input['password'] = bcrypt($temporaryPassword);
                 $input['employee_id'] = $employee->id;
                 $user = User::create($input);

@@ -30,6 +30,7 @@ class Payroll extends Model
         'base_tax',
         'compensation_level',
         'tax_rate',
+        'income_tax',
         'net_salary',
         'status'
     ];

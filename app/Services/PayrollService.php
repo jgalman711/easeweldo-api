@@ -91,8 +91,8 @@ class PayrollService
 
         $taxableIncome = $grossPay - $totalContributions;
 
-        $incomeTax = $this->tax->compute($taxableIncome);
-        $netPay = $grossPay - $totalContributions - $incomeTax;
+        $incomeTax = $this->tax->compute($taxableIncome, $period->type);
+        $netPay = $taxableIncome - $incomeTax;
 
         return Payroll::create([
             'employee_id' => $employee->id,
@@ -114,6 +114,7 @@ class PayrollService
             'base_tax' => $this->tax->getBaseTax(),
             'compensation_level' => $this->tax->getCompensationLevel(),
             'tax_rate' => $this->tax->getTaxRate(),
+            'income_tax' => $incomeTax,
             'net_salary' => $netPay
         ]);
     }

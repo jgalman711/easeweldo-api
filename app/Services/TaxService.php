@@ -2,15 +2,31 @@
 
 namespace App\Services;
 
+use App\Models\Tax;
+use Illuminate\Support\Facades\Cache;
+
 class TaxService
 {
-    protected $baseTax = 2500;
-    protected $compensationLevel = 33333;
-    protected $taxRate = 0.25;
+    protected $baseTax;
+    protected $compensationLevel;
+    protected $taxRate;
 
-    public function compute(float $taxableAmount): float
+    public function compute(float $taxableAmount, string $type): float
     {
-        return ($taxableAmount - $this->compensationLevel) * $this->taxRate;
+        $tax = Cache::remember('taxes', 3660, function () use ($type, $taxableAmount) {
+            return Tax::where([
+                'type' => $type,
+                ['min_compensation', '<=', $taxableAmount],
+                ['max_compensation', '>=', $taxableAmount]
+            ])->first();
+        });
+
+        $this->baseTax = $tax->base_tax;
+        $this->compensationLevel = $tax->min_compensation;
+        $this->taxRate = $tax->over_compensation_level_rate;
+
+        $overCompensation = $taxableAmount - $tax->min_compensation;
+        return $overCompensation * $tax->over_compensation_level_rate + $tax->base_tax;
     }
 
     public function getBaseTax(): float

@@ -28,7 +28,8 @@ class EmployeeRequest extends BaseRequest
                 Rule::requiredIf($this->has('role') && $this->role == 'business-admin'),
                 'numeric',
                 'unique:users,mobile_number'
-            ]
+            ],
+            'role' => 'string|max:255'
         ];
     }
 }
