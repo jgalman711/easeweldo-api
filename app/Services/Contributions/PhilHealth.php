@@ -3,12 +3,16 @@
 namespace App\Services\Contributions;
 
 use App\Models\PhilHealth as PhilHealthModel;
+use Illuminate\Support\Facades\Cache;
 
 class PhilHealth extends ContributionService
 {
     public function compute(float $salary): float
     {
-        $philhealth = PhilHealthModel::where('status', PhilHealthModel::ACTIVE)->first();
+        Cache::forget('philhealth');
+        $philhealth = Cache::remember('philhealth', 3660, function () {
+            return PhilHealthModel::where('status', PhilHealthModel::ACTIVE)->first();
+        });
 
         $contribution = $salary * $philhealth->contribution_rate;
         if ($contribution < $philhealth->min_contribution) {

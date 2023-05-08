@@ -13,7 +13,7 @@ class LoginController extends BaseController
     {
         if (Auth::attempt(['mobile_number' => $request->mobile_number, 'password' => $request->password])) {
             $user = Auth::user();
-            $success['token'] =  $user->createToken('MyApp')->plainTextToken;
+            $success['token'] =  $user->createToken(env('APP_NAME'))->plainTextToken;
             return $this->sendResponse($success, 'User login successfully.');
         } else {
             return $this->sendError('Unauthorised.', ['error'=>'Unauthorised']);

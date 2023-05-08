@@ -26,9 +26,10 @@ class EmployeeRequest extends BaseRequest
             'vacation_leaves' => self::REQUIRED_NUMERIC,
             'mobile_number' => [
                 Rule::requiredIf($this->has('role') && $this->role == 'business-admin'),
-                'numeric',
+                'regex:/^(09|\+639)\d{9}$/',
                 'unique:users,mobile_number'
             ],
+            'email' => 'required|email|unique:users,email',
             'role' => 'string|max:255'
         ];
     }

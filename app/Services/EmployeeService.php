@@ -21,11 +21,10 @@ class EmployeeService
             $employee = Employee::create($data);
             if ($this->isRoleBusinessAdmin($data)) {
                 $role = Role::where('name', self::BUSINESS_ADMIN_ROLE)->first();
-                $temporaryPassword = Str::random(10);
-                $input['mobile_number'] = $data['contact_number'];
-                $input['password'] = bcrypt($temporaryPassword);
-                $input['employee_id'] = $employee->id;
-                $user = User::create($input);
+                $temporaryPassword = Str::random(6);
+                $data['password'] = bcrypt($temporaryPassword);
+                $data['employee_id'] = $employee->id;
+                $user = User::create($data);
                 $user->assignRole($role);
                 $this->message .= ' The business admin temporary password is ' . $temporaryPassword;
             }

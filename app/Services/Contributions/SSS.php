@@ -12,7 +12,7 @@ class SSS extends ContributionService
 
     public function compute(float $salary): float
     {
-        $sss = Cache::remember('taxes', 3660, function () use ($salary) {
+        $sss = Cache::remember('sss', 3660, function () use ($salary) {
             return SSSModel::where([
                 ['min_compensation', '<=', $salary],
                 ['max_compensation', '>=', $salary]

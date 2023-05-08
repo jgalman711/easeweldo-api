@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Employee;
 use App\Models\Payroll;
+use App\Models\PayrollTaxesContributions;
 use App\Models\Period;
 use App\Models\TimeRecord;
 use App\Services\Contributions\PagIbig;
@@ -12,6 +13,7 @@ use App\Services\Contributions\SSS;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class PayrollService
 {
@@ -46,7 +48,6 @@ class PayrollService
                 $absences++;
                 continue;
             }
-            
             $actualClockIn = $this->timeOnlyFormat($timeRecord->clock_in);
             $expectedClockIn = $this->timeOnlyFormat($timeRecord->expected_clock_in);
 
@@ -99,29 +100,44 @@ class PayrollService
         $incomeTax = $this->tax->compute($taxableIncome, $period->type);
         $netPay = $taxableIncome - $incomeTax;
 
-        return Payroll::create([
-            'employee_id' => $employee->id,
-            'period_id' => $period->id,
-            'basic_salary' => $basicSalary,
-            'total_late_minutes' => $totalMinutesLate,
-            'total_late_deductions' => $totalLateDeductions,
-            'total_absent_days' => $absences,
-            'total_absent_deductions' => $totalAbsentDeductions,
-            'total_overtime_minutes' => $totalOvertime,
-            'total_overtime_pay' => $totalOverTimePay,
-            'total_undertime_minutes' => $totalUnderTime,
-            'total_undertime_deductions' => $totalUnderTimeDeductions,
-            'sss_contribution' => $sssContribution,
-            'philhealth_contribution' => $philHealthContribution,
-            'pagibig_contribution' => $pagIbigContribution,
-            'total_contributions' => $totalContributions,
-            'taxable_income' => $taxableIncome,
-            'base_tax' => $this->tax->getBaseTax(),
-            'compensation_level' => $this->tax->getCompensationLevel(),
-            'tax_rate' => $this->tax->getTaxRate(),
-            'income_tax' => $incomeTax,
-            'net_salary' => $netPay
-        ]);
+        try {
+            DB::beginTransaction();
+            $payroll = Payroll::create([
+                'employee_id' => $employee->id,
+                'period_id' => $period->id,
+                'basic_salary' => $basicSalary,
+                'total_late_minutes' => $totalMinutesLate,
+                'total_late_deductions' => $totalLateDeductions,
+                'total_absent_days' => $absences,
+                'total_absent_deductions' => $totalAbsentDeductions,
+                'total_overtime_minutes' => $totalOvertime,
+                'total_overtime_pay' => $totalOverTimePay,
+                'total_undertime_minutes' => $totalUnderTime,
+                'total_undertime_deductions' => $totalUnderTimeDeductions,
+                'sss_contribution' => $sssContribution,
+                'philhealth_contribution' => $philHealthContribution,
+                'pagibig_contribution' => $pagIbigContribution,
+                'total_contributions' => $totalContributions,
+                'taxable_income' => $taxableIncome,
+                'base_tax' => $this->tax->getBaseTax(),
+                'compensation_level' => $this->tax->getCompensationLevel(),
+                'tax_rate' => $this->tax->getTaxRate(),
+                'income_tax' => $incomeTax,
+                'net_salary' => $netPay
+            ]);
+            PayrollTaxesContributions::create([
+                'payroll_id' => $payroll->id,
+                'company_id' => $employee->company->id,
+                'withholding_tax' => $this->tax->getBaseTax(),
+                'sss_contribution' => $this->sss->getEmployerShare(),
+                'pagibig_contribution' => $this->pagibig->getEmployerShare()
+            ]);
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+        return $payroll;
     }
 
     private function validate(Period $period, Employee $employee): void

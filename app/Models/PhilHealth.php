@@ -16,11 +16,9 @@ class PhilHealth extends Model
     protected $table = 'philhealth';
 
     protected $fillable = [
-        'min_compensation',
-        'max_compensation',
         'min_contribution',
         'max_contribution',
-        'premium_rate',
+        'contribution_rate',
         'status'
     ];
 }

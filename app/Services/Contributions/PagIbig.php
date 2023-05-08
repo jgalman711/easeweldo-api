@@ -20,12 +20,14 @@ class PagIbig extends ContributionService
             ])->first();
         });
 
-        $this->employeeShare = $pagibig->employee_contribution;
-        $this->employerShare = $pagibig->employer_contribution;
-
-        return $salary >= PagibigModel::MAX_SALARY
-            ? PagibigModel::MAX_SALARY * $pagibig->employee_contribution_rate
-            : $salary * $pagibig->employee_contribution_rate;
+        if ($salary >= PagibigModel::MAX_SALARY) {
+            $this->employeeShare = PagibigModel::MAX_SALARY * $pagibig->employee_contribution_rate;
+            $this->employerShare = PagibigModel::MAX_SALARY * $pagibig->employer_contribution_rate;
+        } else {
+            $this->employeeShare = $salary * $pagibig->employee_contribution_rate;
+            $this->employerShare = $salary * $pagibig->employer_contribution_rate;
+        }
+        return $this->employeeShare;
     }
 
     public function getEmployerShare(): float

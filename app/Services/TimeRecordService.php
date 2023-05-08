@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Employee;
 use App\Models\TimeRecord;
+use Exception;
 
 class TimeRecordService
 {
@@ -12,6 +13,7 @@ class TimeRecordService
         $workSchedule = $employee->schedules()
             ->where('start_date', '<=', now())
             ->first();
+        throw_unless($workSchedule, new Exception('No available work schedule'));
 
         $dayClockInProperty = strtolower(date('l')) . '_clock_in_time';
         $dayClockOutProperty = strtolower(date('l')) . '_clock_out_time';
