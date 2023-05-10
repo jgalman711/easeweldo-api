@@ -32,31 +32,39 @@ class LeaveService
         return $leaves;
     }
 
-    public function applyLeave(Employee $employee, array $data): Leave
+    public function applyLeave(array $data): Leave
     {
         $createdByUser = Auth::user();
         $data['created_by'] = $createdByUser->id;
+        $data['status'] = Leave::PENDING;
+        $leave = Leave::create($data);
+
         if ($createdByUser->hasRole('business-admin') || $createdByUser->hasRole('super-admin')) {
-            $data['status'] = Leave::APPROVED;
-            $this->insertToTimeRecords($employee, $data);
-        } else {
-            $data['status'] = Leave::PENDING;
+            $this->approve($leave);
         }
-        return Leave::create($data);
+        return $leave;
     }
 
-    public function insertToTimeRecords(Employee $employee, array $data): TimeRecord
+    public function approve(Leave $leave): void
     {
+        $leave->status = Leave::APPROVED;
+        $leave->save();
+        $this->insertToTimeRecords($leave);
+    }
+
+    public function insertToTimeRecords(Leave $leave): TimeRecord
+    {
+        $employee = $leave->employee;
         $timeRecord = TimeRecord::whereDate(
             'created_at',
             '=',
-            date('Y-m-d', strtotime($data['start_date']))
+            date('Y-m-d', strtotime($leave->start_date))
         )->where('employee_id', $employee->id)->first();
         if (!$timeRecord) {
-            $timeRecord = $this->timeRecordService->create($employee, $data['start_date'], $data['end_date']);
+            $timeRecord = $this->timeRecordService->create($employee, $leave->start_date, $leave->end_date);
         }
-        $timeRecord->clock_in = $data['start_date'];
-        $timeRecord->clock_out = $data['end_date'];
+        $timeRecord->clock_in = $leave->start_date;
+        $timeRecord->clock_out = $leave->end_date;
         $timeRecord->save();
         return $timeRecord;
     }

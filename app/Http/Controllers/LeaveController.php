@@ -34,7 +34,7 @@ class LeaveController extends Controller
         $data = $leaveRequest->validated();
         $data['company_id'] = $company->id;
         $data['employee_id'] = $employee->id;
-        $leave = $this->leaveService->applyLeave($employee, $data);
+        $leave = $this->leaveService->applyLeave($data);
         return $this->sendResponse(new BaseResource($leave), 'Leave created successfully.');
     }
 
