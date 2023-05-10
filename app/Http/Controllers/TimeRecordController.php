@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
-use App\Models\TimeRecord;
 use App\Services\TimeRecordService;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Http\JsonResponse;
 
 class TimeRecordController extends Controller
 {
@@ -40,7 +40,7 @@ class TimeRecordController extends Controller
         }
     }
 
-    public function clockOut(Company $company, int $employeeId)
+    public function clockOut(Company $company, int $employeeId): JsonResponse
     {
         try {
             $employee = $company->getEmployeeById($employeeId);
@@ -56,14 +56,27 @@ class TimeRecordController extends Controller
         }
     }
 
-    public function clock(Company $company, int $employeeId)
+    public function clock(Company $company, int $employeeId): JsonResponse
     {
         try {
             $employee = $company->getEmployeeById($employeeId);
 
             $latestTimeRecord = $employee->timeRecords()->latest()->first();
+            $currentTime = Carbon::now();
+            $isRecentlyClocked = false;
             if (!$latestTimeRecord || ($latestTimeRecord->clock_in && $latestTimeRecord->clock_out)) {
+                if ($currentTime->diffInMinutes($latestTimeRecord->clock_out) <= 1) {
+                    $message = 'You cannot clock in yet. Please wait for at least 1 minute.';
+                    $isRecentlyClocked = true;
+                }
                 $latestTimeRecord = $this->timeRecordService->create($employee);
+            } elseif (!$latestTimeRecord->clock_out && $currentTime->diffInMinutes($latestTimeRecord->clock_in) <= 1) {
+                $message = 'You cannot clock out yet. Please wait for at least 1 minute.';
+                $isRecentlyClocked = true;
+            }
+
+            if ($isRecentlyClocked) {
+                return $this->sendError($message);
             }
 
             if ($latestTimeRecord->clock_in == null) {

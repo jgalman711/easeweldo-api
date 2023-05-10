@@ -62,4 +62,18 @@ class Employee extends Model
     {
         return $this->hasMany(TimeRecord::class);
     }
+
+    public function leaves(): HasMany
+    {
+        return $this->hasMany(Leave::class);
+    }
+
+    public function getLeaveById(int $leaveId): Leave
+    {
+        $leave = $this->leaves->where('id', $leaveId)->first();
+        if (!$leave) {
+            throw new \Exception('Leave not found');
+        }
+        return $leave;
+    }
 }

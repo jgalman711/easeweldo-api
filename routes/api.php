@@ -7,6 +7,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeScheduleController;
+use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\PeriodsController;
 use App\Http\Controllers\SalaryComputationController;
@@ -37,6 +38,7 @@ Route::group(['middleware' => 'auth:sanctum', ['role:super-admin', 'employee-of-
         Route::resource('companies.employees', EmployeeController::class);
         Route::resource('companies.work-schedules', WorkScheduleController::class);
         Route::resource('companies.payrolls', PayrollController::class);
+        Route::resource('companies.employees.leaves', LeaveController::class);
         Route::prefix('companies/{company}/employees/{employee}')->group(function () {
             Route::get('/time-record', [TimeRecordController::class, 'getTimeRecords']);
             Route::post('/clock-in', [TimeRecordController::class, 'clockIn']);
