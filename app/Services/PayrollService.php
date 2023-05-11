@@ -36,31 +36,34 @@ class PayrollService
     public function compute(Employee $employee, Period $period): Payroll
     {
         $this->validate($period, $employee);
-        $timeRecords = $this->getTimeRecords($employee, $period->start_date, $period->end_date);
-
+        $timeRecords = $this->getTimeRecords($employee, $period->start_date, $period->end_date)
+            ->groupBy(function ($record) {
+                return $record->created_at->format('Y-m-d');
+            });
         $totalMinutesLate = 0;
         $totalUnderTime = 0;
         $totalOvertime = 0;
         $absences = 0;
-        
-        foreach ($timeRecords as $timeRecord) {
-            if ($timeRecord->expected_clock_in && $timeRecord->clock_in == null) {
+
+        foreach ($timeRecords as $timeRecordsByDate) {
+            $actualClockIn = strtotime($timeRecordsByDate->min('clock_in'));
+            $expectedClockIn = strtotime($timeRecordsByDate->min('expected_clock_in'));
+
+            $actualClockOut = strtotime($timeRecordsByDate->max('clock_out'));
+            $expectedClockOut = strtotime($timeRecordsByDate->max('expected_clock_out'));
+
+            if ($expectedClockIn && $actualClockIn == null) {
                 $absences++;
                 continue;
             }
-            $actualClockIn = $this->timeOnlyFormat($timeRecord->clock_in);
-            $expectedClockIn = $this->timeOnlyFormat($timeRecord->expected_clock_in);
 
-            $actualClockOut = $this->timeOnlyFormat($timeRecord->clock_out);
-            $expectedClockOut = $this->timeOnlyFormat($timeRecord->expected_clock_out);
-            
-            $minutesLate = $actualClockIn->greaterThan($expectedClockIn)
-                ? $actualClockIn->diffInMinutes($expectedClockIn) : 0;
-            $underTimeInMinutes = $expectedClockOut->greaterThan($actualClockOut)
-                ? $expectedClockOut->diffInMinutes($actualClockOut) : 0;
-            $overtimeInMinutes = $actualClockOut->greaterThan($expectedClockOut)
-                && ($actualClockOut->diffInMinutes($expectedClockOut) > 60)
-                ? $actualClockOut->diffInMinutes($expectedClockOut) : 0;
+            $minutesLate = $actualClockIn > $expectedClockIn
+                ? ($actualClockIn - $expectedClockIn) / 60 : 0;
+            $underTimeInMinutes = $expectedClockOut > $actualClockOut
+                ? ($expectedClockOut - $actualClockOut) / 60 : 0;
+            $overtimeInMinutes = $actualClockOut > $expectedClockOut
+                && ($actualClockOut - $expectedClockOut > 60)
+                ? $actualClockOut - $expectedClockOut : 0;
 
             $totalMinutesLate += $minutesLate;
             $totalUnderTime += $underTimeInMinutes;
@@ -75,6 +78,7 @@ class PayrollService
         
         $basicSalary = $employee->salaryComputation->basic_salary;
         $grossPay = $basicSalary + $totalOverTimePay - $totalLateDeductions - $totalUnderTimeDeductions;
+
         //$totalNightDiffPay = TBD
 
         $sssContribution = $this->sss->compute($basicSalary);
@@ -159,11 +163,6 @@ class PayrollService
             ->whereBetween('created_at', [$startDate, $endDate])
             ->whereNotNull(['expected_clock_in', 'expected_clock_out'])
             ->get();
-    }
-
-    private function timeOnlyFormat($time): Carbon
-    {
-        return Carbon::parse(Carbon::parse($time)->format('H:i:s'));
     }
 }
 
