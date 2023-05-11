@@ -28,9 +28,7 @@ class Employee extends Model
         'pagibig_number',
         'philhealth_number',
         'tax_identification_number',
-        'bank_account_number',
-        'sick_leaves',
-        'vacation_leaves'
+        'bank_account_number'
     ];
 
     public function company(): BelongsTo
@@ -66,6 +64,21 @@ class Employee extends Model
     public function leaves(): HasMany
     {
         return $this->hasMany(Leave::class);
+    }
+
+    public function getSickLeaveAttribute(): float
+    {
+        return $this->salaryComputation->available_sick_leaves;
+    }
+
+    public function getVacationLeaveAttribute(): float
+    {
+        return $this->salaryComputation->available_vacation_leaves;
+    }
+
+    public function getEmergencyLeaveAttribute(): float
+    {
+        return $this->vacation_leaves;
     }
 
     public function getLeaveById(int $leaveId): Leave

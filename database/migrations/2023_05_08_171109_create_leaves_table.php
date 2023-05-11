@@ -13,7 +13,7 @@ return new class extends Migration
             $table->unsignedBigInteger('company_id');
             $table->unsignedBigInteger('employee_id');
             $table->unsignedBigInteger('created_by');
-            $table->enum('type', ['sick leave', 'vacation leave', 'emergency leave', 'paid without leave']);
+            $table->enum('type', ['sick_leave', 'vacation_leave', 'emergency_leave', 'leave_without_pay']);
             $table->dateTime('start_date');
             $table->dateTime('end_date');
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');

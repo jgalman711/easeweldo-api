@@ -18,44 +18,6 @@ class TimeRecordController extends Controller
         $this->timeRecordService = $timeRecordService;
     }
 
-    public function clockIn(Company $company, int $employeeId)
-    {
-        try {
-            $employee = $company->getEmployeeById($employeeId);
-            $latestTimeRecord = $employee->timeRecords()
-                ->whereDate('created_at', Carbon::today())
-                ->first();
-            if ($latestTimeRecord && $latestTimeRecord->clock_in != null && $latestTimeRecord->clockOut == null) {
-                return $this->sendError('Employee is already clocked in');
-            }
-            if (!$latestTimeRecord) {
-                $latestTimeRecord = $this->timeRecordService->create($employee);
-            }
-            $latestTimeRecord->employee_id = $employee->id;
-            $latestTimeRecord->clock_in = now()->format('H:i:s');
-            $latestTimeRecord->save();
-            return $this->sendResponse(new BaseResource($latestTimeRecord), 'Clock in successful.');
-        } catch (Exception $e) {
-            return $this->sendError($e->getMessage());
-        }
-    }
-
-    public function clockOut(Company $company, int $employeeId): JsonResponse
-    {
-        try {
-            $employee = $company->getEmployeeById($employeeId);
-            $latestTimeRecord = $employee->timeRecords()->latest()->first();
-            if ($latestTimeRecord && $latestTimeRecord->clock_out || !$latestTimeRecord) {
-                return $this->sendError('Employee is already clocked out');
-            }
-            $latestTimeRecord->clock_out = now()->format('H:i:s');
-            $latestTimeRecord->save();
-            return $this->sendResponse(new BaseResource($latestTimeRecord), 'Clock out successful.');
-        } catch (Exception $e) {
-            return $this->sendError($e->getMessage());
-        }
-    }
-
     public function clock(Company $company, int $employeeId): JsonResponse
     {
         try {

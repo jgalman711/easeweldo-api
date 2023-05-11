@@ -41,8 +41,6 @@ Route::group(['middleware' => 'auth:sanctum', ['role:super-admin', 'employee-of-
         Route::resource('companies.employees.leaves', LeaveController::class);
         Route::prefix('companies/{company}/employees/{employee}')->group(function () {
             Route::get('/time-record', [TimeRecordController::class, 'getTimeRecords']);
-            Route::post('/clock-in', [TimeRecordController::class, 'clockIn']);
-            Route::post('/clock-out', [TimeRecordController::class, 'clockOut']);
             Route::post('/clock', [TimeRecordController::class, 'clock']);
             Route::prefix('salary-computation')->group(function () {
                 Route::get('/', [SalaryComputationController::class, 'show']);

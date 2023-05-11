@@ -16,6 +16,10 @@ return new class extends Migration
             $table->float('night_diff_rate');
             $table->float('regular_holiday_rate');
             $table->float('special_holiday_rate');
+            $table->double('total_sick_leaves');
+            $table->double('total_vacation_leaves');
+            $table->double('available_sick_leaves');
+            $table->double('available_vacation_leaves');
             $table->timestamps();
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
         });

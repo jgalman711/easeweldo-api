@@ -24,8 +24,7 @@ return new class extends Migration
             $table->string('philhealth_number');
             $table->string('tax_identification_number');
             $table->string('bank_account_number');
-            $table->integer('sick_leaves');
-            $table->integer('vacation_leaves');
+
             $table->timestamps();
             $table->softDeletes();
         });

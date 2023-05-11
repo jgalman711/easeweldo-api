@@ -24,7 +24,11 @@ class SalaryComputation extends Model
         'tax_rate',
         'sss_contribution',
         'pagibig_contribution',
-        'philhealth_contribution'
+        'philhealth_contribution',
+        'total_sick_leaves',
+        'total_vacation_leaves',
+        'available_sick_leaves',
+        'available_vacation_leaves'
     ];
 
     public function employee(): BelongsTo

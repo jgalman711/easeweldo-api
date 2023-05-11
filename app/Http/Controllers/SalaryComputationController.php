@@ -21,9 +21,14 @@ class SalaryComputationController extends Controller
 
     public function store(SalaryComputationRequest $request, Company $company, int $employeeId): JsonResponse
     {
-        $company->getEmployeeById($employeeId);
+        $employee = $company->getEmployeeById($employeeId);
+        if ($employee->salaryComputation) {
+            return $this->sendError("Salary computation for employee already exists.");
+        }
         $input = $request->validated();
         $input['employee_id'] = $employeeId;
+        $input['available_sick_leaves'] = $input['total_sick_leaves'] = $input['sick_leaves'];
+        $input['available_vacation_leaves'] = $input['total_vacation_leaves'] = $input['vacation_leaves'];
         $salaryComputation = SalaryComputation::create($input);
         return $this->sendResponse(
             new BaseResource($salaryComputation),
@@ -42,7 +47,7 @@ class SalaryComputationController extends Controller
         $salaryComputation->update($input);
         return $this->sendResponse(
             new BaseResource($salaryComputation),
-            'Salary computation created successfully.'
+            'Salary computation updated successfully.'
         );
     }
 

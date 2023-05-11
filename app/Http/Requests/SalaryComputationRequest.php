@@ -12,10 +12,8 @@ class SalaryComputationRequest extends BaseRequest
             'night_diff_rate' => self::REQUIRED_NUMERIC,
             'regular_holiday_rate' => self::REQUIRED_NUMERIC,
             'special_holiday_rate' => self::REQUIRED_NUMERIC,
-            'tax_rate' => self::REQUIRED_NUMERIC,
-            'sss_contribution' => self::REQUIRED_NUMERIC,
-            'pagibig_contribution' => self::REQUIRED_NUMERIC,
-            'philhealth_contribution' => self::REQUIRED_NUMERIC
+            'sick_leaves' => self::REQUIRED_NUMERIC,
+            'vacation_leaves' => self::REQUIRED_NUMERIC,
         ];
     }
 }

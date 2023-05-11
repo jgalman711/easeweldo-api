@@ -14,6 +14,10 @@ class Leave extends Model
     public const APPROVED = 'approved';
     public const REJECTED = 'rejected';
 
+    public const TYPE_SICK_LEAVE = 'sick_leave';
+    public const TYPE_VACATION_LEAVE = 'vacation_leave';
+    public const TYPE_EMERGENCY_LEAVE = 'emergency_leave';
+
     protected $fillable = [
         'company_id',
         'employee_id',
@@ -28,4 +32,6 @@ class Leave extends Model
     {
         return $this->belongsTo(Employee::class);
     }
+
+    
 }

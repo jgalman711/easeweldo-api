@@ -17,19 +17,37 @@ class EmployeeRequest extends BaseRequest
             'date_of_birth' => self::REQUIRED_DATE,
             'contact_number' => self::REQUIRED_STRING,
             'address' => self::REQUIRED_STRING,
-            'sss_number' => 'required|string|max:255|unique:employees,sss_number',
-            'pagibig_number' => 'required|string|max:255|unique:employees,pagibig_number',
-            'philhealth_number' => 'required|string|max:255|unique:employees,philhealth_number',
-            'tax_identification_number' => 'required|string|max:255|unique:employees,tax_identification_number',
+            'sss_number' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('employees', 'sss_number')->ignore($this->employee),
+            ],
+            'pagibig_number' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('employees', 'pagibig_number')->ignore($this->employee),
+            ],
+            'philhealth_number' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('employees', 'philhealth_number')->ignore($this->employee),
+            ],
+            'tax_identification_number' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('employees', 'tax_identification_number')->ignore($this->employee),
+            ],
             'bank_account_number' => self::REQUIRED_STRING,
-            'sick_leaves' => self::REQUIRED_NUMERIC,
-            'vacation_leaves' => self::REQUIRED_NUMERIC,
             'mobile_number' => [
                 Rule::requiredIf($this->has('role') && $this->role == 'business-admin'),
                 'regex:/^(09|\+639)\d{9}$/',
                 'unique:users,mobile_number'
             ],
-            'email' => 'required|email|unique:users,email',
+            'email' => 'email|unique:users,email',
             'role' => 'string|max:255'
         ];
     }
