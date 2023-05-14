@@ -42,10 +42,10 @@ class TimeRecordController extends Controller
             }
 
             if ($latestTimeRecord->clock_in == null) {
-                $latestTimeRecord->clock_in = now()->format('H:i:s');
+                $latestTimeRecord->clock_in = Carbon::now();
                 $message = 'Clock in successful.';
             } else {
-                $latestTimeRecord->clock_out = now()->format('H:i:s');
+                $latestTimeRecord->clock_out = Carbon::now();
                 $message = 'Clock out successful.';
             }
             $latestTimeRecord->save();
