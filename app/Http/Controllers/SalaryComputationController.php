@@ -5,11 +5,18 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SalaryComputationRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
-use App\Models\SalaryComputation;
+use App\Services\SalaryComputationService;
 use Illuminate\Http\JsonResponse;
 
 class SalaryComputationController extends Controller
 {
+    protected $salaryComputationService;
+
+    public function __construct(SalaryComputationService $salaryComputationService)
+    {
+        $this->salaryComputationService = $salaryComputationService;
+    }
+
     public function show(Company $company, int $employeeId): JsonResponse
     {
         $employee = $company->getEmployeeById($employeeId);
@@ -27,9 +34,7 @@ class SalaryComputationController extends Controller
         }
         $input = $request->validated();
         $input['employee_id'] = $employeeId;
-        $input['available_sick_leaves'] = $input['total_sick_leaves'] = $input['sick_leaves'];
-        $input['available_vacation_leaves'] = $input['total_vacation_leaves'] = $input['vacation_leaves'];
-        $salaryComputation = SalaryComputation::create($input);
+        $salaryComputation = $this->salaryComputationService->initialize($input);
         return $this->sendResponse(
             new BaseResource($salaryComputation),
             'Salary computation created successfully.'

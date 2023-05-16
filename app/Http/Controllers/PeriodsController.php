@@ -17,15 +17,7 @@ class PeriodsController extends Controller
     {
         $this->periodService = $periodService;
     }
-    /**
-     * IMPORTANT: Period refers to the cut-off period of payroll.
-     *
-     * Example:
-     * The employees' salaries are disbursed on every 15th and 30th of the month.
-     * The period must 15-day duration before the 15th. so the duration would be 26th of the previous month up to 10th.
-     * This must be explicitly put in the Periods Page so the user can put the correct period.
-     *
-     */
+
     public function index(Company $company): JsonResponse
     {
         $periods = $company->periods;
@@ -50,7 +42,7 @@ class PeriodsController extends Controller
         $period = $company->getPeriodById($periodId);
         $input = $request->validated();
         if ($period->status != Period::STATUS_PENDING) {
-            return $this->sendError('This period cannot be edited as it has already been ' . $period->status . '.');
+            return $this->sendError('This period cannot be edited as it is already ' . $period->status);
         }
         $companyPreviousPeriod = $company->periods()->latest()->first();
         if ($companyPreviousPeriod && $input['start_date'] <= $companyPreviousPeriod->end_date) {
@@ -64,7 +56,7 @@ class PeriodsController extends Controller
     {
         $period = $company->getPeriodById($periodId);
         if ($period->status != Period::STATUS_PENDING) {
-            return $this->sendError('This period cannot be edited as it has already been ' . $period->status . '.');
+            return $this->sendError('This period cannot be edited as it is already ' . $period->status);
         }
         $period->delete();
         return $this->sendResponse(new BaseResource($period), 'Payroll period deleted successfully.');

@@ -22,6 +22,7 @@ class Employee extends Model
         'job_title',
         'date_of_hire',
         'date_of_birth',
+        'work_arrangement',
         'contact_number',
         'address',
         'sss_number',

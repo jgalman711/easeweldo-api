@@ -17,6 +17,8 @@ class SalaryComputation extends Model
     protected $fillable = [
         'employee_id',
         'basic_salary',
+        'hourly_rate',
+        'daily_rate',
         'overtime_rate',
         'night_diff_rate',
         'regular_holiday_rate',
@@ -39,15 +41,5 @@ class SalaryComputation extends Model
     public function timeRecords(): HasMany
     {
         return $this->hasMany(TimeRecord::class);
-    }
-
-    public function getDailySalary()
-    {
-        return $this->basic_salary / self::TYPICAL_WORK_DAYS_PER_MONTH;
-    }
-
-    public function getHourlySalary()
-    {
-        return $this->getDailySalary() / self::EIGHT_HOURS;
     }
 }

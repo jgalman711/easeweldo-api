@@ -15,6 +15,13 @@ return new class extends Migration
             $table->string('last_name');
             $table->string('department');
             $table->string('job_title');
+            $table->enum('work_arrangement', [
+                    'full_time',
+                    'part_time',
+                    'probational',
+                    'contractual'
+                ]
+            )->default('full_time');
             $table->date('date_of_hire');
             $table->date('date_of_birth');
             $table->string('contact_number');

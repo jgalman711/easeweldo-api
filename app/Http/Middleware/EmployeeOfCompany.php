@@ -27,6 +27,8 @@ class EmployeeOfCompany
         if ($user->employee && $user->employee->company_id == $companyId) {
             return $next($request);
         }
-        return response()->json(['message' => 'Unauthorized.'], 401);
+        return response()->json([
+            'message' => 'Access Denied. You are not authorized to perform this action in the current company'
+        ], 401);
     }
 }

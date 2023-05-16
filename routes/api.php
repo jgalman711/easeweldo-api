@@ -30,9 +30,9 @@ Route::post('register', [RegisterController::class, 'register']);
 Route::post('login', [LoginController::class, 'login']);
 Route::post('reset-password', [PasswordResetController::class, 'reset']);
 
-Route::group(['middleware' => 'auth:sanctum', ['role:super-admin', 'employee-of-company']], function () {
+Route::group(['middleware' => 'auth:sanctum', ['role:super-admin']], function () {
     Route::resource('companies', CompanyController::class);
-    Route::group(['middleware' => ['role:business-admin']], function () {
+    Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {
         Route::get('{company}/dashboard', [DashboardController::class, 'dashboard']);
         Route::resource('companies', CompanyController::class)->only('view', 'update');
         Route::resource('companies.employees', EmployeeController::class);
@@ -48,12 +48,7 @@ Route::group(['middleware' => 'auth:sanctum', ['role:super-admin', 'employee-of-
                 Route::put('/', [SalaryComputationController::class, 'update']);
                 Route::delete('/', [SalaryComputationController::class, 'delete']);
             });
-            Route::prefix('/work-schedule')->group(function () {
-                Route::get('/', [EmployeeScheduleController::class, 'show']);
-                Route::post('/', [EmployeeScheduleController::class, 'store']);
-                Route::put('/', [EmployeeScheduleController::class, 'update']);
-                Route::delete('/', [EmployeeScheduleController::class, 'delete']);
-            });
+            Route::resource('work-schedule', EmployeeScheduleController::class);
         });
         Route::resource('companies.payroll-periods', PeriodsController::class);
     });

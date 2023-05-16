@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Period;
+use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 
 class PeriodRequest extends BaseRequest
@@ -11,7 +12,10 @@ class PeriodRequest extends BaseRequest
     {
         return [
             'type' => Rule::in(Period::TYPES),
-            'salary_date' => self::REQUIRED_DATE
+            'salary_date' => [
+                'required',
+                'date',
+                'after:' . Carbon::now()->format('Y-m-d')],
         ];
     }
 }

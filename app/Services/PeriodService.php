@@ -40,5 +40,30 @@ class PeriodService
             : 1;
         return Period::create($data);
     }
+
+    public function initializeFromPreviousPeriod(Company $company): ?Period
+    {
+        $currentDate = Carbon::now()->toDateString();
+        $companyPreviousPeriod = $company->periods()->latest()->first();
+        if ($companyPreviousPeriod && $companyPreviousPeriod->end_date < $currentDate) {
+            $data['company_id'] = $company->id;
+            $data['company_period_number'] = $companyPreviousPeriod->company_period_number + 1;
+            $data['type'] = $companyPreviousPeriod->type;
+            if ($data['type'] == Period::TYPE_SEMI_MONTHLY) {
+                $data['start_date'] = $companyPreviousPeriod->end_date->addDay();
+                $data['end_date'] = $companyPreviousPeriod->start_date->addMonth()->subDay();
+            } elseif ($data['type'] == Period::TYPE_MONTHLY) {
+                $data['start_date'] = $companyPreviousPeriod->start_date->addMonth();
+                $data['end_date'] = $companyPreviousPeriod->end_date->addMonth();
+            } elseif ($data['type'] == Period::TYPE_WEEKLY) {
+                $data['start_date'] = $companyPreviousPeriod->start_date->addDays(7);
+                $data['end_date'] = $companyPreviousPeriod->end_date->addDays(7);
+            } else {
+                throw new Exception('Invalid period type ' . $data['type']);
+            }
+            return Period::create($data);
+        }
+        return null;
+    }
 }
 

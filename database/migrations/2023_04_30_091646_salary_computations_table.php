@@ -11,7 +11,9 @@ return new class extends Migration
         Schema::create('salary_computations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('employee_id');
-            $table->float('basic_salary');
+            $table->float('basic_salary')->nullable();
+            $table->float('hourly_rate')->nullable();
+            $table->float('daily_rate')->nullable();
             $table->float('overtime_rate');
             $table->float('night_diff_rate');
             $table->float('regular_holiday_rate');

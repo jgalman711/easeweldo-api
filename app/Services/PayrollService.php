@@ -40,7 +40,7 @@ class PayrollService
 
         $attendanceSummary = $this->calculateAttendanceSummary($timeRecords);
 
-        $hourlyRate = $employee->salaryComputation->getHourlySalary();
+        $hourlyRate = $employee->hourly_rate;
         $totalAbsentDeductions = $attendanceSummary['absences'] * $employee->salaryComputation->getDailySalary();
         $totalLateDeductions = round($hourlyRate * ($attendanceSummary['totalMinutesLate'] / 60), 2);
         $totalUnderTimeDeductions = round($hourlyRate * ($attendanceSummary['totalUnderTime'] / 60), 2);
@@ -91,6 +91,8 @@ class PayrollService
                 'sss_contribution' => $this->sss->getEmployerShare(),
                 'pagibig_contribution' => $this->pagibig->getEmployerShare()
             ]);
+            $period->status = Period::STATUS_COMPLETED;
+            $period->save();
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();

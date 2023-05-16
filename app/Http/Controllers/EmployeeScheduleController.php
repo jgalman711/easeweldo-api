@@ -24,4 +24,17 @@ class EmployeeScheduleController extends Controller
             return $this->sendError($e->getMessage());
         }
     }
+
+    public function show(Company $company, int $employeeId): JsonResponse
+    {
+        try {
+            $employee = $company->getEmployeeById($employeeId);
+            return $this->sendResponse(
+                new BaseResource($employee->schedules),
+                'Employee schedule retrieved successfully.'
+            );
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
+    }
 }
