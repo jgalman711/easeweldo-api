@@ -38,8 +38,9 @@ class TimeRecordService
         $clockOutDate = is_null($clockOutDate) ? Carbon::now() : Carbon::parse($clockOutDate);
 
         $workSchedule = $employee->schedules()
-            ->where('start_date', '<=', now())
+            ->wherePivot('start_date', '<=', now())
             ->first();
+
         throw_unless($workSchedule, new Exception('No available work schedule'));
 
         $dayClockInProperty = strtolower($clockInDate->dayName) . self::CLOCK_IN_TIME_SUFFIX;

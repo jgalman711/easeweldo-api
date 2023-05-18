@@ -13,7 +13,7 @@ class PasswordResetController extends BaseController
     public function reset(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'mobile_number' => 'required',
+            'email' => 'required',
             'old_password' => 'required',
             'new_password' => 'required|confirmed|min:6'
         ]);

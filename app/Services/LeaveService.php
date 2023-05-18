@@ -8,6 +8,7 @@ use App\Models\Leave;
 use App\Models\TimeRecord;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class LeaveService
@@ -92,6 +93,22 @@ class LeaveService
         $timeRecord->attendance_status = $leave->type;
         $timeRecord->save();
         return $timeRecord;
+    }
+
+    public function getSoonestLeaves(int $companyId): Collection
+    {
+        $leaves = Leave::where('company_id', $companyId)
+            ->where('status', Leave::APPROVED)
+            ->whereDate('start_date', '>=', now())
+            ->whereDate('start_date', '<=', now()->addDays(7))
+            ->orderBy('start_date')
+            ->get();
+        $groupedLeaves = $leaves->groupBy(function ($item) {
+            return Carbon::parse($item->start_date)->format('Y-m-d');
+        });
+        return $groupedLeaves->sortBy(function ($item) {
+            return $item;
+        });
     }
 
     private function getHoursInOneWorkingDay(Employee $employee, string $clockInDate, string $clockOutDate): float

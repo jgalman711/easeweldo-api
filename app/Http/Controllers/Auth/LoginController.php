@@ -11,9 +11,13 @@ class LoginController extends BaseController
 {
     public function login(Request $request): JsonResponse
     {
-        if (Auth::attempt(['mobile_number' => $request->mobile_number, 'password' => $request->password])) {
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
             $success['token'] =  $user->createToken(env('APP_NAME'))->plainTextToken;
+            $success['data'] = [
+                $user,
+                $user->employee
+            ];
             return $this->sendResponse($success, 'User login successfully.');
         } else {
             return $this->sendError('Unauthorised.', ['error'=>'Unauthorised']);

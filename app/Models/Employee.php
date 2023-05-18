@@ -82,6 +82,11 @@ class Employee extends Model
         return $this->vacation_leaves;
     }
 
+    public function getFullNameAttribute(): string
+    {
+        return ucfirst($this->first_name) . " " . ucfirst($this->last_name);
+    }
+
     public function getLeaveById(int $leaveId): Leave
     {
         $leave = $this->leaves->where('id', $leaveId)->first();
