@@ -42,19 +42,25 @@ class DashboardController extends Controller
             }
         }
 
-        $leavesCollection = $this->leaveService->getSoonestLeaves($company->id);
-
-        $upcomingHolidays = Holiday::get();
+        $upcomingHolidays = Holiday::whereDate('date', '>=', now())
+            ->whereDate('date', '<=', now()->addDays(7))
+            ->orderBy('date')
+            ->first();
+            
         $dashboardData = [
             "lates" => $lates,
             "absents" => $absents,
-            "upcoming_leaves" => [
-                'count' => $leavesCollection->first()->count(),
-                'date' => $leavesCollection->first()->count() ? $leavesCollection->keys()->first() : null
-            ],
             "upcoming_holidays" => $upcomingHolidays,
             "no_work_schedule" => $noWorkSchedules
         ];
+
+        $leavesCollection = $this->leaveService->getSoonestLeaves($company->id);
+        if ($leavesCollection->first()) {
+            $dashboardData['upcoming_leaves'] = [
+                'count' => $leavesCollection->first()->count(),
+                'date' => $leavesCollection->keys()->first()
+            ];
+        }
         return $this->sendResponse($dashboardData, 'Dashboard data retrieved successfully.');
     }
 }
