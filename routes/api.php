@@ -37,7 +37,7 @@ Route::group(['middleware' => 'auth:sanctum', ['role:super-admin']], function ()
     Route::resource('holidays', HolidayController::class);
     Route::resource('companies', CompanyController::class);
     Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {
-        Route::get('{company}/dashboard', [DashboardController::class, 'dashboard']);
+        Route::get('companies/{company}/dashboard', [DashboardController::class, 'dashboard']);
         Route::resource('companies', CompanyController::class)->only('view', 'update');
         Route::resource('companies.employees', EmployeeController::class);
         Route::resource('companies.work-schedules', WorkScheduleController::class);

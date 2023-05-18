@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained()->onDelete('cascade')->nullable();
             $table->integer('company_period_number');
-            $table->enum('status', ['monthly', 'semi-monthly', 'weekly']);
+            $table->enum('type', ['monthly', 'semi-monthly', 'weekly']);
             $table->date('start_date');
             $table->date('end_date');
             $table->enum('status', ['pending', 'cancelled', 'completed']);
