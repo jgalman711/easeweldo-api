@@ -6,18 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
         Schema::create('holidays', function (Blueprint $table) {
             $table->id();
-            $table->date('date');
             $table->string('name');
+            $table->date('date');
+            $table->enum('type', ['special', 'regular']);
             $table->timestamps();
             $table->softDeletes();
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('holidays');
     }

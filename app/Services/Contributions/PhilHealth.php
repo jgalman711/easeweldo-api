@@ -9,7 +9,6 @@ class PhilHealth extends ContributionService
 {
     public function compute(float $salary): float
     {
-        Cache::forget('philhealth');
         $philhealth = Cache::remember('philhealth', 3660, function () {
             return PhilHealthModel::where('status', PhilHealthModel::ACTIVE)->first();
         });
