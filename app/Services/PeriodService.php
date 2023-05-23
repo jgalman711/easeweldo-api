@@ -32,7 +32,7 @@ class PeriodService
         $companyPreviousPeriod = $company->periods()->latest()->first();
         throw_if(
             $companyPreviousPeriod && $data['start_date'] <= $companyPreviousPeriod->end_date,
-            new Exception('This period overlaps the current period. Please adjust')
+            new Exception('This period overlaps the current period. Please adjust.')
         );
         $data['company_id'] = $company->id;
         $data['company_period_number'] = $companyPreviousPeriod
@@ -52,12 +52,15 @@ class PeriodService
             if ($data['type'] == Period::TYPE_SEMI_MONTHLY) {
                 $data['start_date'] = $companyPreviousPeriod->end_date->addDay();
                 $data['end_date'] = $companyPreviousPeriod->start_date->addMonth()->subDay();
+                $data['salary_date'] = $data['end_date']->copy()->addDays(self::PAYROLL_ALLOWANCE_DAY);
             } elseif ($data['type'] == Period::TYPE_MONTHLY) {
                 $data['start_date'] = $companyPreviousPeriod->start_date->addMonth();
                 $data['end_date'] = $companyPreviousPeriod->end_date->addMonth();
+                $data['salary_date'] = $companyPreviousPeriod->salary_date->addMonth();
             } elseif ($data['type'] == Period::TYPE_WEEKLY) {
                 $data['start_date'] = $companyPreviousPeriod->start_date->addDays(7);
                 $data['end_date'] = $companyPreviousPeriod->end_date->addDays(7);
+                $data['salary_date'] = $companyPreviousPeriod->salary_date->addDays(7);
             } else {
                 throw new Exception('Invalid period type ' . $data['type']);
             }
@@ -66,4 +69,3 @@ class PeriodService
         return null;
     }
 }
-

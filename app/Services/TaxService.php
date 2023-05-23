@@ -13,20 +13,20 @@ class TaxService
 
     public function compute(float $taxableAmount, string $type): float
     {
-        $tax = Cache::remember('taxes', 3660, function () use ($type, $taxableAmount) {
-            return Tax::where([
-                'type' => $type,
-                ['min_compensation', '<=', $taxableAmount],
-                ['max_compensation', '>=', $taxableAmount]
-            ])->first();
-        });
+        $tax = Tax::where([
+            'type' => $type,
+            ['min_compensation', '<=', $taxableAmount],
+            ['max_compensation', '>=', $taxableAmount]
+        ])->first();
 
-        $this->baseTax = $tax->base_tax;
-        $this->compensationLevel = $tax->min_compensation;
-        $this->taxRate = $tax->over_compensation_level_rate;
-
-        $overCompensation = $taxableAmount - $tax->min_compensation;
-        return $overCompensation * $tax->over_compensation_level_rate + $tax->base_tax;
+        if ($tax) {
+            $this->baseTax = $tax->base_tax;
+            $this->compensationLevel = $tax->min_compensation;
+            $this->taxRate = $tax->over_compensation_level_rate;
+            $overCompensation = $taxableAmount - $tax->min_compensation;
+            return $overCompensation * $tax->over_compensation_level_rate + $tax->base_tax;
+        }
+        return 0;
     }
 
     public function getBaseTax(): float

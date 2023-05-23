@@ -7,6 +7,7 @@ use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Models\Period;
 use App\Services\PeriodService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 
 class PeriodsController extends Controller
@@ -27,8 +28,12 @@ class PeriodsController extends Controller
     public function store(PeriodRequest $request, Company $company): JsonResponse
     {
         $input = $request->validated();
-        $period = $this->periodService->initializeFromSalaryDate($input, $company);
-        return $this->sendResponse(new BaseResource($period), 'Payroll period created successfully.');
+        try {
+            $period = $this->periodService->initializeFromSalaryDate($input, $company);
+            return $this->sendResponse(new BaseResource($period), 'Payroll period created successfully.');
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
     }
 
     public function show(Company $company, int $periodId): JsonResponse

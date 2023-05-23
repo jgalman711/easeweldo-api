@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->dateTime('clock_in')->nullable();
             $table->dateTime('clock_out')->nullable();
+            $table->date('date')->nullable();
             $table->time('expected_clock_in')->nullable();
             $table->time('expected_clock_out')->nullable();
             $table->string('attendance_status')->nullable();

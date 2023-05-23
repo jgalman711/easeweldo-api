@@ -15,6 +15,7 @@ use App\Http\Controllers\PeriodsController;
 use App\Http\Controllers\SalaryComputationController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\WorkScheduleController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,7 +28,12 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
+Route::get('artisan-migrate', function () {
+    Artisan::call('migrate');
+});
+Route::get('artisan-migrate-rollback', function () {
+    Artisan::call('migrate:rollback');
+});
 Route::post('register', [RegisterController::class, 'register']);
 Route::post('login', [LoginController::class, 'login']);
 Route::post('reset-password', [PasswordResetController::class, 'reset'])->name('password.reset');
@@ -37,14 +43,14 @@ Route::group(['middleware' => 'auth:sanctum', ['role:super-admin']], function ()
     Route::resource('holidays', HolidayController::class);
     Route::resource('companies', CompanyController::class);
     Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {
-        Route::get('companies/{company}/dashboard', [DashboardController::class, 'dashboard']);
+        Route::get('companies/{company}/dashboard', [DashboardController::class, 'index']);
         Route::resource('companies', CompanyController::class)->only('view', 'update');
         Route::resource('companies.employees', EmployeeController::class);
         Route::resource('companies.work-schedules', WorkScheduleController::class);
         Route::resource('companies.payrolls', PayrollController::class);
         Route::resource('companies.employees.leaves', LeaveController::class);
+        Route::resource('companies.employees.time-records', TimeRecordController::class);
         Route::prefix('companies/{company}/employees/{employee}')->group(function () {
-            Route::get('/time-record', [TimeRecordController::class, 'getTimeRecords']);
             Route::post('/clock', [TimeRecordController::class, 'clock']);
             Route::prefix('salary-computation')->group(function () {
                 Route::get('/', [SalaryComputationController::class, 'show']);
@@ -57,4 +63,3 @@ Route::group(['middleware' => 'auth:sanctum', ['role:super-admin']], function ()
         Route::resource('companies.payroll-periods', PeriodsController::class);
     });
 });
-

@@ -23,7 +23,8 @@ class EmployeeOfCompany
         }
         $companyId = $request->route('company') instanceof Company
             ? $request->route('company')->id
-            : $request->route('company');
+            : Company::where('slug', $request->route('company'))->first()->id;
+
         if ($user->employee && $user->employee->company_id == $companyId) {
             return $next($request);
         }

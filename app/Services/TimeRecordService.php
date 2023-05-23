@@ -6,6 +6,7 @@ use App\Models\Employee;
 use App\Models\TimeRecord;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Collection;
 
 class TimeRecordService
 {
@@ -16,17 +17,26 @@ class TimeRecordService
         Employee $employee,
         string $clockInDate = null,
         string $clockOutDate = null
-    ): TimeRecord {
+    ): ?TimeRecord {
         list($expectedClockIn, $expectedClockOut) = $this->getExpectedScheduleOf(
             $employee,
             $clockInDate,
             $clockOutDate
         );
-        return TimeRecord::create([
-            'employee_id' => $employee->id,
-            'expected_clock_in' => $expectedClockIn,
-            'expected_clock_out' => $expectedClockOut
-        ]);
+
+        if ($expectedClockIn && $expectedClockOut) {
+            $expectedClockIn = Carbon::parse($clockInDate)->format('Y-m-d')
+                . ' ' . Carbon::parse($expectedClockIn)->format('H:i:s');
+            $expectedClockOut = Carbon::parse($clockOutDate)->format('Y-m-d')
+                . ' ' . Carbon::parse($expectedClockOut)->format('H:i:s');
+
+            return TimeRecord::create([
+                'employee_id' => $employee->id,
+                'expected_clock_in' => $expectedClockIn,
+                'expected_clock_out' => $expectedClockOut
+            ]);
+        }
+        return null;
     }
 
     public function getExpectedScheduleOf(
@@ -50,5 +60,17 @@ class TimeRecordService
             $workSchedule->$dayClockInProperty,
             $workSchedule->$dayClockOutProperty
         ];
+    }
+
+    public function getTimeRecordsByDateRange(Employee $employee, string $dateFrom, string $dateTo): Collection
+    {
+        return $employee->timeRecords()
+            ->where(function ($query) use ($dateFrom, $dateTo) {
+                $dateTo = Carbon::parse($dateTo)->addDay();
+                $query->whereBetween('expected_clock_in', [$dateFrom, $dateTo])
+                    ->orWhereBetween('expected_clock_out', [$dateFrom, $dateTo])
+                    ->orWhereBetween('clock_in', [$dateFrom, $dateTo])
+                    ->orWhereBetween('clock_out', [$dateFrom, $dateTo]);
+            })->get();
     }
 }
