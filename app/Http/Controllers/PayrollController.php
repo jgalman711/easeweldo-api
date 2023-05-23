@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PayrollRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
+use App\Models\Period;
 use App\Services\PayrollService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -26,22 +27,35 @@ class PayrollController extends Controller
     
     public function store(PayrollRequest $request, Company $company): JsonResponse
     {
-        $request->validated();
+        $input = $request->validated();
         $successPayroll = [];
         $failedPayroll = [];
+        $period = $company->getPeriodById($input['period_id']);
+        $period->status = Period::STATUS_PROCESSING;
+        $period->save();
+
         foreach ($company->employees as $employee) {
             try {
-                $period = $company->getPeriodById($request->period_id);
-                $payroll = $this->payrollService->compute($employee, $period);
+                $payroll = $this->payrollService->generate($period, $employee);
                 array_push($successPayroll, $payroll);
             } catch (Exception $e) {
                 array_push($failedPayroll, $e->getMessage());
             }
         }
+
+        if (empty($failedPayroll)) {
+            $period->status = Period::STATUS_COMPLETED;
+        } elseif (empty($successPayroll)) {
+            $period->status = Period::STATUS_FAILED;
+        } else {
+            $period->status = Period::STATUS_ATTENTION_REQUIRED;
+        }
+        $period->save();
+
         return $this->sendResponse([
-            $successPayroll,
-            $failedPayroll
-        ], 'Payrolls retrieved successfully.');
+            'success' => $successPayroll,
+            'failed' => $failedPayroll
+        ], 'Payrolls created successfully.');
     }
 
     public function show(Company $company, int $payrollId): JsonResponse

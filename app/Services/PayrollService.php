@@ -6,57 +6,91 @@ use App\Models\Employee;
 use App\Models\Payroll;
 use App\Models\PayrollTaxesContributions;
 use App\Models\Period;
-use App\Models\TimeRecord;
-use App\Services\Contributions\PagIbig;
-use App\Services\Contributions\PhilHealth;
-use App\Services\Contributions\SSS;
+use App\Services\Contributions\PagIbigService;
+use App\Services\Contributions\PhilHealthService;
+use App\Services\Contributions\SSSService;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class PayrollService
 {
-    protected $pagibig;
-    protected $philhealth;
-    protected $sss;
-    protected $tax;
-
     public const FREQUENCY_SEMI_MONTHLY = 2;
+
     public const FREQUENCY_WEEKLY = 4.33;
 
-    public function __construct(PagIbig $pagIbig, PhilHealth $philHealth, SSS $sss, TaxService $tax)
-    {
-        $this->pagibig = $pagIbig;
-        $this->philhealth = $philHealth;
-        $this->sss = $sss;
-        $this->tax = $tax;
+    private const MINUTES_60 = 60;
+
+    protected $timeRecordService;
+
+    protected $pagIbigService;
+
+    protected $philHealthService;
+
+    protected $sssService;
+
+    protected $taxService;
+
+    public function __construct(
+        TimeRecordService $timeRecordService,
+        PagIbigService $pagIbigService,
+        PhilHealthService $philHealthService,
+        SSSService $sssService,
+        TaxService $taxService
+    ) {
+        $this->timeRecordService = $timeRecordService;
+        $this->pagIbigService = $pagIbigService;
+        $this->philHealthService = $philHealthService;
+        $this->sssService = $sssService;
+        $this->taxService = $taxService;
     }
 
-    public function compute(Employee $employee, Period $period): Payroll
+    public function generate(Period $period, Employee $employee): Payroll
     {
         $this->validate($period, $employee);
-        $timeRecords = $this->getTimeRecords($employee, $period->start_date, $period->end_date);
+        $timeRecords = $this->timeRecordService->getTimeRecordsByDateRange(
+            $employee,
+            $period->start_date,
+            $period->end_date
+        );
 
-        $attendanceSummary = $this->calculateAttendanceSummary($timeRecords);
-
-        $hourlyRate = $employee->hourly_rate;
-        $totalAbsentDeductions = $attendanceSummary['absences'] * $employee->salaryComputation->getDailySalary();
-        $totalLateDeductions = round($hourlyRate * ($attendanceSummary['totalMinutesLate'] / 60), 2);
-        $totalUnderTimeDeductions = round($hourlyRate * ($attendanceSummary['totalUnderTime'] / 60), 2);
-        $totalHourOverTime = $attendanceSummary['totalOvertime'] / 60;
-        $totalOverTimePay = round($totalHourOverTime * $hourlyRate * $employee->salaryComputation->overtime_rate, 2);
+        list(
+            $absences,
+            $absentHours,
+            $lateMinutes,
+            $overtimeMinutes,
+            $undertimeMinutes,
+            $hoursWorkedMinutes,
+            $totalExpectedWorkedHours
+        ) = $this->calculateAttendanceRecords($timeRecords);
         
-        $basicSalary = $employee->salaryComputation->basic_salary;
-        $grossPay = $basicSalary + $totalOverTimePay - $totalLateDeductions - $totalUnderTimeDeductions;
+        $salaryComputation = $employee->salaryComputation;
 
-        //$totalNightDiffPay = TBD
+        if (!$salaryComputation->basic_salary && $salaryComputation->hourly_rate) {
+            $basicPay = $totalExpectedWorkedHours * $salaryComputation->hourly_rate;
+        } elseif ($period->type == Period::TYPE_MONTHLY) {
+            $basicPay = $salaryComputation->basic_salary;
+        } elseif ($period->type == Period::TYPE_SEMI_MONTHLY) {
+            $basicPay = $salaryComputation->basic_salary / self::FREQUENCY_SEMI_MONTHLY;
+        } elseif ($period->type == Period::TYPE_WEEKLY) {
+            $basicPay = $salaryComputation->basic_salary / self::FREQUENCY_WEEKLY;
+        } else {
+            throw new Exception("Invalid period type");
+        }
 
-        $contributionSummary = $this->calculateContributionSummary($basicSalary, $period->type);
+        $absencesDeductions = $absentHours * $salaryComputation->hourly_rate;
+        $latesDeductions = $lateMinutes / self::MINUTES_60 * $salaryComputation->hourly_rate;
+        $undertimeDeductions = $undertimeMinutes / self::MINUTES_60 * $salaryComputation->hourly_rate;
+        $overtimeCompensation = $overtimeMinutes / self::MINUTES_60 * $salaryComputation->hourly_rate;
 
-        $taxableIncome = $grossPay - $contributionSummary['totalContributions'];
+        $grossPay = $basicPay - $absencesDeductions - $latesDeductions - $undertimeDeductions + $overtimeCompensation;
 
-        $incomeTax = $this->tax->compute($taxableIncome, $period->type);
+        $calculateContributions = $this->calculateContributions($grossPay, $period->type);
+
+        $taxableIncome = $grossPay - $calculateContributions['total'];
+
+        $incomeTax = $this->taxService->compute($taxableIncome, $period->type);
         $netPay = $taxableIncome - $incomeTax;
 
         try {
@@ -64,105 +98,111 @@ class PayrollService
             $payroll = Payroll::create([
                 'employee_id' => $employee->id,
                 'period_id' => $period->id,
-                'basic_salary' => $basicSalary,
-                'total_late_minutes' => $attendanceSummary['totalMinutesLate'],
-                'total_late_deductions' => $totalLateDeductions,
-                'total_absent_days' => $attendanceSummary['absences'],
-                'total_absent_deductions' => $totalAbsentDeductions,
-                'total_overtime_minutes' => $attendanceSummary['totalOvertime'],
-                'total_overtime_pay' => $totalOverTimePay,
-                'total_undertime_minutes' => $attendanceSummary['totalUnderTime'],
-                'total_undertime_deductions' => $totalUnderTimeDeductions,
-                'sss_contribution' => $contributionSummary['sssContribution'],
-                'philhealth_contribution' => $contributionSummary['philHealthContribution'],
-                'pagibig_contribution' => $contributionSummary['pagIbigContribution'],
-                'total_contributions' => $contributionSummary['totalContributions'],
+                'basic_salary' => $basicPay,
+                'total_late_minutes' => $lateMinutes,
+                'total_late_deductions' => $latesDeductions,
+                'total_absent_days' => $absences,
+                'total_absent_deductions' => $absencesDeductions,
+                'total_overtime_minutes' =>  $overtimeMinutes,
+                'total_overtime_pay' => $overtimeCompensation,
+                'total_undertime_minutes' => $undertimeMinutes,
+                'total_undertime_deductions' => $undertimeDeductions,
+                'total_hours_worked' => $hoursWorkedMinutes / self::MINUTES_60,
+                'sss_contribution' => $calculateContributions['sss'],
+                'philhealth_contribution' => $calculateContributions['philHealth'],
+                'pagibig_contribution' => $calculateContributions['pagIbig'],
+                'total_contributions' => $calculateContributions['total'],
                 'taxable_income' => $taxableIncome,
-                'base_tax' => $this->tax->getBaseTax(),
-                'compensation_level' => $this->tax->getCompensationLevel(),
-                'tax_rate' => $this->tax->getTaxRate(),
+                'base_tax' => $this->taxService->getBaseTax(),
+                'compensation_level' => $this->taxService->getCompensationLevel(),
+                'tax_rate' => $this->taxService->getTaxRate(),
                 'income_tax' => $incomeTax,
                 'net_salary' => $netPay
             ]);
             PayrollTaxesContributions::create([
                 'payroll_id' => $payroll->id,
                 'company_id' => $employee->company->id,
-                'withholding_tax' => $this->tax->getBaseTax(),
-                'sss_contribution' => $this->sss->getEmployerShare(),
-                'pagibig_contribution' => $this->pagibig->getEmployerShare()
+                'withholding_tax' => $this->taxService->getBaseTax(),
+                'sss_contribution' => $this->sssService->getEmployerShare(),
+                'pagibig_contribution' => $this->pagIbigService->getEmployerShare()
             ]);
-            $period->status = Period::STATUS_COMPLETED;
-            $period->save();
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
-            throw $e;
+            throw new Exception($e->getMessage());
         }
         return $payroll;
     }
 
-    public function calculateAttendanceSummary(Collection $timeRecords): array
+    private function validate(Period $period, Employee $employee): void
     {
-        $totalMinutesLate = 0;
-        $totalUnderTime = 0;
-        $totalOvertime = 0;
-        $absences = 0;
-        $summary = [];
-        foreach ($timeRecords as $date => $group) {
-            $lateMinutes = 0;
-            $undertimeMinutes = 0;
-            $absent = true;
-            $overtimeMinutes = 0;
+        throw_if($period->status == Period::STATUS_COMPLETED, new Exception('Period is already ' . $period->status));
 
-            $expectedClockIn = null;
-            $expectedClockOut = null;
-            foreach ($group as $record) {
-                $clockIn = $this->timeOnlyFormat($record->clock_in);
-                $clockOut = $this->timeOnlyFormat($record->clock_out);
-                list($expectedClockIn, $expectedClockOut) = $this->getExpectedClocks($record);
-                if ($clockOut) {
-                    $absent = false;
-                    $lateMinutes += $this->computeLateMinutes($clockIn, $expectedClockIn);
-                    $undertimeMinutes += $this->computeUndertimeMinutes($clockOut, $expectedClockOut);
-                } else {
-                    $absent = true;
-                    $lateMinutes += $this->computeLateMinutes($clockIn, $expectedClockIn);
-                }
-            }
-            if (!$absent) {
-                $overtimeMinutes = $this->computeOvertimeMinutes($clockOut, $expectedClockOut);
-            } else {
-                $absences++;
-            }
-            $totalMinutesLate += $lateMinutes;
-            $totalUnderTime += $undertimeMinutes;
-            $totalOvertime += $overtimeMinutes;
-            $summary[$date] = [
-                'lateMinutes' => $lateMinutes,
-                'undertimeMinutes' => $undertimeMinutes,
-                'overtimeMinutes' => $overtimeMinutes
-            ];
-        }
-        $summary['totalMinutesLate'] = $totalMinutesLate;
-        $summary['totalUnderTime'] = $totalUnderTime;
-        $summary['totalOvertime'] = $totalOvertime;
-        $summary['absences'] = $absences;
-        return $summary;
+        throw_unless(
+            $employee->salaryComputation,
+            new Exception('No available salary details for ' . $employee->fullName)
+        );
+
+        $payroll= $employee->payrolls->firstWhere('period_id', $period->id);
+        throw_if($payroll, new Exception('Payroll already exists.'));
     }
 
-    public function calculateContributionSummary(float $basicSalary, string $periodType): array
+    private function calculateAttendanceRecords(Collection $timeRecords): array
     {
-        $sssContribution = $this->sss->compute($basicSalary);
-        $pagIbigContribution = $this->pagibig->compute($basicSalary);
-        $philHealthContribution = $this->philhealth->compute($basicSalary);
+        $absences = 0;
+        $absentHours = 0;
+        $lateMinutes = 0;
+        $overtimeMinutes = 0;
+        $undertimeMinutes = 0;
+        $hoursWorkedMinutes = 0;
+        $totalExpectedWorkedHours = 0;
+        $expectedWorkedHours = 0;
+
+        foreach ($timeRecords as $timeRecord) {
+            $expectedClockIn = Carbon::parse($timeRecord->expected_clock_in);
+            $expectedClockOut = Carbon::parse($timeRecord->expected_clock_out);
+            $clockIn = Carbon::parse($timeRecord->clock_in);
+            $clockOut = Carbon::parse($timeRecord->clock_out);
+            $expectedWorkedHours = $expectedClockIn->diffInHours($expectedClockOut);
+            $totalExpectedWorkedHours += $expectedWorkedHours;
+            if (!$timeRecord->clock_in && !$timeRecord->clock_out) {
+                $absences++;
+                $absentHours += $expectedWorkedHours;
+            } else {
+                $lateMinutes += $clockIn->gt($expectedClockIn)
+                    ? $clockIn->diffInMinutes($expectedClockIn): 0;
+                $undertimeMinutes += $clockOut->lt($expectedClockOut)
+                    ? $clockOut->diffInMinutes($expectedClockOut) : 0;
+                $overtimeMinutes += $clockOut->gt($expectedClockOut)
+                    ? $clockOut->diffInMinutes($expectedClockOut) : 0;
+                $hoursWorkedMinutes += $clockIn->diffInMinutes($clockOut);
+            }
+        }
+
+        return [
+            $absences,
+            $absentHours,
+            $lateMinutes,
+            $overtimeMinutes,
+            $undertimeMinutes,
+            $hoursWorkedMinutes,
+            $totalExpectedWorkedHours,
+            $expectedWorkedHours
+        ];
+    }
+
+    private function calculateContributions(float $grossPay, string $periodType): array
+    {
+
+        $sssContribution = $this->sssService->compute($grossPay);
+        $pagIbigContribution = $this->pagIbigService->compute($grossPay);
+        $philHealthContribution = $this->philHealthService->compute($grossPay);
 
         if ($periodType == Period::TYPE_SEMI_MONTHLY) {
-            $basicSalary = $basicSalary / self::FREQUENCY_SEMI_MONTHLY;
             $sssContribution = $sssContribution / self::FREQUENCY_SEMI_MONTHLY;
             $pagIbigContribution = $pagIbigContribution / self::FREQUENCY_SEMI_MONTHLY;
             $philHealthContribution = $philHealthContribution / self::FREQUENCY_SEMI_MONTHLY;
         } elseif ($periodType == Period::TYPE_WEEKLY) {
-            $basicSalary = $basicSalary / self::FREQUENCY_WEEKLY;
             $sssContribution = $sssContribution / self::FREQUENCY_WEEKLY;
             $pagIbigContribution = $pagIbigContribution / self::FREQUENCY_WEEKLY;
             $philHealthContribution = $philHealthContribution / self::FREQUENCY_WEEKLY;
@@ -171,70 +211,10 @@ class PayrollService
         $totalContributions = $pagIbigContribution + $philHealthContribution + $sssContribution;
 
         return [
-            'pagIbigContribution' => $pagIbigContribution,
-            'philHealthContribution' => $philHealthContribution,
-            'sssContribution' => $sssContribution,
-            'totalContributions' => $totalContributions
+            'pagIbig' => $pagIbigContribution,
+            'philHealth' => $philHealthContribution,
+            'sss' => $sssContribution,
+            'total' => $totalContributions
         ];
     }
-
-    private function validate(Period $period, Employee $employee): void
-    {
-        throw_if($period->status != Period::STATUS_PENDING, new Exception('Period is already ' . $period->status));
-        $payroll = $employee->payrolls->firstWhere('period_id', $period->id);
-
-        throw_if($payroll, new Exception('Payroll already exists.'));
-        $workSchedule = $employee->schedules()
-            ->where('start_date', '<=', $period->start_date)
-            ->first();
-
-        throw_unless($workSchedule, new Exception('No available work schedule for this period'));
-    }
-
-    private function getTimeRecords(Employee $employee, Carbon $startDate, Carbon $endDate): Collection
-    {
-        return $employee->timeRecords()
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->whereNotNull(['expected_clock_in', 'expected_clock_out'])
-            ->orderBy('clock_in')
-            ->get()
-            ->groupBy(function ($record) {
-                return Carbon::parse($record->clock_in)->format('Y-m-d');
-            });
-    }
-
-    private function getExpectedClocks(TimeRecord $record): array
-    {
-        if ($record->attendance_status == 'leave') {
-            $expectedClockIn = $this->timeOnlyFormat($record->clock_in);
-            $expectedClockOut = $this->timeOnlyFormat($record->clock_out);
-        } else {
-            $expectedClockIn = $this->timeOnlyFormat($record->expected_clock_in);
-            $expectedClockOut = $this->timeOnlyFormat($record->expected_clock_out);
-        }
-        return [$expectedClockIn, $expectedClockOut];
-    }
-
-    private function timeOnlyFormat($time): Carbon
-    {
-        return Carbon::parse(Carbon::parse($time)->format('H:i:s'));
-    }
-
-    private function computeLateMinutes(Carbon $clockIn, Carbon $expectedClockIn): string
-    {
-        return $clockIn->gt($expectedClockIn) ? $clockIn->diffInMinutes($expectedClockIn) : 0;
-    }
-
-    private function computeUndertimeMinutes(Carbon $clockOut, Carbon $expectedClockOut): string
-    {
-        return $clockOut->lt($expectedClockOut) ? $expectedClockOut->diffInMinutes($clockOut) : 0;
-    }
-
-    private function computeOvertimeMinutes(Carbon $actualClockOut, Carbon $expectedClockOut): float
-    {
-        return $actualClockOut->greaterThan($expectedClockOut)
-                && ($actualClockOut->diffInMinutes($expectedClockOut) > 60)
-                ? $actualClockOut->diffInMinutes($expectedClockOut) : 0;
-    }
 }
-

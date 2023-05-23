@@ -12,15 +12,22 @@ class Period extends Model
 {
     use HasFactory, SoftDeletes;
 
-
-    public const STATUS_PENDING = 'pending';
+    public const STATUS_ATTENTION_REQUIRED = 'attention_required';
     public const STATUS_CANCELLED = 'cancelled';
     public const STATUS_COMPLETED = 'completed';
+    public const STATUS_FAILED = 'failed';
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_PROCESSING = 'processing';
+
     public const STATUSES = [
-        self::STATUS_PENDING,
+        self::STATUS_ATTENTION_REQUIRED,
         self::STATUS_CANCELLED,
-        self::STATUS_COMPLETED
+        self::STATUS_COMPLETED,
+        self::STATUS_FAILED,
+        self::STATUS_PENDING,
+        self::STATUS_PROCESSING
     ];
+
     public const TYPE_MONTHLY = 'monthly';
     public const TYPE_SEMI_MONTHLY = 'semi-monthly';
     public const TYPE_WEEKLY = 'weekly';
@@ -38,12 +45,14 @@ class Period extends Model
         'type',
         'start_date',
         'end_date',
+        'salary_date',
         'status'
     ];
 
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
+        'salary_date' => 'datetime',
         'status' => 'string'
     ];
 
