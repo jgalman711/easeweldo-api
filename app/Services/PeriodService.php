@@ -45,10 +45,11 @@ class PeriodService
     {
         $currentDate = Carbon::now()->toDateString();
         $companyPreviousPeriod = $company->periods()->latest()->first();
-        if ($companyPreviousPeriod && $companyPreviousPeriod->end_date < $currentDate) {
+        if ($companyPreviousPeriod && $companyPreviousPeriod->end_date->copy()->subDays(2) <= $currentDate) {
             $data['company_id'] = $company->id;
             $data['company_period_number'] = $companyPreviousPeriod->company_period_number + 1;
             $data['type'] = $companyPreviousPeriod->type;
+            $data['status'] = Period::STATUS_PENDING;
             if ($data['type'] == Period::TYPE_SEMI_MONTHLY) {
                 $data['start_date'] = $companyPreviousPeriod->end_date->addDay();
                 $data['end_date'] = $companyPreviousPeriod->start_date->addMonth()->subDay();
