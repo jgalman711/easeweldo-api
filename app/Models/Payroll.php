@@ -22,6 +22,8 @@ class Payroll extends Model
         'total_overtime_pay',
         'total_undertime_minutes',
         'total_undertime_deductions',
+        'total_leave_hours',
+        'total_leave_compensation',
         'sss_contribution',
         'philhealth_contribution',
         'pagibig_contribution',

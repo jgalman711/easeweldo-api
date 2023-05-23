@@ -16,6 +16,7 @@ class SalaryComputationRequest extends BaseRequest
             'special_holiday_rate' => self::REQUIRED_NUMERIC,
             'sick_leaves' => self::REQUIRED_NUMERIC,
             'vacation_leaves' => self::REQUIRED_NUMERIC,
+            'unit' => 'required|in:hour,day'
         ];
     }
 }

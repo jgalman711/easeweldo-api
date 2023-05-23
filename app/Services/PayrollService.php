@@ -32,18 +32,22 @@ class PayrollService
 
     protected $taxService;
 
+    protected $leaveService;
+
     public function __construct(
         TimeRecordService $timeRecordService,
         PagIbigService $pagIbigService,
         PhilHealthService $philHealthService,
         SSSService $sssService,
-        TaxService $taxService
+        TaxService $taxService,
+        LeaveService $leaveService
     ) {
         $this->timeRecordService = $timeRecordService;
         $this->pagIbigService = $pagIbigService;
         $this->philHealthService = $philHealthService;
         $this->sssService = $sssService;
         $this->taxService = $taxService;
+        $this->leaveService = $leaveService;
     }
 
     public function generate(Period $period, Employee $employee): Payroll
@@ -55,15 +59,22 @@ class PayrollService
             $period->end_date
         );
 
+        $leaves = $this->leaveService->getLeaveByDateRange(
+            $employee,
+            $period->start_date,
+            $period->end_date
+        );
+
         list(
             $absences,
             $absentHours,
+            $leaveHours,
             $lateMinutes,
             $overtimeMinutes,
             $undertimeMinutes,
             $hoursWorkedMinutes,
             $totalExpectedWorkedHours
-        ) = $this->calculateAttendanceRecords($timeRecords);
+        ) = $this->calculateAttendanceRecords($timeRecords, $leaves);
         
         $salaryComputation = $employee->salaryComputation;
 
@@ -83,8 +94,11 @@ class PayrollService
         $latesDeductions = $lateMinutes / self::MINUTES_60 * $salaryComputation->hourly_rate;
         $undertimeDeductions = $undertimeMinutes / self::MINUTES_60 * $salaryComputation->hourly_rate;
         $overtimeCompensation = $overtimeMinutes / self::MINUTES_60 * $salaryComputation->hourly_rate;
+        $leaveCompensation = $leaveHours * $salaryComputation->hourly_rate;
 
-        $grossPay = $basicPay - $absencesDeductions - $latesDeductions - $undertimeDeductions + $overtimeCompensation;
+        $compensations = $overtimeCompensation + $leaveCompensation;
+        $deductions = $absencesDeductions - $latesDeductions - $undertimeDeductions;
+        $grossPay = $basicPay - $deductions + $compensations;
 
         $calculateContributions = $this->calculateContributions($grossPay, $period->type);
 
@@ -108,6 +122,8 @@ class PayrollService
                 'total_undertime_minutes' => $undertimeMinutes,
                 'total_undertime_deductions' => $undertimeDeductions,
                 'total_hours_worked' => $hoursWorkedMinutes / self::MINUTES_60,
+                'total_leave_hours' => $leaveHours,
+                'total_leave_compensation' => $leaveCompensation,
                 'sss_contribution' => $calculateContributions['sss'],
                 'philhealth_contribution' => $calculateContributions['philHealth'],
                 'pagibig_contribution' => $calculateContributions['pagIbig'],
@@ -147,10 +163,11 @@ class PayrollService
         throw_if($payroll, new Exception('Payroll already exists.'));
     }
 
-    private function calculateAttendanceRecords(Collection $timeRecords): array
+    private function calculateAttendanceRecords(Collection $timeRecords, Collection $leaves): array
     {
         $absences = 0;
         $absentHours = 0;
+        $leaveHours = 0;
         $lateMinutes = 0;
         $overtimeMinutes = 0;
         $undertimeMinutes = 0;
@@ -166,8 +183,9 @@ class PayrollService
             $expectedWorkedHours = $expectedClockIn->diffInHours($expectedClockOut);
             $totalExpectedWorkedHours += $expectedWorkedHours;
             if (!$timeRecord->clock_in && !$timeRecord->clock_out) {
-                $absences++;
+                $absences ++;
                 $absentHours += $expectedWorkedHours;
+                $leaveHours += $this->calculateLeaveHours($leaves, $expectedWorkedHours, $expectedClockIn);
             } else {
                 $lateMinutes += $clockIn->gt($expectedClockIn)
                     ? $clockIn->diffInMinutes($expectedClockIn): 0;
@@ -182,6 +200,7 @@ class PayrollService
         return [
             $absences,
             $absentHours,
+            $leaveHours,
             $lateMinutes,
             $overtimeMinutes,
             $undertimeMinutes,
@@ -216,5 +235,20 @@ class PayrollService
             'sss' => $sssContribution,
             'total' => $totalContributions
         ];
+    }
+
+    private function calculateLeaveHours(Collection $leaves, float $expectedWorkedHours, Carbon $expectedClockIn): float
+    {
+        $leave = $leaves->where('start_date', '<=', $expectedClockIn)
+                    ->where('end_date', '>=', $expectedClockIn)
+                    ->first();
+        if ($leave) {
+            $leaveStartDate = Carbon::parse($leave->start_date);
+            $leaveEndDate = Carbon::parse($leave->end_date);
+            return $leaveStartDate->diffInHours($leaveEndDate) > $expectedWorkedHours
+                ? $expectedWorkedHours
+                : $leaveStartDate->diffInHours($leaveEndDate);
+        }
+        return 0;
     }
 }

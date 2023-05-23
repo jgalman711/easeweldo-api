@@ -37,6 +37,16 @@ class LeaveService
         return $leaves;
     }
 
+    public function getLeaveByDateRange(Employee $employee, Carbon $dateFrom, Carbon $dateTo): Collection
+    {
+        return $employee->leaves()
+            ->where(function ($query) use ($dateFrom, $dateTo) {
+                $dateTo = Carbon::parse($dateTo)->addDay();
+                $query->whereBetween('start_date', [$dateFrom, $dateTo])
+                    ->orWhereBetween('end_date', [$dateFrom, $dateTo]);
+            })->get();
+    }
+
     public function applyLeave(Employee $employee, array $data): Leave
     {
         $data['type'] = Leave::TYPE_EMERGENCY_LEAVE ? Leave::TYPE_VACATION_LEAVE : $data['type'];
@@ -73,26 +83,6 @@ class LeaveService
     {
         $leave->status = Leave::APPROVED;
         $leave->save();
-        $this->insertToTimeRecords($leave);
-    }
-
-    public function insertToTimeRecords(Leave $leave): TimeRecord
-    {
-        $employee = $leave->employee;
-        $timeRecord = TimeRecord::whereDate(
-            'created_at',
-            '=',
-            date('Y-m-d', strtotime($leave->start_date))
-        )->where('employee_id', $employee->id)->first();
-        
-        if (!$timeRecord) {
-            $timeRecord = $this->timeRecordService->create($employee, $leave->start_date, $leave->end_date);
-        }
-        $timeRecord->clock_in = $leave->start_date;
-        $timeRecord->clock_out = $leave->end_date;
-        $timeRecord->attendance_status = $leave->type;
-        $timeRecord->save();
-        return $timeRecord;
     }
 
     public function getSoonestLeaves(int $companyId): Collection

@@ -8,6 +8,11 @@ class SalaryComputationService
 {
     public function initialize(array $data): SalaryComputation
     {
+        $data['sick_leaves'] = $data['unit'] == SalaryComputation::UNIT_DAY
+            ?  $data['sick_leaves'] : $data['sick_leaves'] * SalaryComputation::EIGHT_HOURS;
+        $data['vacation_leaves'] = $data['unit'] == SalaryComputation::UNIT_DAY
+            ?  $data['vacation_leaves'] : $data['vacation_leaves'] * SalaryComputation::EIGHT_HOURS;
+
         $data['available_sick_leaves'] = $data['total_sick_leaves'] = $data['sick_leaves'];
         $data['available_vacation_leaves'] = $data['total_vacation_leaves'] = $data['vacation_leaves'];
 

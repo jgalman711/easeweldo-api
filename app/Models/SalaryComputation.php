@@ -11,6 +11,7 @@ class SalaryComputation extends Model
 {
     use HasFactory;
 
+    public const UNIT_DAY = 'day';
     public const TYPICAL_WORK_DAYS_PER_MONTH = 22;
     public const EIGHT_HOURS = 8;
 
@@ -27,10 +28,10 @@ class SalaryComputation extends Model
         'sss_contribution',
         'pagibig_contribution',
         'philhealth_contribution',
-        'total_sick_leaves',
-        'total_vacation_leaves',
-        'available_sick_leaves',
-        'available_vacation_leaves'
+        'total_sick_leave_hours',
+        'total_vacation_leave_hours',
+        'available_sick_leave_hours',
+        'available_vacation_leave_hours'
     ];
 
     public function employee(): BelongsTo
