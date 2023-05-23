@@ -20,7 +20,7 @@ class EmployeeController extends Controller
     public function index(Company $company): JsonResponse
     {
         $employees = $company->employees()->paginate(10);
-        return $this->sendResponse(BaseResource::collection($employees), 'Employees retrieved successfully.');
+        return $this->sendResponse($employees, 'Employees retrieved successfully.');
     }
 
     public function store(EmployeeRequest $request, Company $company): JsonResponse

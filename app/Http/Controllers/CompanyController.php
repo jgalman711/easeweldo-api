@@ -12,7 +12,7 @@ class CompanyController extends Controller
     public function index(): JsonResponse
     {
         $companies = Company::paginate(10);
-        return $this->sendResponse(BaseResource::collection($companies), 'Companies retrieved successfully.');
+        return $this->sendResponse($companies, 'Companies retrieved successfully.');
     }
 
     public function store(CompanyRequest $request): JsonResponse
