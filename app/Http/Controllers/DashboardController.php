@@ -15,8 +15,10 @@ class DashboardController extends Controller
 
     protected $timeRecordService;
 
-    public function __construct(LeaveService $leaveService, TimeRecordService $timeRecordService)
-    {
+    public function __construct(
+        LeaveService $leaveService,
+        TimeRecordService $timeRecordService
+    ) {
         $this->leaveService = $leaveService;
         $this->timeRecordService = $timeRecordService;
     }
@@ -62,5 +64,15 @@ class DashboardController extends Controller
             ];
         }
         return $this->sendResponse($dashboardData, 'Dashboard data retrieved successfully.');
+    }
+
+    public function index(Company $company): JsonResponse
+    {
+        $sections = [];
+        $upcomingPeriod = $company->periods()->latest()->first();
+        $payrolls = $company->payrolls->where('id', $upcomingPeriod->id);
+        dd($payrolls);
+        $sections['upcoming_period'] = $upcomingPeriod;
+        return $this->sendResponse($sections, 'Dashboard data retrieved successfully.');
     }
 }

@@ -11,13 +11,14 @@ class CompanyController extends Controller
 {
     public function index(): JsonResponse
     {
-        $companies = Company::all();
+        $companies = Company::paginate(10);
         return $this->sendResponse(BaseResource::collection($companies), 'Companies retrieved successfully.');
     }
 
     public function store(CompanyRequest $request): JsonResponse
     {
         $input = $request->validated();
+
         $input['slug'] = strtolower(str_replace(' ', '-', $input['name']));
         $input['status'] = Company::STATUS_ACTIVE;
         $company = Company::create($input);

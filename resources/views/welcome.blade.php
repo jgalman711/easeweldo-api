@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Easeweldo: Elevate Your Payroll Experience with Ease!</title>
+        <title>Easeweldo: Elevate Your Payroll Experience with Ease! - edited</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
