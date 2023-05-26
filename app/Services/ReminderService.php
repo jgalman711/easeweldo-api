@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Company;
 use App\Models\Holiday;
 use App\Models\Leave;
+use Illuminate\Support\Collection;
 
 class ReminderService
 {
@@ -22,7 +23,7 @@ class ReminderService
 
     private const REMINDER_COLOR_NEUTRAL = "#A6A6A6";
 
-    public function getReminders(Company $company)
+    public function getReminders(Company $company): Collection
     {
         if ($company->subscription_status == 'unpaid'
             && $company->due_date >= date('Y-m-d')

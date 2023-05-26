@@ -11,6 +11,7 @@ class TimeRecord extends Model
 
     protected $fillable = [
         'employee_id',
+        'company_id',
         'clock_in',
         'clock_out',
         'expected_clock_in',
@@ -23,5 +24,4 @@ class TimeRecord extends Model
     {
         return $this->belongsTo(Employee::class);
     }
-
 }

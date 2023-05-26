@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Company;
 use App\Models\Employee;
+use App\Models\Leave;
 use App\Models\TimeRecord;
 use Carbon\Carbon;
 use Exception;
@@ -72,5 +74,37 @@ class TimeRecordService
                     ->orWhereBetween('clock_in', [$dateFrom, $dateTo])
                     ->orWhereBetween('clock_out', [$dateFrom, $dateTo]);
             })->get();
+    }
+
+    public function getAttendanceSummary(Company $company, string $date): array
+    {
+        $absent = 0;
+        $late = 0;
+        $onTime = 0;
+
+        $timeRecords = TimeRecord::where('company_id', $company->id)->whereDate('expected_clock_in', $date)->get();
+        $leaves = Leave::where(function ($query) use ($date) {
+            $query->whereDate('start_date', '<=', $date)
+                ->whereDate('end_date', '>=', $date);
+        });
+        foreach ($timeRecords as $timeRecord) {
+            if (!$timeRecord->clock_in && !$timeRecord->clock_out &&
+                !$leaves->where('employee_id', $timeRecord->employee_id)->first()
+            ) {
+                $absent ++;
+            } elseif ($timeRecord->clock_in && $timeRecord->clock_in->gt($timeRecord->expected_clock_in)) {
+                $late ++;
+            } elseif ($timeRecord->clock_in && $timeRecord->clock_in->lt($timeRecord->expected_clock_in)) {
+                $onTime ++;
+            }
+        }
+        $restDay = $company->employees->count() - $timeRecords->count();
+        return [
+            'absent' => $absent,
+            'late' => $late,
+            'onTime' => $onTime,
+            'restDay' => $restDay,
+            'leaves' => $leaves->count()
+        ];
     }
 }
