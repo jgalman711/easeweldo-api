@@ -6,12 +6,16 @@ use App\Http\Requests\CompanyRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use Illuminate\Http\JsonResponse;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class CompanyController extends Controller
 {
     public function index(): JsonResponse
     {
-        $companies = Company::paginate(10);
+        $companies = QueryBuilder::for(Company::class)
+            ->allowedFilters(['name'])
+            ->allowedSorts('name')
+            ->paginate(10);
         return $this->sendResponse($companies, 'Companies retrieved successfully.');
     }
 

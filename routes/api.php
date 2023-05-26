@@ -28,12 +28,6 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-Route::get('artisan-migrate', function () {
-    Artisan::call('migrate');
-});
-Route::get('artisan-migrate-rollback', function () {
-    Artisan::call('migrate:rollback');
-});
 Route::post('register', [RegisterController::class, 'register']);
 Route::post('login', [LoginController::class, 'login']);
 Route::post('reset-password', [PasswordResetController::class, 'reset'])->name('password.reset');
