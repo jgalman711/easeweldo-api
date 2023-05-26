@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Leave;
-use App\Models\TimeRecord;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -16,6 +15,8 @@ class LeaveService
     protected $timeRecordService;
 
     private const HOUR_BREAK = 1;
+
+    private const WORK_HOURS_PER_DAY = 8;
 
     public function __construct(TimeRecordService $timeRecordService)
     {
@@ -50,29 +51,23 @@ class LeaveService
     public function applyLeave(Employee $employee, array $data): Leave
     {
         $data['type'] = Leave::TYPE_EMERGENCY_LEAVE ? Leave::TYPE_VACATION_LEAVE : $data['type'];
-        
         $startDate = Carbon::parse($data['start_date']);
         $endDate = Carbon::parse($data['end_date']);
-        $leaveDuration = $startDate->diffInHours($endDate);
-        $hoursInOneWorkingDay = $this->getHoursInOneWorkingDay($employee, $data['start_date'], $data['end_date']);
-        
-        $leave = $leaveDuration > $hoursInOneWorkingDay
-            ? $hoursInOneWorkingDay
-            : $leaveDuration / $hoursInOneWorkingDay;
-        $availableLeaveType = "available_" . $data['type'] . "s";
-        
+        $leaveHours = $startDate->diffInHours($endDate);
+        if ($leaveHours > self::WORK_HOURS_PER_DAY) {
+            $leaveHours -= self::HOUR_BREAK;
+        }
+        $availableHoursLeaveType = "available_" . $data['type'] . "_hours";
         throw_if(
-            $employee->salaryComputation->{$availableLeaveType} <= $leave,
+            $employee->salaryComputation->{$availableHoursLeaveType} <= $leaveHours,
             new Exception('Insufficient leave')
         );
-        $employee->salaryComputation->{$availableLeaveType} -= $leave;
+        $employee->salaryComputation->{$availableHoursLeaveType} -= $leaveHours;
         $employee->salaryComputation->save();
-
         $createdByUser = Auth::user();
         $data['created_by'] = $createdByUser->id;
         $data['status'] = Leave::PENDING;
         $leave = Leave::create($data);
-
         if ($createdByUser->hasRole('business-admin') || $createdByUser->hasRole('super-admin')) {
             $this->approve($leave);
         }
@@ -99,21 +94,5 @@ class LeaveService
         return $groupedLeaves->sortBy(function ($item) {
             return $item;
         });
-    }
-
-    private function getHoursInOneWorkingDay(Employee $employee, string $clockInDate, string $clockOutDate): float
-    {
-        list($expectedClockIn, $expectedClockOut) = $this->timeRecordService->getExpectedScheduleOf(
-            $employee,
-            $clockInDate,
-            $clockOutDate
-        );
-        $startDate = Carbon::parse($expectedClockIn);
-        $endDate = Carbon::parse($expectedClockOut);
-        $hoursDifference = $startDate->diffInHours($endDate);
-        if ($hoursDifference >= 9) {
-            $hoursDifference -= self::HOUR_BREAK;
-        }
-        return $hoursDifference;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Company;
+use App\Models\Holiday;
 use App\Models\Period;
 use Carbon\Carbon;
 use Exception;
@@ -68,5 +69,20 @@ class PeriodService
             return Period::create($data);
         }
         return null;
+    }
+
+    public function getUpcomingPeriod(Company $company): array
+    {
+        $now = Carbon::now();
+        $targetDate = $now->copy()->addDays(2);
+        $period = $company->periods()->whereDate('salary_date', "<=", $targetDate->toDateString())->first();
+        $payrolls = $company->payrolls->where('period_id', $period->id);
+        return [
+            "period" => $period,
+            "employees_net_salary" => $payrolls->sum('net_salary'),
+            "number_of_employees" => $payrolls->count(),
+            "days_before_salary" => $period->salary_date->diffInDays($now),
+            "salary_date" => $period->salary_date
+        ];
     }
 }
