@@ -2,20 +2,17 @@
 
 namespace App\Traits;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 trait Filter
 {
-    protected $searchables = [];
-
-    protected function applyFilters(Request $request, $query): LengthAwarePaginator
+    protected function applyFilters(Request $request, $query, ?array $searchableColumns = []): LengthAwarePaginator
     {
         if ($request->has('search')) {
             $search = $request->input('search');
-            foreach ($this->searchables as $searchable) {
-                $query->orWhere($searchable, 'like', '%' . $search . '%');
+            foreach ($searchableColumns as $searchableColumn) {
+                $query->orWhere($searchableColumn, 'like', '%' . $search . '%');
             }
         }
         $sortColumn = $request->input('sort');

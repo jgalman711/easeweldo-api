@@ -18,16 +18,15 @@ class EmployeeController extends Controller
 
     public function __construct(EmployeeService $employeeService)
     {
-        $this->searchables = [
-            'first_name',
-            'last_name'
-        ];
         $this->employeeService = $employeeService;
     }
     
     public function index(Request $request, Company $company): JsonResponse
     {
-        $employees = $this->applyFilters($request, $company->employees());
+        $employees = $this->applyFilters($request, $company->employees(), [
+            'first_name',
+            'last_name'
+        ]);
         return $this->sendResponse($employees, 'Employees retrieved successfully.');
     }
 

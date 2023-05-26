@@ -13,13 +13,6 @@ class CompanyController extends Controller
 {
     use Filter;
 
-    public function __construct()
-    {
-        $this->searchables = [
-            'name'
-        ];
-    }
-
     public function index(Request $request): JsonResponse
     {
         $companies = $this->applyFilters($request, Company::query());
