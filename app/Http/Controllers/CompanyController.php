@@ -5,24 +5,30 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CompanyRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
+use App\Traits\Filter;
 use Illuminate\Http\JsonResponse;
-use Spatie\QueryBuilder\QueryBuilder;
+use Illuminate\Http\Request;
 
 class CompanyController extends Controller
 {
-    public function index(): JsonResponse
+    use Filter;
+
+    public function __construct()
     {
-        $companies = QueryBuilder::for(Company::class)
-            ->allowedFilters(['name'])
-            ->allowedSorts('name')
-            ->paginate(10);
+        $this->searchables = [
+            'name'
+        ];
+    }
+
+    public function index(Request $request): JsonResponse
+    {
+        $companies = $this->applyFilters($request, Company::query());
         return $this->sendResponse($companies, 'Companies retrieved successfully.');
     }
 
     public function store(CompanyRequest $request): JsonResponse
     {
         $input = $request->validated();
-
         $input['slug'] = strtolower(str_replace(' ', '-', $input['name']));
         $input['status'] = Company::STATUS_ACTIVE;
         $company = Company::create($input);

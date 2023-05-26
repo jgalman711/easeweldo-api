@@ -6,20 +6,28 @@ use App\Http\Requests\EmployeeRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Services\EmployeeService;
+use App\Traits\Filter;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class EmployeeController extends Controller
 {
+    use Filter;
+
     protected $employeeService;
 
     public function __construct(EmployeeService $employeeService)
     {
+        $this->searchables = [
+            'first_name',
+            'last_name'
+        ];
         $this->employeeService = $employeeService;
     }
     
-    public function index(Company $company): JsonResponse
+    public function index(Request $request, Company $company): JsonResponse
     {
-        $employees = $company->employees()->paginate(10);
+        $employees = $this->applyFilters($request, $company->employees());
         return $this->sendResponse($employees, 'Employees retrieved successfully.');
     }
 
