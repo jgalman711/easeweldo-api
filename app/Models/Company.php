@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Company extends Model
@@ -13,13 +15,29 @@ class Company extends Model
     use HasFactory, SoftDeletes;
 
     public const STATUS_ACTIVE = 'active';
+    public const STATUS_INACTIVE = 'inactive';
 
     protected $fillable = [
         'name',
         'slug',
         'status',
         'details',
-        'logo'
+        'logo',
+        'legal_name',
+        'address_line_1',
+        'address_line_2',
+        'barangay_town_city_province',
+        'contact_name',
+        'email_address',
+        'mobile_number',
+        'landline_number',
+        'bank_name',
+        'bank_account_name',
+        'bank_account_number',
+        'tin',
+        'sss_number',
+        'philhealth_number',
+        'pagibig_number'
     ];
 
     public function getRouteKeyName(): string
@@ -42,9 +60,26 @@ class Company extends Model
         return $this->hasMany(Period::class);
     }
 
-    public function workSchedules()
+    public function workSchedules(): HasMany
     {
         return $this->hasMany(WorkSchedule::class);
+    }
+
+    public function companySubscription(): HasOne
+    {
+        return $this->hasOne(CompanySubscription::class);
+    }
+
+    public function subscription(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Subscription::class,
+            CompanySubscription::class,
+            'company_id',
+            'id',
+            'id',
+            'subscription_id'
+        );
     }
 
     public function getEmployeeById(int $employeeId): ?Employee

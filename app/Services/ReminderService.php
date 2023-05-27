@@ -25,16 +25,17 @@ class ReminderService
 
     public function getReminders(Company $company): Collection
     {
-        if ($company->subscription_status == 'unpaid'
-            && $company->due_date >= date('Y-m-d')
+        $subscription = $company->companySubscription;
+        if ($subscription->status == 'unpaid'
+            && $subscription->end_date >= date('Y-m-d')
         ) {
             $companyColor = self::REMINDER_COLOR_DANGER;
         } elseif (
-            $company->subscription_status == 'unpaid'
-            && $company->due_date >= date('Y-m-d', strtotime('-3 days'))
+            $subscription->status == 'unpaid'
+            && $subscription->end_date >= date('Y-m-d', strtotime('-3 days'))
         ) {
             $companyColor = self::REMINDER_COLOR_WARNING;
-        } elseif ($company->subscription_status == 'paid') {
+        } elseif ($subscription->status == 'paid') {
             $companyColor = self::REMINDER_COLOR_ACTIVE;
         } else {
             $companyColor = self::REMINDER_COLOR_NEUTRAL;
@@ -68,8 +69,8 @@ class ReminderService
             ];
         }))->push([
             'title' => self::EASEWELDO_DUE_TITLE,
-            'date' => $company->due_date,
-            'sub_title' => $company->amount_due,
+            'date' => $subscription->end_date,
+            'sub_title' => $subscription->amount ?? $subscription->subscription->amount,
             'color' => $companyColor
         ])->sortBy(function ($reminder) {
             return $reminder['date'];
