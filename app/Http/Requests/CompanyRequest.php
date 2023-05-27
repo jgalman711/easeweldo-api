@@ -11,8 +11,7 @@ class CompanyRequest extends BaseRequest
         return [
             'name' => 'required|unique:companies,name,NULL,id,deleted_at,NULL',
             'legal_name' => self::NULLABLE_STRING,
-            'address_line_1' => self::NULLABLE_STRING,
-            'address_line_2' => self::NULLABLE_STRING,
+            'address_line' => self::NULLABLE_STRING,
             'barangay_town_city_province' => self::NULLABLE_STRING,
             'contact_name' => self::NULLABLE_STRING,
             'email_address' => 'nullable|email|max:255',

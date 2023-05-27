@@ -11,8 +11,7 @@ return new class extends Migration
     {
         Schema::table('companies', function (Blueprint $table) {
             $table->string('legal_name')->after('logo')->nullable();
-            $table->string('address_line_1')->after('legal_name')->nullable();
-            $table->string('address_line_2')->after('address_line_1')->nullable();
+            $table->string('address_line')->after('legal_name')->nullable();
             $table->string('barangay_town_city_province')->after('address_line_2')->nullable();
             $table->string('contact_name')->after('barangay_town_city_province')->nullable();
             $table->string('email_address')->after('contact_name')->nullable();
@@ -38,8 +37,7 @@ return new class extends Migration
         Schema::table('companies', function (Blueprint $table) {
             $table->dropColumn([
                 'legal_name',
-                'address_line_1',
-                'address_line_2',
+                'address_line',
                 'barangay_town_city_province',
                 'contact_name',
                 'email_address',
