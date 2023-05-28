@@ -14,7 +14,7 @@ class BaseRequest extends FormRequest
     protected const NUMERIC = 'numeric|min:1';
     protected const NULLABLE_TIME_FORMAT = 'nullable|date_format:H:i:s';
     protected const NULLABLE_STRING = 'nullable|string|max:255';
-    protected const PH_MOBILE_NUMBER = 'string|regex:/^(09|\+639)\d{9}$/';
+    protected const PH_MOBILE_NUMBER = 'regex:/^(09|\+639)\d{9}$/';
 
     public function authorize(): bool
     {
