@@ -7,9 +7,6 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 trait Filter
 {
-    public const SORT_ASC = 'asc';
-    public const SORT_DESC = 'desc';
-
     protected function applyFilters(Request $request, $query, ?array $searchableColumns = []): LengthAwarePaginator
     {
         if ($request->has('search')) {
@@ -20,14 +17,14 @@ trait Filter
         }
         if ($request->has('sort')) {
             $sortColumn = $request->input('sort');
-            $sortDirection = self::SORT_ASC;
+            $sortDirection = 'asc';
             if (strpos($sortColumn, '-') === 0) {
-                $sortDirection = self::SORT_DESC;
+                $sortDirection = 'desc';
                 $sortColumn = ltrim($sortColumn, '-');
             }
             $query->orderBy($sortColumn, $sortDirection);
         } else {
-            $query->orderBy('created_at', self::SORT_DESC);
+            $query->orderBy('created_at', 'asc');
         }
         $perPage = $request->input('per_page', 10);
         return $query->paginate($perPage);
