@@ -15,9 +15,9 @@ class EmployeeRequest extends BaseRequest
             'job_title' => self::REQUIRED_STRING,
             'date_of_hire' => self::REQUIRED_DATE,
             'date_of_birth' => self::REQUIRED_DATE,
-            'work_arrangement' => self::REQUIRED_STRING,
+            'employment_status' => self::REQUIRED_STRING,
             'contact_number' => self::REQUIRED_STRING,
-            'address' => self::REQUIRED_STRING,
+            'address_line' => self::REQUIRED_STRING,
             'sss_number' => [
                 'required',
                 'string',
@@ -42,7 +42,9 @@ class EmployeeRequest extends BaseRequest
                 'max:255',
                 Rule::unique('employees', 'tax_identification_number')->ignore($this->employee),
             ],
-            'bank_account_number' => self::REQUIRED_STRING,
+            'bank_name' => self::NULLABLE_STRING,
+            'bank_account_name' => self::NULLABLE_STRING,
+            'bank_account_number' => self::NULLABLE_STRING,
             'mobile_number' => [
                 Rule::requiredIf($this->has('role') && $this->role == 'business-admin'),
                 'regex:/^(09|\+639)\d{9}$/',
