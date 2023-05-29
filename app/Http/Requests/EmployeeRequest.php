@@ -48,7 +48,7 @@ class EmployeeRequest extends BaseRequest
             'bank_name' => self::NULLABLE_STRING,
             'bank_account_name' => self::NULLABLE_STRING,
             'bank_account_number' => self::NULLABLE_STRING,
-            'profile_picture' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'email' => 'email|unique:users,email',
             'role' => 'string|max:255'
         ];

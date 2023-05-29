@@ -11,7 +11,7 @@ class CompanyRequest extends BaseRequest
         return [
             'name' => 'required|unique:companies,name,NULL,id,deleted_at,NULL',
             'legal_name' => self::NULLABLE_STRING,
-            'logo' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'address_line' => self::NULLABLE_STRING,
             'barangay_town_city_province' => self::NULLABLE_STRING,
             'contact_name' => self::NULLABLE_STRING,
