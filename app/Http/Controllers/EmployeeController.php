@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\EmployeeRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
+use App\Models\Employee;
 use App\Services\EmployeeService;
 use App\Traits\Filter;
 use Illuminate\Http\JsonResponse;
@@ -34,6 +35,10 @@ class EmployeeController extends Controller
     {
         $input = $request->validated();
         $input['company_id'] = $company->id;
+        if (isset($input['profile_picture']) && $input['profile_picture']) {
+            $input['profile_picture'] = Employee::STORAGE_PATH . time() . '.' . $request->profile_picture->extension();
+            $request->logo->storeAs(Employee::STORAGE_PATH, $input['profile_picture']);
+        }
         $employee = $this->employeeService->create($input);
         $message = $this->employeeService->getEmployeeCreationMessage();
         return $this->sendResponse(new BaseResource($employee), $message);
@@ -49,6 +54,10 @@ class EmployeeController extends Controller
     {
         $employee = $company->getEmployeeById($employeeId);
         $input = $request->validated();
+        if (isset($input['profile_picture']) && $input['profile_picture']) {
+            $input['profile_picture'] = Employee::STORAGE_PATH . time() . '.' . $request->profile_picture->extension();
+            $request->logo->storeAs(Employee::STORAGE_PATH, $input['profile_picture']);
+        }
         $employee->update($input);
         return $this->sendResponse(new BaseResource($employee), 'Employee updated successfully.');
     }

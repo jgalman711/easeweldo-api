@@ -15,8 +15,11 @@ class EmployeeRequest extends BaseRequest
             'job_title' => self::REQUIRED_STRING,
             'date_of_hire' => self::REQUIRED_DATE,
             'date_of_birth' => self::REQUIRED_DATE,
-            'employment_status' => self::NULLABLE_STRING,
-            'contact_number' => self::REQUIRED_STRING,
+            'employment_status' => self::REQUIRED_STRING,
+            'mobile_number' => [
+                'unique:employees,mobile_number',
+                self::PH_MOBILE_NUMBER
+            ],
             'address_line' => self::REQUIRED_STRING,
             'sss_number' => [
                 'required',
@@ -45,11 +48,7 @@ class EmployeeRequest extends BaseRequest
             'bank_name' => self::NULLABLE_STRING,
             'bank_account_name' => self::NULLABLE_STRING,
             'bank_account_number' => self::NULLABLE_STRING,
-            'mobile_number' => [
-                Rule::requiredIf($this->has('role') && $this->role == 'business-admin'),
-                'regex:/^(09|\+639)\d{9}$/',
-                'unique:users,mobile_number'
-            ],
+            'profile_picture' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'email' => 'email|unique:users,email',
             'role' => 'string|max:255'
         ];

@@ -18,7 +18,7 @@ class Company extends Model
 
     public const STATUS_INACTIVE = 'inactive';
 
-    public const COMPANY_STORAGE_PATH = 'companies/images/';
+    public const STORAGE_PATH = 'companies/images/';
 
     protected $fillable = [
         'name',

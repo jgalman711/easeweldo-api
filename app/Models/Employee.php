@@ -14,6 +14,8 @@ class Employee extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const STORAGE_PATH = 'employees/images/';
+
     protected $fillable = [
         'company_id',
         'first_name',
@@ -24,12 +26,15 @@ class Employee extends Model
         'date_of_birth',
         'work_arrangement',
         'contact_number',
-        'address',
+        'address_line',
         'sss_number',
         'pagibig_number',
         'philhealth_number',
         'tax_identification_number',
-        'bank_account_number'
+        'bank_name',
+        'bank_account_name',
+        'bank_account_number',
+        'profile_picture',
     ];
 
     public function company(): BelongsTo
