@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
+
 class CompanyRequest extends BaseRequest
 {
     private const NULLABLE_STRING_MAX_30 = 'nullable|string|max:30';
@@ -9,7 +11,12 @@ class CompanyRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|unique:companies,name,NULL,id,deleted_at,NULL',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('companies', 'name')->ignore($this->company),
+            ],
             'legal_name' => self::NULLABLE_STRING,
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'address_line' => self::NULLABLE_STRING,

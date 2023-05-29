@@ -56,7 +56,9 @@ class EmployeeController extends Controller
         $input = $request->validated();
         if (isset($input['profile_picture']) && $input['profile_picture']) {
             $input['profile_picture'] = Employee::STORAGE_PATH . time() . '.' . $request->profile_picture->extension();
-            $request->logo->storeAs(Employee::STORAGE_PATH, $input['profile_picture']);
+            $request->profile_picture->storeAs(Employee::STORAGE_PATH, $input['profile_picture']);
+        } else {
+            unset($input['profile_picture']);
         }
         $employee->update($input);
         return $this->sendResponse(new BaseResource($employee), 'Employee updated successfully.');

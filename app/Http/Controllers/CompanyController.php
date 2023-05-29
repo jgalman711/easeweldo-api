@@ -46,6 +46,8 @@ class CompanyController extends Controller
         if (isset($input['logo']) && $input['logo']) {
             $input['logo'] = Company::STORAGE_PATH . time() . '.' . $request->logo->extension();
             $request->logo->storeAs(Company::STORAGE_PATH, $input['logo']);
+        } else {
+            unset($input['logo']);
         }
         $company->update($input);
         return $this->sendResponse(new BaseResource($company), 'Company updated successfully.');
