@@ -27,8 +27,8 @@ class CompanyController extends Controller
         $input['slug'] = strtolower(str_replace(' ', '-', $input['name']));
         $input['status'] = Company::STATUS_ACTIVE;
         if (isset($input['logo']) && $input['logo']) {
-            $input['logo'] = time() . '.' . $request->logo->extension();
-            $request->logo->storeAs('companies/images', $input['logo']);
+            $input['logo'] = Company::COMPANY_STORAGE_PATH . time() . '.' . $request->logo->extension();
+            $request->logo->storeAs(Company::COMPANY_STORAGE_PATH, $input['logo']);
         }
         $company = Company::create($input);
         return $this->sendResponse(new BaseResource($company), 'Company created successfully.');
@@ -43,8 +43,10 @@ class CompanyController extends Controller
     {
         $input = $request->validated();
         $input['slug'] = strtolower(str_replace(' ', '-', $input['name']));
-        $input['logo'] = time() . '.' . $request->image->extension();
-        $request->image->storeAs('images', $input['logo']);
+        if (isset($input['logo']) && $input['logo']) {
+            $input['logo'] = Company::COMPANY_STORAGE_PATH . time() . '.' . $request->logo->extension();
+            $request->logo->storeAs(Company::COMPANY_STORAGE_PATH, $input['logo']);
+        }
         $company->update($input);
         return $this->sendResponse(new BaseResource($company), 'Company updated successfully.');
     }

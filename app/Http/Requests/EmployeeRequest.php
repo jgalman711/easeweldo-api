@@ -15,7 +15,7 @@ class EmployeeRequest extends BaseRequest
             'job_title' => self::REQUIRED_STRING,
             'date_of_hire' => self::REQUIRED_DATE,
             'date_of_birth' => self::REQUIRED_DATE,
-            'employment_status' => self::REQUIRED_STRING,
+            'employment_status' => self::NULLABLE_STRING,
             'contact_number' => self::REQUIRED_STRING,
             'address_line' => self::REQUIRED_STRING,
             'sss_number' => [

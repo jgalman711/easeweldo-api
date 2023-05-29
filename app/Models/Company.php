@@ -15,7 +15,10 @@ class Company extends Model
     use HasFactory, SoftDeletes;
 
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_INACTIVE = 'inactive';
+
+    public const COMPANY_STORAGE_PATH = 'companies/images/';
 
     protected $fillable = [
         'name',
