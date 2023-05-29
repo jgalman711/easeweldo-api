@@ -29,7 +29,7 @@ class CompanyController extends Controller
         if (isset($input['logo']) && $input['logo']) {
             $filename = time() . '.' . $request->logo->extension();
             $request->logo->storeAs(Company::ABSOLUTE_STORAGE_PATH, $filename);
-            $input['logo'] = Company::STORAGE_PATH . time() . '.' . $filename;
+            $input['logo'] = Company::STORAGE_PATH . $filename;
         }
         $company = Company::create($input);
         return $this->sendResponse(new BaseResource($company), 'Company created successfully.');
@@ -47,7 +47,7 @@ class CompanyController extends Controller
         if (isset($input['logo']) && $input['logo']) {
             $filename = time() . '.' . $request->logo->extension();
             $request->logo->storeAs(Company::ABSOLUTE_STORAGE_PATH, $filename);
-            $input['logo'] = Company::STORAGE_PATH . time() . '.' . $filename;
+            $input['logo'] = Company::STORAGE_PATH . $filename;
         } else {
             unset($input['logo']);
         }
