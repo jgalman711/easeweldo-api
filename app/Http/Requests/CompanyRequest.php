@@ -15,7 +15,9 @@ class CompanyRequest extends BaseRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('companies', 'name')->ignore($this->company),
+                Rule::unique('companies', 'name')->where(function ($query) {
+                    $query->whereNull('deleted_at');
+                })->ignore($this->company),
             ],
             'legal_name' => self::NULLABLE_STRING,
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
