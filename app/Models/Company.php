@@ -18,7 +18,9 @@ class Company extends Model
 
     public const STATUS_INACTIVE = 'inactive';
 
-    public const STORAGE_PATH = 'companies/images/';
+    public const ABSOLUTE_STORAGE_PATH = 'public/companies/images';
+
+    public const STORAGE_PATH = 'companies/images';
 
     protected $fillable = [
         'name',
@@ -65,6 +67,18 @@ class Company extends Model
     public function workSchedules(): HasMany
     {
         return $this->hasMany(WorkSchedule::class);
+    }
+
+    public function employeeSchedule(int $employeeId)
+    {
+        return $this->hasManyThrough(
+            WorkSchedule::class,
+            Employee::class,
+            'company_id',
+            'employee_id',
+            'id',
+            'id'
+        );
     }
 
     public function companySubscription(): HasOne

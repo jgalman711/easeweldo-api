@@ -27,8 +27,9 @@ class CompanyController extends Controller
         $input['slug'] = strtolower(str_replace(' ', '-', $input['name']));
         $input['status'] = Company::STATUS_ACTIVE;
         if (isset($input['logo']) && $input['logo']) {
-            $input['logo'] = Company::STORAGE_PATH . time() . '.' . $request->logo->extension();
-            $request->logo->storeAs(Company::STORAGE_PATH, $input['logo']);
+            $filename = time() . '.' . $request->logo->extension();
+            $request->logo->storeAs(Company::ABSOLUTE_STORAGE_PATH, $filename);
+            $input['logo'] = Company::STORAGE_PATH . time() . '.' . $filename;
         }
         $company = Company::create($input);
         return $this->sendResponse(new BaseResource($company), 'Company created successfully.');
@@ -44,8 +45,9 @@ class CompanyController extends Controller
         $input = $request->validated();
         $input['slug'] = strtolower(str_replace(' ', '-', $input['name']));
         if (isset($input['logo']) && $input['logo']) {
-            $input['logo'] = Company::STORAGE_PATH . time() . '.' . $request->logo->extension();
-            $request->logo->storeAs(Company::STORAGE_PATH, $input['logo']);
+            $filename = time() . '.' . $request->logo->extension();
+            $request->logo->storeAs(Company::ABSOLUTE_STORAGE_PATH, $filename);
+            $input['logo'] = Company::STORAGE_PATH . time() . '.' . $filename;
         } else {
             unset($input['logo']);
         }
