@@ -82,7 +82,8 @@ class EmployeeController extends Controller
         $employees = $this->applyFilters($request, Employee::with(['company:id,name,slug,status']), [
             'first_name',
             'last_name',
-            'employment_status'
+            'employment_status',
+            'company.name'
         ]);
         return $this->sendResponse($employees, 'Employees retrieved successfully.');
     }

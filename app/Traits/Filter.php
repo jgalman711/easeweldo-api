@@ -14,23 +14,21 @@ trait Filter
     {
         if ($request->has('search')) {
             $search = $request->input('search');
-            $query->where(function ($searchQuery) use ($searchableColumns, $search) {
-                foreach ($searchableColumns as $searchableColumn) {
-                    $columnRelationship = explode('.', $searchableColumn);
-                    if (count($columnRelationship) == 2) {
-                        $searchQuery->orWhereHas(
-                            $columnRelationship[0],
-                            function ($queryRelationship) use ($columnRelationship, $search) {
-                                $queryRelationship->orWhere($columnRelationship[1], 'like', '%' . $search . '%');
-                            }
-                        );
-                    } elseif (count($columnRelationship) == 1) {
-                        $searchQuery->orWhere($searchableColumn, 'like', '%' . $search . '%');
-                    } else {
-                        throw new Exception('Unsupported search query');
-                    }
+            foreach ($searchableColumns as $searchableColumn) {
+                $columnRelationship = explode('.', $searchableColumn);
+                if (count($columnRelationship) == 2) {
+                    $query->orWhereHas(
+                        $columnRelationship[0],
+                        function ($queryRelationship) use ($columnRelationship, $search) {
+                            $queryRelationship->where($columnRelationship[1], 'like', '%' . $search . '%');
+                        }
+                    );
+                } elseif (count($columnRelationship) == 1) {
+                    $query->orWhere($searchableColumn, 'like', '%' . $search . '%');
+                } else {
+                    throw new Exception('Unsupported search query');
                 }
-            });
+            }
         }
         if ($request->has('sort')) {
             $sortColumn = $request->input('sort');
