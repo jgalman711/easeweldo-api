@@ -66,11 +66,20 @@ class EmployeeController extends Controller
         return $this->sendResponse(new BaseResource($employee), 'Employee updated successfully.');
     }
 
-    public function destroy(Company $company, int $employeeId)
+    public function destroy(Company $company, int $employeeId): JsonResponse
     {
         $employee = $company->getEmployeeById($employeeId);
         $employee->company_id = null;
         $employee->save();
         return $this->sendResponse(new BaseResource($employee), 'Employee deleted successfully.');
+    }
+
+    public function all(Request $request): JsonResponse
+    {
+        $employees = $this->applyFilters($request, Employee::query(), [
+            'first_name',
+            'last_name'
+        ]);
+        return $this->sendResponse($employees, 'Employees retrieved successfully.');
     }
 }

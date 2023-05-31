@@ -42,6 +42,7 @@ Route::post('forgot-password', [ForgotPasswordController::class, 'forgot']);
 Route::group(['middleware' => 'auth:sanctum', ['role:super-admin']], function () {
     Route::resource('holidays', HolidayController::class);
     Route::resource('companies', CompanyController::class);
+    Route::get('employees', [EmployeeController::class, 'all']);
     Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {
         Route::get('companies/{company}/dashboard', [DashboardController::class, 'index']);
         Route::resource('companies', CompanyController::class)->only('view', 'update');

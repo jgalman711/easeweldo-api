@@ -4,11 +4,13 @@ namespace App\Traits;
 
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 trait Filter
 {
-    protected function applyFilters(Request $request, $query, ?array $searchableColumns = []): LengthAwarePaginator
+    /*
+     * @return LengthAwarePaginator or Collection
+     */
+    protected function applyFilters(Request $request, $query, ?array $searchableColumns = [])
     {
         if ($request->has('search')) {
             $search = $request->input('search');
@@ -41,7 +43,10 @@ trait Filter
         } else {
             $query->orderBy('created_at', 'asc');
         }
-        $perPage = $request->input('per_page', 10);
-        return $query->paginate($perPage);
+        if ($request->has('per_page')) {
+            $perPage = $request->input('per_page', 10);
+            return $query->paginate($perPage);
+        }
+        return $query->get();
     }
 }
