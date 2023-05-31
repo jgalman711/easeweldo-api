@@ -38,6 +38,6 @@ class WorkSchedule extends Model
 
     public function employees(): BelongsToMany
     {
-        return $this->belongsToMany(Employee::class, 'employee_schedules')->withTimestamps();
+        return $this->belongsToMany(Employee::class, 'employee_schedules');
     }
 }

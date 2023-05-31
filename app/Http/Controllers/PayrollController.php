@@ -7,11 +7,15 @@ use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Models\Period;
 use App\Services\PayrollService;
+use App\Traits\Filter;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class PayrollController extends Controller
 {
+    use Filter;
+
     protected $payrollService;
 
     public function __construct(PayrollService $payrollService)
@@ -19,9 +23,13 @@ class PayrollController extends Controller
         $this->payrollService = $payrollService;
     }
 
-    public function index(Company $company): JsonResponse
+    public function index(Request $request, Company $company): JsonResponse
     {
-        $payrolls = $company->payrolls;
+        $payrolls = $this->applyFilters($request, $company->payrolls(), [
+            'status',
+            'employee.first_name',
+            'employee.last_name'
+        ]);
         return $this->sendResponse(BaseResource::collection($payrolls), 'Payrolls retrieved successfully.');
     }
     
@@ -67,9 +75,14 @@ class PayrollController extends Controller
     // Payroll should not be updated I think. But will do this feature next.
     public function update(PayrollRequest $request, Company $company, int $payrollId): JsonResponse
     {
-        $payroll = $company->payrolls->where('id', $payrollId)->first();
         $input = $request->validated();
-        $payroll->update($input);
+        $payroll = $company->payrolls->where('id', $payrollId)->first();
+        if ($request->has('regenerate') && $request->regenerate === true) {
+            $payroll->delete();
+            $payroll = $this->payrollService->generate($payroll->period, $payroll->employee);
+        } else {
+            $payroll->update($input);
+        }
         return $this->sendResponse(new BaseResource($payroll), 'Payroll updated successfully.');
     }
 

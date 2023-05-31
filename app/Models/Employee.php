@@ -14,6 +14,8 @@ class Employee extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const ABSOLUTE_STORAGE_PATH = 'public/employees/images';
+
     public const STORAGE_PATH = 'employees/images/';
 
     protected $fillable = [

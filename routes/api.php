@@ -50,15 +50,15 @@ Route::group(['middleware' => 'auth:sanctum', ['role:super-admin']], function ()
         Route::resource('companies.payrolls', PayrollController::class);
         Route::resource('companies.employees.leaves', LeaveController::class);
         Route::resource('companies.employees.time-records', TimeRecordController::class);
-        Route::prefix('companies/{company}/employees/{employee}')->group(function () {
-            Route::post('/clock', [TimeRecordController::class, 'clock']);
-            Route::prefix('salary-computation')->group(function () {
+        Route::resource('companies.employees.work-schedules', EmployeeScheduleController::class);
+        Route::prefix('companies/{company}/employees')->group(function () {
+            Route::post('{employee}/clock', [TimeRecordController::class, 'clock']);
+            Route::prefix('{employee}/salary-computation')->group(function () {
                 Route::get('/', [SalaryComputationController::class, 'show']);
                 Route::post('/', [SalaryComputationController::class, 'store']);
                 Route::put('/', [SalaryComputationController::class, 'update']);
                 Route::delete('/', [SalaryComputationController::class, 'delete']);
             });
-            Route::resource('work-schedule', EmployeeScheduleController::class);
         });
         Route::resource('companies.payroll-periods', PeriodsController::class);
     });
