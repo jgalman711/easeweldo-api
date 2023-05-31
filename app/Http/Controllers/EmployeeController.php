@@ -26,7 +26,10 @@ class EmployeeController extends Controller
     {
         $employees = $this->applyFilters($request, $company->employees(), [
             'first_name',
-            'last_name'
+            'last_name',
+            'job_title',
+            'employment_status',
+            'department'
         ]);
         return $this->sendResponse($employees, 'Employees retrieved successfully.');
     }
@@ -76,9 +79,10 @@ class EmployeeController extends Controller
 
     public function all(Request $request): JsonResponse
     {
-        $employees = $this->applyFilters($request, Employee::query(), [
+        $employees = $this->applyFilters($request, Employee::with(['company:id,name,slug,status']), [
             'first_name',
-            'last_name'
+            'last_name',
+            'employment_status'
         ]);
         return $this->sendResponse($employees, 'Employees retrieved successfully.');
     }

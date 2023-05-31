@@ -21,7 +21,7 @@ trait Filter
                         $searchQuery->orWhereHas(
                             $columnRelationship[0],
                             function ($queryRelationship) use ($columnRelationship, $search) {
-                                $queryRelationship->orWhere($columnRelationship[1], $search);
+                                $queryRelationship->orWhere($columnRelationship[1], 'like', '%' . $search . '%');
                             }
                         );
                     } elseif (count($columnRelationship) == 1) {
