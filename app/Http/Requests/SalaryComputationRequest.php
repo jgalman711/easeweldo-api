@@ -14,9 +14,10 @@ class SalaryComputationRequest extends BaseRequest
             'night_diff_rate' => self::REQUIRED_NUMERIC,
             'regular_holiday_rate' => self::REQUIRED_NUMERIC,
             'special_holiday_rate' => self::REQUIRED_NUMERIC,
-            'sick_leaves' => self::REQUIRED_NUMERIC,
-            'vacation_leaves' => self::REQUIRED_NUMERIC,
-            'unit' => 'required|in:hour,day'
+            'total_sick_leave_hours' => self::REQUIRED_NUMERIC,
+            'total_vacation_leave_hours' => self::REQUIRED_NUMERIC,
+            'available_sick_leave_hours' => self::REQUIRED_NUMERIC,
+            'available_vacation_leave_hours' => self::REQUIRED_NUMERIC,
         ];
     }
 }
