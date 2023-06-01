@@ -8,7 +8,8 @@ use App\Models\Leave;
 use App\Models\TimeRecord;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\Request;
 
 class TimeRecordService
 {
@@ -64,16 +65,23 @@ class TimeRecordService
         ];
     }
 
-    public function getTimeRecordsByDateRange(Employee $employee, string $dateFrom, string $dateTo): Collection
+    public function getTimeRecordsByDateRange(Request $request, Relation $timeRecordsQuery): Relation
     {
-        return $employee->timeRecords()
-            ->where(function ($query) use ($dateFrom, $dateTo) {
-                $dateTo = Carbon::parse($dateTo)->addDay();
-                $query->whereBetween('expected_clock_in', [$dateFrom, $dateTo])
-                    ->orWhereBetween('expected_clock_out', [$dateFrom, $dateTo])
-                    ->orWhereBetween('clock_in', [$dateFrom, $dateTo])
-                    ->orWhereBetween('clock_out', [$dateFrom, $dateTo]);
-            })->get();
+        if ($request->has('filter')) {
+            if (isset($request->filter['date_from']) && $request->filter['date_from']) {
+                $timeRecordsQuery->where(function ($query) use ($request) {
+                    $query->whereDate('expected_clock_in', '>=', $request->filter['date_from'])
+                        ->orWhereDate('clock_in', '>=', $request->filter['date_from']);
+                });
+            }
+            if (isset($request->filter['date_to']) && $request->filter['date_to']) {
+                $timeRecordsQuery->where(function ($query) use ($request) {
+                    $query->whereDate('expected_clock_out', '<=', $request->filter['date_to'])
+                        ->orWhereDate('clock_out', '<=', $request->filter['date_to']);
+                });
+            }
+        }
+        return $timeRecordsQuery;
     }
 
     public function getAttendanceSummary(Company $company, string $date): array

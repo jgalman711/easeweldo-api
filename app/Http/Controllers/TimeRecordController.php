@@ -7,6 +7,7 @@ use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Models\TimeRecord;
 use App\Services\TimeRecordService;
+use App\Traits\Filter;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -14,6 +15,8 @@ use Illuminate\Http\Request;
 
 class TimeRecordController extends Controller
 {
+    use Filter;
+
     protected $timeRecordService;
 
     public function __construct(TimeRecordService $timeRecordService)
@@ -24,19 +27,38 @@ class TimeRecordController extends Controller
     public function index(Request $request, Company $company, int $employeeId): JsonResponse
     {
         $employee = $company->getEmployeeById($employeeId);
-        $timeRecords = $this->timeRecordService->getTimeRecordsByDateRange(
-            $employee,
-            $request->date_from,
-            $request->date_to
-        );
+        $timeRecords = $this->timeRecordService->getTimeRecordsByDateRange($request, $employee->timeRecords());
+        $timeRecords = $this->applyFilters($request, $timeRecords);
         return $this->sendResponse(BaseResource::collection($timeRecords), 'Time records retrieved successfully.');
     }
 
     public function store(TimeRecordRequest $request, Company $company, int $employeeId): JsonResponse
     {
+        $employee = $company->getEmployeeById($employeeId);
         $input = $request->validated();
-        $input['employee_id'] = $employeeId;
+        $input['employee_id'] = $employee->id;
         return TimeRecord::create($input);
+    }
+
+    public function update(
+        TimeRecordRequest $request,
+        Company $company,
+        int $employeeId,
+        int $timeRecordId
+    ): JsonResponse {
+        $employee = $company->getEmployeeById($employeeId);
+        $timeRecord = $employee->timeRecords()->findOrFail($timeRecordId);
+        $input = $request->validated();
+        $timeRecord->update($input);
+        return $this->sendResponse(new BaseResource($timeRecord), 'Time records updated successfully.');
+    }
+
+    public function destroy(Company $company, int $employeeId, int $timeRecordId): JsonResponse
+    {
+        $employee = $company->getEmployeeById($employeeId);
+        $timeRecord = $employee->timeRecords()->findOrFail($timeRecordId);
+        $timeRecord->delete();
+        return $this->sendResponse(new BaseResource($timeRecord), 'Time records updated successfully.');
     }
 
     public function clock(Company $company, int $employeeId): JsonResponse

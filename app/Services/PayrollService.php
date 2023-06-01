@@ -11,6 +11,7 @@ use App\Services\Contributions\PhilHealthService;
 use App\Services\Contributions\SSSService;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -53,11 +54,13 @@ class PayrollService
     public function generate(Period $period, Employee $employee): Payroll
     {
         $this->validate($period, $employee);
-        $timeRecords = $this->timeRecordService->getTimeRecordsByDateRange(
-            $employee,
-            $period->start_date,
-            $period->end_date
-        );
+        $request = new Request([
+            'filter' => [
+                'date_from' => $period->start_date,
+                'date_to' => $period->end_date
+            ]
+        ]);
+        $timeRecords = $this->timeRecordService->getTimeRecordsByDateRange($request, $employee->timeRecords())->get();
 
         $leaves = $this->leaveService->getLeaveByDateRange(
             $employee,
