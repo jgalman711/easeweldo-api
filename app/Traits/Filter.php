@@ -3,7 +3,6 @@
 namespace App\Traits;
 
 use Exception;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 
 trait Filter
@@ -11,7 +10,7 @@ trait Filter
     /*
      * @return LengthAwarePaginator or Collection
      */
-    protected function applyFilters(Request $request, Relation $query, ?array $searchableColumns = [])
+    protected function applyFilters(Request $request, $query, ?array $searchableColumns = [])
     {
         if ($request->has('search')) {
             $search = $request->input('search');

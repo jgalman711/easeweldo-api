@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CompanyRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
+use App\Services\CompanyService;
 use App\Traits\Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,6 +13,13 @@ use Illuminate\Http\Request;
 class CompanyController extends Controller
 {
     use Filter;
+
+    protected $companyService;
+
+    public function __construct(CompanyService $companyService)
+    {
+        $this->companyService = $companyService;
+    }
 
     public function index(Request $request): JsonResponse
     {
@@ -32,6 +40,7 @@ class CompanyController extends Controller
             $input['logo'] = Company::STORAGE_PATH . $filename;
         }
         $company = Company::create($input);
+        $this->companyService->initialize($company);
         return $this->sendResponse(new BaseResource($company), 'Company created successfully.');
     }
 
