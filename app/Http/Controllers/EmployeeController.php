@@ -41,7 +41,7 @@ class EmployeeController extends Controller
         if (isset($input['profile_picture']) && $input['profile_picture']) {
             $filename = time() . '.' . $request->profile_picture->extension();
             $request->profile_picture->storeAs(Employee::ABSOLUTE_STORAGE_PATH, $filename);
-            $input['profile_picture'] = Employee::STORAGE_PATH . time() . '.' . $filename;
+            $input['profile_picture'] = Employee::STORAGE_PATH . $filename;
         }
         $employee = $this->employeeService->create($input);
         $message = $this->employeeService->getEmployeeCreationMessage();
