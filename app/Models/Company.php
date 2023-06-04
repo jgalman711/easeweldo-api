@@ -81,7 +81,7 @@ class Company extends Model
         );
     }
 
-    public function settings(): HasOne
+    public function setting(): HasOne
     {
         return $this->hasOne(Setting::class);
     }
