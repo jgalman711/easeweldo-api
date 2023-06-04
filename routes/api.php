@@ -46,17 +46,18 @@ Route::group(['middleware' => 'auth:sanctum', ['role:super-admin']], function ()
     Route::get('employees', [EmployeeController::class, 'all']);
     Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {
         Route::resource('companies', CompanyController::class)->only('view', 'update');
-        Route::resource('companies.employees', EmployeeController::class);
-        Route::resource('companies.work-schedules', WorkScheduleController::class);
-        Route::resource('companies.payrolls', PayrollController::class);
-        Route::resource('companies.employees.leaves', LeaveController::class);
-        Route::resource('companies.employees.time-records', TimeRecordController::class);
-        Route::resource('companies.employees.work-schedules', EmployeeScheduleController::class);
         Route::prefix('companies/{company}')->group(function () {
+            Route::resource('/employees', EmployeeController::class);
+            Route::resource('/payrolls', PayrollController::class);
+            Route::resource('/payroll-periods', PeriodsController::class)->except('store');
+            Route::resource('/work-schedules', WorkScheduleController::class);
             Route::get('/dashboard', [DashboardController::class, 'index']);
             Route::get('/settings', [SettingController::class, 'index']);
             Route::put('/settings', [SettingController::class, 'update']);
             Route::prefix('employees/{employee}')->group(function () {
+                Route::resource('/leaves', LeaveController::class);
+                Route::resource('/time-records', TimeRecordController::class);
+                Route::resource('/work-schedules', EmployeeScheduleController::class);
                 Route::post('/clock', [TimeRecordController::class, 'clock']);
                 Route::prefix('/salary-computation')->group(function () {
                     Route::get('/', [SalaryComputationController::class, 'show']);
@@ -66,6 +67,5 @@ Route::group(['middleware' => 'auth:sanctum', ['role:super-admin']], function ()
                 });
             });
         });
-        Route::resource('companies.payroll-periods', PeriodsController::class);
     });
 });
