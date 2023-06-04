@@ -6,6 +6,7 @@ use App\Models\Employee;
 use App\Models\Payroll;
 use App\Models\PayrollTaxesContributions;
 use App\Models\Period;
+use App\Models\Setting;
 use App\Services\Contributions\PagIbigService;
 use App\Services\Contributions\PhilHealthService;
 use App\Services\Contributions\SSSService;
@@ -68,6 +69,7 @@ class PayrollService
             $period->end_date
         );
 
+        $settings = $employee->company->setting;
         list(
             $absences,
             $absentHours,
@@ -77,7 +79,7 @@ class PayrollService
             $undertimeMinutes,
             $hoursWorkedMinutes,
             $totalExpectedWorkedHours
-        ) = $this->calculateAttendanceRecords($timeRecords, $leaves);
+        ) = $this->calculateAttendanceRecords($timeRecords, $leaves, $settings);
         
         $salaryComputation = $employee->salaryComputation;
 
@@ -166,7 +168,7 @@ class PayrollService
         throw_if($payroll, new Exception('Payroll already exists.'));
     }
 
-    private function calculateAttendanceRecords(Collection $timeRecords, Collection $leaves): array
+    private function calculateAttendanceRecords(Collection $timeRecords, Collection $leaves, Setting $settings): array
     {
         $absences = 0;
         $absentHours = 0;
@@ -191,10 +193,12 @@ class PayrollService
                 $leaveHours += $this->calculateLeaveHours($leaves, $expectedWorkedHours, $expectedClockIn);
             } else {
                 $lateMinutes += $clockIn->gt($expectedClockIn)
-                    ? $clockIn->diffInMinutes($expectedClockIn): 0;
+                    && $clockIn->diffInMinutes($expectedClockIn) > $settings->grace_period
+                    ? $clockIn->diffInMinutes($expectedClockIn) : 0;
                 $undertimeMinutes += $clockOut->lt($expectedClockOut)
                     ? $clockOut->diffInMinutes($expectedClockOut) : 0;
                 $overtimeMinutes += $clockOut->gt($expectedClockOut)
+                    && $clockOut->diffInMinutes($expectedClockOut) > $settings->minimum_overtime
                     ? $clockOut->diffInMinutes($expectedClockOut) : 0;
                 $hoursWorkedMinutes += $clockIn->diffInMinutes($clockOut);
             }

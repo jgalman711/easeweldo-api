@@ -40,7 +40,6 @@ class CompanyController extends Controller
             $input['logo'] = Company::STORAGE_PATH . $filename;
         }
         $company = Company::create($input);
-        $this->companyService->initialize($company);
         return $this->sendResponse(new BaseResource($company), 'Company created successfully.');
     }
 

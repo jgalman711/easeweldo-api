@@ -31,10 +31,11 @@ class PeriodService
             $data['start_date'] =  $data['end_date']->copy()->subDays(6);
         }
         $companyPreviousPeriod = $company->periods()->latest()->first();
-        throw_if(
-            $companyPreviousPeriod && $data['start_date'] <= $companyPreviousPeriod->end_date,
-            new Exception('This period overlaps the current period. Please adjust.')
-        );
+        if ($companyPreviousPeriod && $data['start_date'] <= $companyPreviousPeriod->end_date) {
+            $data['start_date'] = $companyPreviousPeriod->end_date->addDay();
+        }
+
+        $data['status'] = Period::STATUS_PENDING;
         $data['company_id'] = $company->id;
         $data['company_period_number'] = $companyPreviousPeriod
             ? $companyPreviousPeriod->company_period_number + 1
