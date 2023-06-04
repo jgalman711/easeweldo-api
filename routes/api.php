@@ -11,6 +11,7 @@ use App\Http\Controllers\EmployeeScheduleController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\PayrollController;
+use App\Http\Controllers\PayrollGeneratorController;
 use App\Http\Controllers\PeriodsController;
 use App\Http\Controllers\SalaryComputationController;
 use App\Http\Controllers\SettingController;
@@ -48,9 +49,13 @@ Route::group(['middleware' => 'auth:sanctum', ['role:super-admin']], function ()
         Route::resource('companies', CompanyController::class)->only('view', 'update');
         Route::prefix('companies/{company}')->group(function () {
             Route::resource('/employees', EmployeeController::class);
+            Route::resource('/work-schedules', WorkScheduleController::class);
             Route::resource('/payrolls', PayrollController::class);
             Route::resource('/payroll-periods', PeriodsController::class)->except('store');
-            Route::resource('/work-schedules', WorkScheduleController::class);
+            Route::prefix('payroll-periods/{period_id}')->group(function () {
+                Route::post('/generate', [PayrollGeneratorController::class, 'store']);
+                Route::put('/regenerate', [PayrollGeneratorController::class, 'update']);
+            });
             Route::get('/dashboard', [DashboardController::class, 'index']);
             Route::get('/settings', [SettingController::class, 'index']);
             Route::put('/settings', [SettingController::class, 'update']);

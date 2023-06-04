@@ -164,7 +164,7 @@ class PayrollService
             new Exception('No available salary details for ' . $employee->fullName)
         );
 
-        $payroll= $employee->payrolls->firstWhere('period_id', $period->id);
+        $payroll = $employee->payrolls->firstWhere('period_id', $period->id);
         throw_if($payroll, new Exception('Payroll already exists.'));
     }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PayrollRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
+use App\Models\Payroll;
 use App\Models\Period;
 use App\Services\PayrollService;
 use App\Traits\Filter;
@@ -36,34 +37,9 @@ class PayrollController extends Controller
     public function store(PayrollRequest $request, Company $company): JsonResponse
     {
         $input = $request->validated();
-        $successPayroll = [];
-        $failedPayroll = [];
-        $period = $company->getPeriodById($input['period_id']);
-        $period->status = Period::STATUS_PROCESSING;
-        $period->save();
-
-        foreach ($company->employees as $employee) {
-            try {
-                $payroll = $this->payrollService->generate($period, $employee);
-                array_push($successPayroll, $payroll);
-            } catch (Exception $e) {
-                array_push($failedPayroll, $e->getMessage());
-            }
-        }
-
-        if (empty($failedPayroll)) {
-            $period->status = Period::STATUS_COMPLETED;
-        } elseif (empty($successPayroll)) {
-            $period->status = Period::STATUS_FAILED;
-        } else {
-            $period->status = Period::STATUS_ATTENTION_REQUIRED;
-        }
-        $period->save();
-
-        return $this->sendResponse([
-            'success' => $successPayroll,
-            'failed' => $failedPayroll
-        ], 'Payrolls created successfully.');
+        $input['company_id'] = $company->id;
+        $payroll = Payroll::create($input);
+        return $this->sendResponse(new BaseResource($payroll), 'Payroll created successfully');
     }
 
     public function show(Company $company, int $payrollId): JsonResponse
@@ -72,7 +48,6 @@ class PayrollController extends Controller
         return $this->sendResponse(new BaseResource($payroll), 'Payroll retrieved successfully');
     }
 
-    // Payroll should not be updated I think. But will do this feature next.
     public function update(PayrollRequest $request, Company $company, int $payrollId): JsonResponse
     {
         $input = $request->validated();
