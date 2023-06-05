@@ -19,7 +19,7 @@ class EmployeeRequest extends BaseRequest
             'mobile_number' => [
                 'nullable',
                 'sometimes',
-                'unique:employees,mobile_number',
+                Rule::unique('employees', 'mobile_number')->ignore($this->employee),
                 self::PH_MOBILE_NUMBER
             ],
             'address_line' => self::REQUIRED_STRING,
