@@ -13,6 +13,7 @@ use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\PayrollGeneratorController;
 use App\Http\Controllers\PeriodsController;
+use App\Http\Controllers\QrController;
 use App\Http\Controllers\SalaryComputationController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TimeRecordController;
@@ -49,6 +50,19 @@ Route::group(['middleware' => 'auth:sanctum', ['role:super-admin']], function ()
         Route::resource('companies', CompanyController::class)->only('view', 'update');
         Route::prefix('companies/{company}')->group(function () {
             Route::resource('/employees', EmployeeController::class);
+            Route::prefix('employees/{employee}')->group(function () {
+                Route::get('/qrcode', [QrController::class, 'show']);
+                Route::post('/clock', [TimeRecordController::class, 'clock']);
+                Route::resource('/leaves', LeaveController::class);
+                Route::resource('/time-records', TimeRecordController::class);
+                Route::resource('/work-schedules', EmployeeScheduleController::class);
+                Route::prefix('/salary-computation')->group(function () {
+                    Route::get('/', [SalaryComputationController::class, 'show']);
+                    Route::post('/', [SalaryComputationController::class, 'store']);
+                    Route::put('/', [SalaryComputationController::class, 'update']);
+                    Route::delete('/', [SalaryComputationController::class, 'delete']);
+                });
+            });
             Route::resource('/work-schedules', WorkScheduleController::class);
             Route::resource('/payrolls', PayrollController::class);
             Route::resource('/payroll-periods', PeriodsController::class)->except('store');
@@ -59,18 +73,6 @@ Route::group(['middleware' => 'auth:sanctum', ['role:super-admin']], function ()
             Route::get('/dashboard', [DashboardController::class, 'index']);
             Route::get('/settings', [SettingController::class, 'index']);
             Route::put('/settings', [SettingController::class, 'update']);
-            Route::prefix('employees/{employee}')->group(function () {
-                Route::resource('/leaves', LeaveController::class);
-                Route::resource('/time-records', TimeRecordController::class);
-                Route::resource('/work-schedules', EmployeeScheduleController::class);
-                Route::post('/clock', [TimeRecordController::class, 'clock']);
-                Route::prefix('/salary-computation')->group(function () {
-                    Route::get('/', [SalaryComputationController::class, 'show']);
-                    Route::post('/', [SalaryComputationController::class, 'store']);
-                    Route::put('/', [SalaryComputationController::class, 'update']);
-                    Route::delete('/', [SalaryComputationController::class, 'delete']);
-                });
-            });
         });
     });
 });

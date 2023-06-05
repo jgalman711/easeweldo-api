@@ -67,11 +67,11 @@ class TimeRecordController extends Controller
             $employee = $company->getEmployeeById($employeeId);
             $currentTime = Carbon::now();
             $currentDate = $currentTime->copy()->format('Y-m-d');
-            $timeRecord = $employee->timeRecords()
-                ->whereDate('expected_clock_in', $currentDate)
-                ->where('attendance_status', null)
-                ->first();
-
+            $timeRecord = $employee->timeRecords()->firstOrNew([
+                'expected_clock_in' => $currentDate,
+                'attendance_status' => null
+            ]);
+            $timeRecord->company_id = $company->id;
             if (!$timeRecord) {
                 $timeRecord = new TimeRecord();
                 $timeRecord->employee_id = $employeeId;
