@@ -17,30 +17,33 @@ class EmployeeRequest extends BaseRequest
             'date_of_birth' => self::REQUIRED_DATE,
             'employment_status' => self::REQUIRED_STRING,
             'mobile_number' => [
+                'nullable',
+                'sometimes',
                 'unique:employees,mobile_number',
                 self::PH_MOBILE_NUMBER
             ],
             'address_line' => self::REQUIRED_STRING,
+            'barangay_town_city_province' => self::REQUIRED_STRING,
             'sss_number' => [
-                'required',
+                'nullable',
                 'string',
                 'max:255',
                 Rule::unique('employees', 'sss_number')->ignore($this->employee),
             ],
             'pagibig_number' => [
-                'required',
+                'nullable',
                 'string',
                 'max:255',
                 Rule::unique('employees', 'pagibig_number')->ignore($this->employee),
             ],
             'philhealth_number' => [
-                'required',
+                'nullable',
                 'string',
                 'max:255',
                 Rule::unique('employees', 'philhealth_number')->ignore($this->employee),
             ],
             'tax_identification_number' => [
-                'required',
+                'nullable',
                 'string',
                 'max:255',
                 Rule::unique('employees', 'tax_identification_number')->ignore($this->employee),
@@ -48,9 +51,7 @@ class EmployeeRequest extends BaseRequest
             'bank_name' => self::NULLABLE_STRING,
             'bank_account_name' => self::NULLABLE_STRING,
             'bank_account_number' => self::NULLABLE_STRING,
-            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'email' => 'email|unique:users,email',
-            'role' => 'string|max:255'
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ];
     }
 }
