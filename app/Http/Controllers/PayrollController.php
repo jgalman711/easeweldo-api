@@ -6,10 +6,8 @@ use App\Http\Requests\PayrollRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Models\Payroll;
-use App\Models\Period;
 use App\Services\PayrollService;
 use App\Traits\Filter;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -26,12 +24,12 @@ class PayrollController extends Controller
 
     public function index(Request $request, Company $company): JsonResponse
     {
-        $payrolls = $this->applyFilters($request, $company->payrolls(), [
+        $payrolls = $this->applyFilters($request, $company->payrolls()->with('employee'), [
             'status',
             'employee.first_name',
             'employee.last_name'
         ]);
-        return $this->sendResponse(BaseResource::collection($payrolls), 'Payrolls retrieved successfully.');
+        return $this->sendResponse($payrolls, 'Payrolls retrieved successfully.');
     }
     
     public function store(PayrollRequest $request, Company $company): JsonResponse

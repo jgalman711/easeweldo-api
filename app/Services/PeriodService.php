@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Company;
-use App\Models\Holiday;
 use App\Models\Period;
 use Carbon\Carbon;
 use Exception;
@@ -14,7 +13,7 @@ class PeriodService
     private const SEMI_MONTHLY_DAYS = 15;
     private const MINIMUM_LAST_DAY = 28;
 
-    public function initializeFromSalaryDate(array $data, Company $company): Period
+    public function initializeFromSalaryDate(Company $company, array $data): Period
     {
         $salaryDate = Carbon::parse($data['salary_date']);
         $data['end_date'] = $salaryDate->copy()->subDays(self::PAYROLL_ALLOWANCE_DAY);

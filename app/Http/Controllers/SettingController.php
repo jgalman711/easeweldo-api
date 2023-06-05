@@ -7,10 +7,7 @@ use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Models\Setting;
 use App\Services\PeriodService;
-use Carbon\Carbon;
-use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 
 class SettingController extends Controller
 {
@@ -23,8 +20,7 @@ class SettingController extends Controller
 
     public function index(Company $company): JsonResponse
     {
-        $settings = $company->setting;
-        return $this->sendResponse(new BaseResource($settings), 'Company settings retrieved successfully.');
+        return $this->sendResponse(new BaseResource($company->setting), 'Company settings retrieved successfully.');
     }
 
     public function update(SettingRequest $request, Company $company): JsonResponse
@@ -32,7 +28,7 @@ class SettingController extends Controller
         $input = $request->validated();
         $companyPreviousPeriod = $company->periods()->latest()->first();
         if ($companyPreviousPeriod) {
-            return $this->sendError('Existing period found. Please contact ES administrator.', 409);
+            return $this->sendError('Existing period found. Please contact ES Administrator.');
         }
         $settings = Setting::updateOrCreate(
             ['company_id' => $company->id],
