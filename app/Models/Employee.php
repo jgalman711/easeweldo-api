@@ -24,11 +24,12 @@ class Employee extends Model
         'last_name',
         'department',
         'job_title',
-        'date_of_hire',
-        'date_of_birth',
         'employment_status',
         'mobile_number',
         'address_line',
+        'barangay_town_city_province',
+        'date_of_hire',
+        'date_of_birth',
         'sss_number',
         'pagibig_number',
         'philhealth_number',
@@ -36,7 +37,7 @@ class Employee extends Model
         'bank_name',
         'bank_account_name',
         'bank_account_number',
-        'profile_picture',
+        'profile_picture'
     ];
 
     public function company(): BelongsTo
