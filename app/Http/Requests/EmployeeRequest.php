@@ -19,7 +19,9 @@ class EmployeeRequest extends BaseRequest
             'mobile_number' => [
                 'nullable',
                 'sometimes',
-                Rule::unique('employees', 'mobile_number')->ignore($this->employee),
+                Rule::unique('employees', 'mobile_number')
+                    ->whereNull('deleted_at')
+                    ->ignore($this->employee),
                 self::PH_MOBILE_NUMBER
             ],
             'address_line' => self::REQUIRED_STRING,
@@ -28,25 +30,33 @@ class EmployeeRequest extends BaseRequest
                 'nullable',
                 'string',
                 'max:255',
-                Rule::unique('employees', 'sss_number')->ignore($this->employee),
+                Rule::unique('employees', 'sss_number')
+                    ->whereNull('deleted_at')
+                    ->ignore($this->employee),
             ],
             'pagibig_number' => [
                 'nullable',
                 'string',
                 'max:255',
-                Rule::unique('employees', 'pagibig_number')->ignore($this->employee),
+                Rule::unique('employees', 'pagibig_number')
+                    ->whereNull('deleted_at')
+                    ->ignore($this->employee),
             ],
             'philhealth_number' => [
                 'nullable',
                 'string',
                 'max:255',
-                Rule::unique('employees', 'philhealth_number')->ignore($this->employee),
+                Rule::unique('employees', 'philhealth_number')
+                    ->whereNull('deleted_at')
+                    ->ignore($this->employee),
             ],
             'tax_identification_number' => [
                 'nullable',
                 'string',
                 'max:255',
-                Rule::unique('employees', 'tax_identification_number')->ignore($this->employee),
+                Rule::unique('employees', 'tax_identification_number')
+                    ->whereNull('deleted_at')
+                    ->ignore($this->employee),
             ],
             'bank_name' => self::NULLABLE_STRING,
             'bank_account_name' => self::NULLABLE_STRING,
