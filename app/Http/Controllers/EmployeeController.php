@@ -7,6 +7,7 @@ use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Services\EmployeeService;
+use App\Services\UserService;
 use App\Traits\Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,9 +18,12 @@ class EmployeeController extends Controller
 
     protected $employeeService;
 
-    public function __construct(EmployeeService $employeeService)
+    protected $userService;
+
+    public function __construct(EmployeeService $employeeService, UserService $userService)
     {
         $this->employeeService = $employeeService;
+        $this->userService = $userService;
     }
     
     public function index(Request $request, Company $company): JsonResponse
@@ -58,6 +62,13 @@ class EmployeeController extends Controller
     {
         $employee = $company->getEmployeeById($employeeId);
         $input = $request->validated();
+        if ($request->has('reset_password') && $request->reset_password) {
+            $temporaryPassword = $this->userService->employeeResetPassword($employee->user);
+            return $this->sendResponse(
+                new BaseResource($employee),
+                'Employee password reset successfully. Temporary password: ' . $temporaryPassword
+            );
+        }
         if (isset($input['profile_picture']) && $input['profile_picture']) {
             $filename = time() . '.' . $request->profile_picture->extension();
             $request->profile_picture->storeAs(Employee::ABSOLUTE_STORAGE_PATH, $filename);
@@ -66,6 +77,11 @@ class EmployeeController extends Controller
             unset($input['profile_picture']);
         }
         $employee->update($input);
+        if ($request->has('email')) {
+            $employee->user->update([
+                'email' => $request->email
+            ]);
+        }
         return $this->sendResponse(new BaseResource($employee), 'Employee updated successfully.');
     }
 
