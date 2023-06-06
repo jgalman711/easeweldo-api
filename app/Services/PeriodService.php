@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Company;
 use App\Models\Period;
 use Carbon\Carbon;
+use DateTime;
 use Exception;
 
 class PeriodService
@@ -13,19 +14,37 @@ class PeriodService
     private const SEMI_MONTHLY_DAYS = 15;
     private const MINIMUM_LAST_DAY = 28;
 
-    public function initializeFromSalaryDate(Company $company, array $data): Period
+    protected $today;
+
+    protected $currentMonth;
+
+    protected $currentYear;
+
+    protected $salaryDate;
+
+    public function __construct()
     {
-        $salaryDate = Carbon::parse($data['salary_date']);
+        $this->today = new DateTime();
+        $this->currentMonth = $this->today->format('n');
+        $this->currentYear = $this->today->format('Y');
+        $this->salaryDate = null;
+    }
+
+    public function initializeFromSalaryDate(Company $company, DateTime $salaryDate, string $periodCycle): Period
+    {
+        $salaryDate = Carbon::parse($salaryDate);
+        $data['type'] = $periodCycle;
+        $data['salary_date'] = $salaryDate;
         $data['end_date'] = $salaryDate->copy()->subDays(self::PAYROLL_ALLOWANCE_DAY);
 
         if ($salaryDate->day > self::MINIMUM_LAST_DAY || $data['end_date']->day > self::MINIMUM_LAST_DAY) {
             $data['end_date'] = Carbon::now()->setDay(25);
         }
-        if ($data['type'] == Period::TYPE_MONTHLY) {
+        if ($periodCycle == Period::TYPE_MONTHLY) {
             $data['start_date'] = $data['end_date']->copy()->subMonth()->addDay();
-        } elseif ($data['type'] == Period::TYPE_SEMI_MONTHLY) {
+        } elseif ($periodCycle == Period::TYPE_SEMI_MONTHLY) {
             $data['start_date'] = $data['end_date']->copy()->subDays(self::SEMI_MONTHLY_DAYS)->addDay();
-        } elseif ($data['type'] == Period::TYPE_WEEKLY) {
+        } elseif ($periodCycle == Period::TYPE_WEEKLY) {
             $data['end_date'] =  $salaryDate->copy()->subDays(7);
             $data['start_date'] =  $data['end_date']->copy()->subDays(6);
         }
@@ -84,5 +103,72 @@ class PeriodService
             "days_before_salary" => $period->salary_date->diffInDays($now),
             "salary_date" => $period->salary_date
         ];
+    }
+
+    public function convertSalaryDayToDate(string|array|int $salaryDay, string $periodCycle): ?DateTime
+    {
+        if ($periodCycle == Period::TYPE_MONTHLY) {
+            $this->salaryDate = $this->salaryDayMonthly($salaryDay);
+        } elseif ($periodCycle == Period::TYPE_SEMI_MONTHLY && is_array($salaryDay)) {
+            $this->salaryDate = $this->salaryDaySemiMonthly($salaryDay);
+        } elseif ($periodCycle == Period::TYPE_WEEKLY) {
+            $this->salaryDate = $this->salaryWeekly($salaryDay);
+        }
+        if ($this->salaryDate) {
+            return $this->salaryDate;
+        }
+        return null;
+    }
+
+    private function salaryDayMonthly(int $salaryDay): DateTime
+    {
+        $salaryDay = $salaryDay - self::PAYROLL_ALLOWANCE_DAY;
+        if ($this->today->format('j') > $salaryDay) {
+            $this->currentMonth += 1;
+            if ($this->currentMonth > 12) {
+                $this->currentMonth = 1;
+                $this->currentYear += 1;
+            }
+        }
+        return new DateTime($this->currentYear . '-' . $this->currentMonth . '-' . $salaryDay);
+    }
+
+    private function salaryDaySemiMonthly(array $salaryDay): DateTime
+    {
+        foreach ($salaryDay as $day) {
+            if ($this->today->format('j') <= $day - self::PAYROLL_ALLOWANCE_DAY) {
+                $salaryDate = new DateTime($this->currentYear . '-' . $this->currentMonth . '-' . $day);
+                break;
+            }
+        }
+        if (!$this->salaryDate) {
+            $this->currentMonth += 1;
+            if ($this->currentMonth > 12) {
+                $this->currentMonth = 1;
+                $this->currentYear += 1;
+            }
+            $nextMonth = new DateTime($this->currentYear . '-' . $this->currentMonth . '-1');
+            $salaryDay = reset($salaryDay);
+            $salaryDate = new DateTime($nextMonth->format('Y-m') . '-' . $salaryDay);
+        }
+        return $salaryDate;
+    }
+
+    private function salaryWeekly(string $salaryDay): DateTime
+    {
+        $salaryDay = strtolower($salaryDay);
+        throw_unless(
+            in_array($salaryDay, Period::ALLOWED_DAYS),
+            new Exception("Invalid day.")
+        );
+        $todayDayOfWeek = $this->today->format('N');
+        $dayIndex = array_search($salaryDay, Period::ALLOWED_DAYS);
+        $daysToAdd = ($dayIndex - $todayDayOfWeek + 8) % 7;
+        if ($daysToAdd < 7) {
+            $daysToAdd += 7;
+        }
+        $salaryDate = clone $this->today;
+        $salaryDate->modify('+' . $daysToAdd . ' day');
+        return $salaryDate;
     }
 }

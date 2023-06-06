@@ -38,6 +38,8 @@ class Period extends Model
         self::TYPE_WEEKLY
     ];
 
+    public const ALLOWED_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
     protected $fillable = [
         'name',
         'company_id',

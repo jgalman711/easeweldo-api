@@ -74,7 +74,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             });
             Route::get('/dashboard', [DashboardController::class, 'index']);
             Route::get('/settings', [SettingController::class, 'index']);
-            Route::put('/settings', [SettingController::class, 'update']);
+            Route::post('/settings', [SettingController::class, 'store']);
         });
     });
     Route::get('/user/qrcode', [UserController::class, 'qrcode']);
