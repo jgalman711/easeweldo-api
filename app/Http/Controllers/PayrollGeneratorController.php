@@ -36,6 +36,7 @@ class PayrollGeneratorController extends Controller
         foreach ($company->employees as $employee) {
             try {
                 DB::beginTransaction();
+                $this->deleteExistingPayroll($employee->payrolls(), $periodId);
                 $payroll = $this->payrollService->generate($period, $employee);
                 array_push($this->successPayroll, $payroll);
                 DB::commit();
@@ -50,31 +51,11 @@ class PayrollGeneratorController extends Controller
         ], 'Payrolls created successfully.');
     }
 
-    public function update(Company $company, int $periodId): JsonResponse
+    private function deleteExistingPayroll($payrolls, int $periodId): void
     {
-        $period = $company->getPeriodById($periodId);
-        $endDate = Carbon::parse($period->end_date);
-        if ($endDate->isFuture()) {
-            return $this->sendError("Unable to generate payroll. The period has not yet concluded.");
+        $payroll = $payrolls->where('period_id', $periodId)->first();
+        if ($payroll) {
+            $payroll->delete();
         }
-        foreach ($company->employees as $employee) {
-            try {
-                DB::beginTransaction();
-                $payroll = $employee->payrolls()->where('period_id', $periodId)->first();
-                if ($payroll) {
-                    $payroll->delete();
-                }
-                $payroll = $this->payrollService->generate($period, $employee);
-                array_push($this->successPayroll, $payroll);
-                DB::commit();
-            } catch (Exception $e) {
-                array_push($this->failedPayroll, $e->getMessage());
-                DB::rollBack();
-            }
-        }
-        return $this->sendResponse([
-            'success' => $this->successPayroll,
-            'failed' => $this->failedPayroll
-        ], 'Payrolls created successfully.');
     }
 }

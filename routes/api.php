@@ -57,6 +57,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
                 Route::get('/qrcode', [QrController::class, 'show']);
                 Route::post('/clock', [TimeRecordController::class, 'clock']);
                 Route::resource('/leaves', LeaveController::class);
+                Route::resource('/payrolls', PayrollController::class);
                 Route::resource('/time-records', TimeRecordController::class);
                 Route::resource('/work-schedules', EmployeeScheduleController::class);
                 Route::prefix('/salary-computation')->group(function () {
@@ -67,11 +68,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
                 });
             });
             Route::resource('/work-schedules', WorkScheduleController::class);
-            Route::resource('/payrolls', PayrollController::class);
-            Route::resource('/payroll-periods', PeriodsController::class)->except('store');
-            Route::prefix('payroll-periods/{period_id}')->group(function () {
-                Route::post('/generate', [PayrollGeneratorController::class, 'store']);
-                Route::put('/regenerate', [PayrollGeneratorController::class, 'update']);
+            Route::resource('/periods', PeriodsController::class)->except('store');
+            Route::prefix('periods/{period_id}')->group(function () {
+                Route::post('/generate-payroll', [PayrollGeneratorController::class, 'store']);
             });
             Route::get('/dashboard', [DashboardController::class, 'index']);
             Route::get('/settings', [SettingController::class, 'index']);
