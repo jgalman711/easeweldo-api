@@ -44,7 +44,7 @@ class EmployeeController extends Controller
             $input['profile_picture'] = Employee::STORAGE_PATH . $filename;
         }
         $employee = $this->employeeService->create($input);
-        $message = $this->employeeService->getEmployeeCreationMessage();
+        $message = $this->employeeService->getEmployeeTemporaryCredentials();
         return $this->sendResponse(new BaseResource($employee), $message);
     }
 

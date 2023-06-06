@@ -11,7 +11,8 @@ class LoginController extends BaseController
 {
     public function login(Request $request): JsonResponse
     {
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+        $credentials = $request->only(['username', 'email', 'password']);
+        if (Auth::attempt($credentials)) {
             $user = Auth::user()->load('employee');
             $success['token'] =  $user->createToken(env('APP_NAME'))->plainTextToken;
             $success['user'] = $user;

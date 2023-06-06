@@ -13,15 +13,17 @@ class PasswordResetController extends BaseController
     public function reset(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required',
+            'email' => 'required_without:username',
+            'username' => 'required_without:email',
             'old_password' => 'required',
             'new_password' => 'required|confirmed|min:6'
         ]);
         if ($validator->fails()) {
             return $this->sendError('Validation Error.', $validator->errors());
         }
-
-        if (Auth::attempt(['mobile_number' => $request->mobile_number, 'password' => $request->old_password])) {
+        $credentials = $request->only(['username', 'email', 'password']);
+        $credentials['password'] = $request->old_password;
+        if (Auth::attempt($credentials)) {
             $user = Auth::user();
             $user->forceFill([
                 'password' => Hash::make($request->new_password)
@@ -29,7 +31,9 @@ class PasswordResetController extends BaseController
             $success['token'] =  $user->createToken(env('APP_NAME'))->plainTextToken;
             return $this->sendResponse($success, 'Password reset successfully.');
         } else {
-            return $this->sendError('Unauthorised.', ['error'=>'Unauthorised']);
+            return $this->sendError('Unauthorised.', [
+                'error' => 'The provided username/email does not match the old password.'
+            ]);
         }
     }
 }
