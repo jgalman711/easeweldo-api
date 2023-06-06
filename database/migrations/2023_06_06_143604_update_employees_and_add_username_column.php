@@ -36,6 +36,3 @@ return new class extends Migration
         });
     }
 };
-
-// jgalman
-// XSpN5r

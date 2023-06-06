@@ -17,6 +17,7 @@ use App\Http\Controllers\QrController;
 use App\Http\Controllers\SalaryComputationController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TimeRecordController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkScheduleController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -42,10 +43,12 @@ Route::post('login', [LoginController::class, 'login']);
 Route::post('reset-password', [PasswordResetController::class, 'reset'])->name('password.reset');
 Route::post('forgot-password', [ForgotPasswordController::class, 'forgot']);
 
-Route::group(['middleware' => 'auth:sanctum', ['role:super-admin']], function () {
-    Route::resource('holidays', HolidayController::class);
-    Route::resource('companies', CompanyController::class);
-    Route::get('employees', [EmployeeController::class, 'all']);
+Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::group(['middleware' => ['role:super-admin']], function () {
+        Route::resource('holidays', HolidayController::class);
+        Route::resource('companies', CompanyController::class);
+        Route::get('employees', [EmployeeController::class, 'all']);
+    });
     Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {
         Route::resource('companies', CompanyController::class)->only('view', 'update');
         Route::prefix('companies/{company}')->group(function () {
@@ -75,4 +78,5 @@ Route::group(['middleware' => 'auth:sanctum', ['role:super-admin']], function ()
             Route::put('/settings', [SettingController::class, 'update']);
         });
     });
+    Route::get('/user/qrcode', [UserController::class, 'qrcode']);
 });

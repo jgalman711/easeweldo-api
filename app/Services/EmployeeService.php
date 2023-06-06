@@ -53,7 +53,6 @@ class EmployeeService
         $username = strtolower(substr($employee->first_name, 0, 1) . $employee->last_name);
         $existingUser = User::where('username', $username)->first();
         $usernameExists = $existingUser !== null;
-
         if ($usernameExists) {
             $i = 1;
             $originalUsername = $username;
