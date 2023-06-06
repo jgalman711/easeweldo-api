@@ -3,19 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Services\QrService;
 use Illuminate\Http\Response;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class QrController extends Controller
 {
+    protected $qrService;
+
+    public function __construct(QrService $qrService)
+    {
+        $this->qrService = $qrService;
+    }
+
     public function show(Company $company, int $employeeId): Response
     {
         $employee = $company->getEmployeeById($employeeId);
-        $data = QrCode::size(256)
-            ->format('png')
-            ->merge('/storage/app/es-logo.jpg')
-            ->errorCorrection('M')
-            ->generate(url('api/companies/' . $company->id . '/employees/' . $employee->id . '/clock'));
+        $data = $this->qrService->generate($company->id, $employee->id);
         return response($data)->header('Content-type', 'image/png');
     }
 }

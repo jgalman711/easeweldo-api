@@ -2,22 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\QrService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class UserController extends Controller
 {
+    protected $qrService;
+
+    public function __construct(QrService $qrService)
+    {
+        $this->qrService = $qrService;
+    }
+
     public function qrcode(): Response
     {
         $user = Auth::user();
         $employee = $user->employee;
         $company = $employee->company;
-        $data = QrCode::size(256)
-            ->format('png')
-            ->merge('/storage/app/es-logo.jpg')
-            ->errorCorrection('M')
-            ->generate(url('api/companies/' . $company->id . '/employees/' . $employee->id . '/clock'));
+        $data = $this->qrService->generate($company->id, $employee->id);
         return response($data)->header('Content-type', 'image/png');
     }
 }
