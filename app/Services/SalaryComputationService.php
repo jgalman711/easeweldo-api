@@ -2,25 +2,21 @@
 
 namespace App\Services;
 
+use App\Models\Employee;
 use App\Models\SalaryComputation;
 
 class SalaryComputationService
 {
-    public function initialize(array $data): SalaryComputation
+    private const MONTHS_12 = 12;
+
+    public function initialize(Employee $employee, array $data): SalaryComputation
     {
-        $data['sick_leaves'] = $data['unit'] == SalaryComputation::UNIT_DAY
-            ?  $data['sick_leaves'] : $data['sick_leaves'] * SalaryComputation::EIGHT_HOURS;
-        $data['vacation_leaves'] = $data['unit'] == SalaryComputation::UNIT_DAY
-            ?  $data['vacation_leaves'] : $data['vacation_leaves'] * SalaryComputation::EIGHT_HOURS;
-
-        $data['available_sick_leaves'] = $data['total_sick_leaves'] = $data['sick_leaves'];
-        $data['available_vacation_leaves'] = $data['total_vacation_leaves'] = $data['vacation_leaves'];
-
-        if (isset($data['hourly_rate']) && $data['hourly_rate']) {
-            unset($data['basic_salary']);
-        } elseif (isset($data['basic_salary']) && $data['basic_salary']) {
-            $data['daily_rate'] = $data['basic_salary'] / SalaryComputation::TYPICAL_WORK_DAYS_PER_MONTH;
-            $data['hourly_rate'] = $data['daily_rate'] / SalaryComputation::EIGHT_HOURS;
+        if ($employee->employment_type == Employee::FULL_TIME) {
+            $workDaysPerWeek = Employee::FIVE_DAYS_PER_WEEK
+                ? SalaryComputation::FIVE_DAYS_PER_WEEK_WORK_DAYS
+                : SalaryComputation::SIX_DAYS_PER_WEEK_WORK_DAYS;
+            $data['daily_rate'] = $data['basic_salary'] * self::MONTHS_12 / $workDaysPerWeek;
+            $data['hourly_rate'] = $data['daily_rate'] / $employee->working_hours_per_day;
         }
         return SalaryComputation::create($data);
     }

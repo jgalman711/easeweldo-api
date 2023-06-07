@@ -11,9 +11,9 @@ class SalaryComputation extends Model
 {
     use HasFactory;
 
-    public const UNIT_DAY = 'day';
-    public const TYPICAL_WORK_DAYS_PER_MONTH = 22;
-    public const EIGHT_HOURS = 8;
+    public const FIVE_DAYS_PER_WEEK_WORK_DAYS = 261;
+
+    public const SIX_DAYS_PER_WEEK_WORK_DAYS = 313;
 
     protected $fillable = [
         'employee_id',

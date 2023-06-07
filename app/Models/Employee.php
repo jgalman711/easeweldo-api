@@ -36,6 +36,15 @@ class Employee extends Model
         self::TERMINATED
     ];
 
+    public const FULL_TIME_WORKING_DAYS_PER_WEEK = [
+        self::FIVE_DAYS_PER_WEEK,
+        self::SIX_DAYS_PER_WEEK
+    ];
+
+    public const FIVE_DAYS_PER_WEEK = 5;
+    public const SIX_DAYS_PER_WEEK = 6;
+    public const AS_NEEDED = 0;
+
     public const ACTIVE = 'active';
     public const INACTIVE = 'inactive';
     public const PROBATIONARY = 'probationary';
@@ -51,6 +60,7 @@ class Employee extends Model
         'employment_status',
         'employment_type',
         'working_days_per_week',
+        'working_hours_per_day',
         'mobile_number',
         'address_line',
         'barangay_town_city_province',

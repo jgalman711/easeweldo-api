@@ -34,7 +34,7 @@ class SalaryComputationController extends Controller
         }
         $input = $request->validated();
         $input['employee_id'] = $employeeId;
-        $salaryComputation = $this->salaryComputationService->initialize($input);
+        $salaryComputation = $this->salaryComputationService->initialize($employee, $input);
         return $this->sendResponse(
             new BaseResource($salaryComputation),
             'Salary computation created successfully.'

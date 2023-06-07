@@ -28,6 +28,16 @@ class EmployeeRequest extends BaseRequest
                     }
                 },
             ],
+            'working_hours_per_day' => [
+                'nullable',
+                'integer',
+                'unsigned',
+                function ($attribute, $value, $fail) {
+                    if ($this->input('employment_type') == Employee::FULL_TIME && empty($value)) {
+                        $fail('The working hours per day field is required for full-time employees.');
+                    }
+                },
+            ],
             'mobile_number' => [
                 'nullable',
                 'sometimes',

@@ -11,7 +11,8 @@ return new class extends Migration
     {
         Schema::table('employees', function (Blueprint $table) {
             $table->enum('employment_type', Employee::EMPLOYMENT_TYPE)->after('employment_status');
-            $table->integer('working_days_per_week')->after('employment_type')->default(5);
+            $table->enum('working_days_per_week', Employee::FULL_TIME_WORKING_DAYS_PER_WEEK);
+            $table->integer('working_hours_per_day')->after('working_days_per_week')->default(8);
             $table->date('date_of_termination')->after('date_of_hire')->nullable();
         });
     }
