@@ -11,6 +11,7 @@ use App\Services\UserService;
 use App\Traits\Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class EmployeeController extends Controller
 {
@@ -64,6 +65,9 @@ class EmployeeController extends Controller
         $input = $request->validated();
         if ($request->has('reset_password') && $request->reset_password) {
             $temporaryPassword = $this->userService->employeeResetPassword($employee->user);
+            PersonalAccessToken::where('tokenable_id', $employee->user->id)
+                ->where('tokenable_type', get_class($employee->user))
+                ->delete();
             return $this->sendResponse(
                 new BaseResource($employee),
                 'Employee password reset successfully. Temporary password: ' . $temporaryPassword

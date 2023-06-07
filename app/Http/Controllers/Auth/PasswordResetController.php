@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class PasswordResetController extends BaseController
 {
@@ -29,6 +30,9 @@ class PasswordResetController extends BaseController
                 'password' => Hash::make($request->new_password)
             ])->save();
             $success['token'] =  $user->createToken(env('APP_NAME'))->plainTextToken;
+            PersonalAccessToken::where('tokenable_id', $user->id)
+                ->where('tokenable_type', get_class($user))
+                ->delete();
             return $this->sendResponse($success, 'Password reset successfully.');
         } else {
             return $this->sendError('Unauthorised.', [
