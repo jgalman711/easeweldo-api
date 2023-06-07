@@ -18,6 +18,30 @@ class Employee extends Model
 
     public const STORAGE_PATH = 'employees/images/';
 
+    public const EMPLOYMENT_TYPE = [
+        self::FULL_TIME,
+        self::PART_TIME,
+        self::CONTRACT
+    ];
+
+    public const FULL_TIME = 'full-time';
+    public const PART_TIME = 'part-time';
+    public const CONTRACT = 'contract';
+
+    public const EMPLOYMENT_STATUS = [
+        self::ACTIVE,
+        self::INACTIVE,
+        self::PROBATIONARY,
+        self::REGULAR,
+        self::TERMINATED
+    ];
+
+    public const ACTIVE = 'active';
+    public const INACTIVE = 'inactive';
+    public const PROBATIONARY = 'probationary';
+    public const REGULAR = 'full-time';
+    public const TERMINATED = 'part-time';
+
     protected $fillable = [
         'company_id',
         'first_name',
@@ -25,10 +49,13 @@ class Employee extends Model
         'department',
         'job_title',
         'employment_status',
+        'employment_type',
+        'working_days_per_week',
         'mobile_number',
         'address_line',
         'barangay_town_city_province',
         'date_of_hire',
+        'date_of_termination',
         'date_of_birth',
         'sss_number',
         'pagibig_number',

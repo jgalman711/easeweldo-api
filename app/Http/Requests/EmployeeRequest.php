@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Employee;
 use Illuminate\Validation\Rule;
 
 class EmployeeRequest extends BaseRequest
@@ -16,6 +17,17 @@ class EmployeeRequest extends BaseRequest
             'date_of_hire' => self::REQUIRED_DATE,
             'date_of_birth' => self::REQUIRED_DATE,
             'employment_status' => self::REQUIRED_STRING,
+            'employment_type' => 'nullable|string|in:Full-time,Part-time,Contract',
+            'working_days_per_week' => [
+                'nullable',
+                'integer',
+                'unsigned',
+                function ($attribute, $value, $fail) {
+                    if ($this->input('employment_type') == Employee::FULL_TIME && empty($value)) {
+                        $fail('The working days per week field is required for full-time employees.');
+                    }
+                },
+            ],
             'mobile_number' => [
                 'nullable',
                 'sometimes',
@@ -26,6 +38,8 @@ class EmployeeRequest extends BaseRequest
             ],
             'address_line' => self::REQUIRED_STRING,
             'barangay_town_city_province' => self::REQUIRED_STRING,
+            'date_of_hire' => ['nullable', 'date'],
+            'date_of_termination' => ['nullable', 'date'],
             'sss_number' => [
                 'nullable',
                 'string',

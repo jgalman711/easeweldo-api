@@ -25,7 +25,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('username');
-            $table->string('mobile_number')->after('email_address')->nullable();
+            $table->string('mobile_number')->after('email')->nullable();
         });
 
         Schema::table('employees', function (Blueprint $table) {
