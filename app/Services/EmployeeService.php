@@ -51,14 +51,23 @@ class EmployeeService
     public function generateUniqueUsername(Employee $employee)
     {
         $username = strtolower(substr($employee->first_name, 0, 1) . $employee->last_name);
-        $existingUser = User::where('username', $username)->first();
+        $company = $employee->company;
+
+        $existingUser = User::where('username', $username)
+            ->whereHas('employee', function ($query) use ($company) {
+                $query->where('company_id', $company->id);
+            })->first();
+
         $usernameExists = $existingUser !== null;
         if ($usernameExists) {
             $i = 1;
             $originalUsername = $username;
             do {
                 $username = $originalUsername . $i;
-                $existingUser = User::where('username', $username)->first();
+                $existingUser = User::where('username', $username)
+                    ->whereHas('employee', function ($query) use ($company) {
+                        $query->where('company_id', $company->id);
+                    })->first();
                 $usernameExists = $existingUser !== null;
                 $i++;
             } while ($usernameExists);
