@@ -24,6 +24,8 @@ class PayrollService
 
     private const MINUTES_60 = 60;
 
+    private const MONTHS_12 = 12;
+
     protected $timeRecordService;
 
     protected $pagIbigService;
@@ -155,6 +157,31 @@ class PayrollService
         return $payroll;
     }
 
+    public function generateThirteenthMonthPay(Employee $employee): Payroll
+    {
+        $basicSalary = $employee->salaryComputation->basic_salary;
+        if ($employee->employment_type == Employee::FULL_TIME) {
+            $monthsWorked = $this->getMonthsWorked($employee->id);
+            $thirteenthMonthPay = $basicSalary * $monthsWorked / self::MONTHS_12;
+            try {
+                DB::beginTransaction();
+                $payroll = Payroll::create([
+                    'employee_id' => $employee->id,
+                    'description' => "{$employee->fullName} 13 Month Pay",
+                    'basic_salary' => $basicSalary,
+                    'net_salary' => $thirteenthMonthPay
+                ]);
+                DB::commit();
+                return $payroll;
+            } catch (Exception $e) {
+                DB::rollBack();
+                throw new Exception($e->getMessage());
+            }
+        } else {
+            // TODO: PART TIME EMPLOYEES COMPUTATION
+        }
+    }
+
     private function validate(Period $period, Employee $employee): void
     {
         throw_if($period->status == Period::STATUS_COMPLETED, new Exception('Period is already ' . $period->status));
@@ -257,5 +284,27 @@ class PayrollService
                 : $leaveStartDate->diffInHours($leaveEndDate);
         }
         return 0;
+    }
+
+    private function getMonthsWorked(int $employeeId): int
+    {
+        $startDate = Carbon::now()->startOfYear();
+        $endDate = Carbon::now()->endOfYear();
+
+        $distinctMonths = Payroll::where('employee_id', $employeeId)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at')
+            ->pluck('created_at')
+            ->map(function ($date) {
+                return $date->format('m');
+            })->unique();
+
+        $allMonths = collect(range(1, 12))->map(function ($month) {
+            return str_pad($month, 2, '0', STR_PAD_LEFT);
+        });
+
+        return $allMonths->filter(function ($month) use ($distinctMonths) {
+            return $distinctMonths->contains($month);
+        })->count();
     }
 }

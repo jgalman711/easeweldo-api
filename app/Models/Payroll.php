@@ -10,9 +10,14 @@ class Payroll extends Model
 {
     use HasFactory, SoftDeletes;
     
+    public const TYPE_REGULAR = "regular";
+
+    public const TYPE_THIRTEENTH_MONTH_PAY = "thirteenth_month_pay";
+
     protected $fillable = [
         'employee_id',
         'period_id',
+        'description',
         'basic_salary',
         'total_late_minutes',
         'total_late_deductions',
@@ -34,7 +39,30 @@ class Payroll extends Model
         'tax_rate',
         'income_tax',
         'net_salary',
-        'status'
+        'status',
+        'remarks'
+    ];
+
+    protected $attributes = [
+        'total_late_minutes' => 0,
+        'total_late_deductions' => 0,
+        'total_absent_days' => 0,
+        'total_absent_deductions' => 0,
+        'total_overtime_minutes' => 0,
+        'total_overtime_pay' => 0,
+        'total_undertime_minutes' => 0,
+        'total_undertime_deductions' => 0,
+        'total_leave_hours' => 0,
+        'total_leave_compensation' => 0,
+        'sss_contribution' => 0,
+        'philhealth_contribution' => 0,
+        'pagibig_contribution' => 0,
+        'total_contributions' => 0,
+        'taxable_income' => 0,
+        'base_tax' => 0,
+        'compensation_level' => 0,
+        'tax_rate' => 0,
+        'income_tax' => 0,
     ];
 
     public function employee()
