@@ -59,9 +59,9 @@ class EmployeeController extends Controller
         return $this->sendResponse(new BaseResource($employee), 'Employee retrieved successfully.');
     }
 
-    public function update(EmployeeRequest $request, Company $company, int $employeeId): JsonResponse
+    public function update(EmployeeRequest $request, Company $company, Employee $employee): JsonResponse
     {
-        $employee = $company->getEmployeeById($employeeId);
+        $company->getEmployeeById($employee->id);
         $input = $request->validated();
         if ($request->has('reset_password') && $request->reset_password) {
             $temporaryPassword = $this->userService->employeeResetPassword($employee->user);
