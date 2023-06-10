@@ -24,7 +24,14 @@ class CompanyRequest extends BaseRequest
             'address_line' => self::NULLABLE_STRING,
             'barangay_town_city_province' => self::NULLABLE_STRING,
             'contact_name' => self::NULLABLE_STRING,
-            'email_address' => 'nullable|email|max:255',
+            'email_address' => [
+                'nullable',
+                'email',
+                'sometimes',
+                Rule::unique('companies', 'email_address')
+                    ->whereNull('deleted_at')
+                    ->ignore($this->company),
+            ],
             'mobile_number' => [
                 'nullable',
                 self::PH_MOBILE_NUMBER

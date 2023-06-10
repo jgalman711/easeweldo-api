@@ -38,7 +38,14 @@ class EmployeeRequest extends BaseRequest
                     }
                 },
             ],
-            'email_address' => 'nullable|email|max:255',
+            'email_address' => [
+                'nullable',
+                'email',
+                'sometimes',
+                Rule::unique('users', 'email_address')
+                    ->whereNull('deleted_at')
+                    ->ignore($this->employee),
+            ],
             'mobile_number' => [
                 'nullable',
                 'sometimes',
