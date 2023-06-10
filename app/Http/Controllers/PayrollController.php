@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PayrollRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
-use App\Models\Employee;
 use App\Models\Payroll;
 use App\Services\PayrollService;
 use App\Traits\Filter;

@@ -81,9 +81,9 @@ class EmployeeController extends Controller
             unset($input['profile_picture']);
         }
         $employee->update($input);
-        if ($request->has('email')) {
+        if ($request->has('email_address')) {
             $employee->user->update([
-                'email' => $request->email
+                'email_address' => $request->email_address
             ]);
         }
         return $this->sendResponse(new BaseResource($employee), 'Employee updated successfully.');

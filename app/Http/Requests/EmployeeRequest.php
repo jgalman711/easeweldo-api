@@ -38,6 +38,7 @@ class EmployeeRequest extends BaseRequest
                     }
                 },
             ],
+            'email_address' => 'nullable|email|max:255',
             'mobile_number' => [
                 'nullable',
                 'sometimes',
