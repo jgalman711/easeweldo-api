@@ -13,7 +13,7 @@ class LoginController extends BaseController
     {
         $credentials = $request->only(['username', 'email_address', 'password']);
         if (Auth::attempt($credentials)) {
-            $user = Auth::user()->load('employee');
+            $user = Auth::user()->load(['employee', 'roles']);
             $success['token'] =  $user->createToken(env('APP_NAME'))->plainTextToken;
             $success['user'] = $user;
             return $this->sendResponse($success, 'User login successfully.');

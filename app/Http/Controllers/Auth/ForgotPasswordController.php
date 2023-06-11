@@ -12,7 +12,7 @@ class ForgotPasswordController extends Controller
     public function forgot(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required'
+            'email_address' => 'required'
         ]);
         if ($validator->fails()) {
             return $this->sendError('Validation Error.', $validator->errors());
