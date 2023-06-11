@@ -29,7 +29,7 @@ class EmployeeController extends Controller
     
     public function index(Request $request, Company $company): JsonResponse
     {
-        $employees = $this->applyFilters($request, $company->employees(), [
+        $employees = $this->applyFilters($request, $company->employees()->with('user'), [
             'first_name',
             'last_name',
             'job_title',
