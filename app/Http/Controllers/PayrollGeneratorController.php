@@ -30,39 +30,36 @@ class PayrollGeneratorController extends Controller
     public function store(PayrollPeriodRequest $request, Company $company): JsonResponse
     {
         $input = $request->validated();
+        $employees = $request->has('employees') ? $request->employees : $company->employees;
         if ($input['type'] == Payroll::TYPE_REGULAR) {
-            $period = $company->getPeriodById($input['period_id']);
+            $period = $company->getPeriodById($request->period_id);
+            $period->status = Period::STATUS_PROCESSING;
+            $period->save();
             $endDate = Carbon::parse($period->end_date);
             if ($endDate->isFuture()) {
                 return $this->sendError("Unable to generate payroll. The period has not yet concluded.");
             }
-            $period = $company->getPeriodById($period->id);
-            $period->status = Period::STATUS_PROCESSING;
-            $period->save();
-            foreach ($company->employees as $employee) {
-                try {
-                    DB::beginTransaction();
+        }
+        foreach ($employees as $employee) {
+            try {
+                DB::beginTransaction();
+                if (is_integer($employee)) {
+                    $employee = Employee::find($employee);
+                    throw_unless($employee, new Exception("Employee not found."));
+                }
+                if ($input['type'] == Payroll::TYPE_REGULAR) {
                     $this->deleteExistingPayroll($employee->payrolls(), $input['period_id']);
                     $payroll = $this->payrollService->generate($period, $employee);
-                    array_push($this->successPayroll, $payroll);
-                    DB::commit();
-                } catch (Exception $e) {
-                    array_push($this->failedPayroll, $e->getMessage());
-                    DB::rollBack();
-                }
-            }
-        } elseif ($input['type'] == Payroll::TYPE_THIRTEENTH_MONTH_PAY) {
-            foreach ($input['employees'] as $employeeId) {
-                try {
-                    $employee = Employee::with('salaryComputation')->findOrFail($employeeId);
-                    DB::beginTransaction();
+                } elseif ($employee && $input['type'] == Payroll::TYPE_THIRTEENTH_MONTH_PAY) {
                     $payroll = $this->payrollService->generateThirteenthMonthPay($employee);
-                    array_push($this->successPayroll, $payroll);
-                    DB::commit();
-                } catch (Exception $e) {
-                    array_push($this->failedPayroll, $e->getMessage());
-                    DB::rollBack();
+                } elseif ($employee && $input['type'] == Payroll::TYPE_FINAL_PAY) {
+                    $payroll = $this->payrollService->generateFinalPay($employee, $input);
                 }
+                array_push($this->successPayroll, $payroll);
+                DB::commit();
+            } catch (Exception $e) {
+                array_push($this->failedPayroll, $e->getMessage());
+                DB::rollBack();
             }
         }
         return $this->sendResponse([

@@ -8,11 +8,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payroll extends Model
 {
-    use HasFactory, SoftDeletes;
+    use SoftDeletes;
     
-    public const TYPE_REGULAR = "regular";
+    public const TYPE_REGULAR = 'regular';
 
-    public const TYPE_THIRTEENTH_MONTH_PAY = "thirteenth_month_pay";
+    public const TYPE_THIRTEENTH_MONTH_PAY = 'thirteenth_month_pay';
+
+    public const TYPE_FINAL_PAY = 'final_pay';
 
     protected $fillable = [
         'employee_id',

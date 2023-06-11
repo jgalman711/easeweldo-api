@@ -157,6 +157,7 @@ class PayrollService
         return $payroll;
     }
 
+    // I am thinking to move this in a separate service that extends payroll service. NthPayrollService
     public function generateThirteenthMonthPay(Employee $employee): Payroll
     {
         $basicSalary = $employee->salaryComputation->basic_salary;
@@ -179,6 +180,104 @@ class PayrollService
             }
         } else {
             // TODO: PART TIME EMPLOYEES COMPUTATION
+        }
+    }
+
+    // I am thinking to move this in a separate service that extends payroll service. FinalPayrollService
+    public function generateFinalPay(Employee $employee, array $input): Payroll
+    {
+        $request = new Request([
+            'filter' => [
+                'date_from' => $input['start_date'],
+                'date_to' => $input['end_date']
+            ]
+        ]);
+        $timeRecords = $this->timeRecordService->getTimeRecordsByDateRange($request, $employee->timeRecords())->get();
+
+        $leaves = $this->leaveService->getLeaveByDateRange(
+            $employee,
+            Carbon::parse($input['start_date']),
+            Carbon::parse($input['end_date'])
+        );
+
+        $settings = $employee->company->setting;
+        list(
+            $absences,
+            $absentHours,
+            $leaveHours,
+            $lateMinutes,
+            $overtimeMinutes,
+            $undertimeMinutes,
+            $hoursWorkedMinutes,
+            $totalExpectedWorkedHours
+        ) = $this->calculateAttendanceRecords($timeRecords, $leaves, $settings);
+
+        throw_unless(
+            $totalExpectedWorkedHours > 0,
+            new Exception("Employee is no longer expected to working during the selected period.")
+        );
+        $salaryComputation = $employee->salaryComputation;
+
+        $basicPay = $totalExpectedWorkedHours * $salaryComputation->hourly_rate;
+
+        $absencesDeductions = $absentHours * $salaryComputation->hourly_rate;
+        $latesDeductions = $lateMinutes / self::MINUTES_60 * $salaryComputation->hourly_rate;
+        $undertimeDeductions = $undertimeMinutes / self::MINUTES_60 * $salaryComputation->hourly_rate;
+        $overtimeCompensation = $overtimeMinutes / self::MINUTES_60 * $salaryComputation->hourly_rate;
+        $leaveCompensation = $leaveHours * $salaryComputation->hourly_rate;
+
+        $compensations = $overtimeCompensation + $leaveCompensation;
+        $deductions = $absencesDeductions - $latesDeductions - $undertimeDeductions;
+
+        $grossPay = $basicPay - $deductions + $compensations;
+
+        $calculateContributions = $this->calculateContributions($grossPay, Period::TYPE_MONTHLY);
+
+        $taxableIncome = $grossPay - $calculateContributions['total'];
+
+        $incomeTax = $this->taxService->compute($taxableIncome, Period::TYPE_MONTHLY);
+        $netPay = $taxableIncome - $incomeTax;
+
+        try {
+            DB::beginTransaction();
+            $payroll = Payroll::create([
+                'employee_id' => $employee->id,
+                'basic_salary' => $basicPay,
+                'total_late_minutes' => $lateMinutes,
+                'total_late_deductions' => $latesDeductions,
+                'total_absent_days' => $absences,
+                'total_absent_deductions' => $absencesDeductions,
+                'total_overtime_minutes' =>  $overtimeMinutes,
+                'total_overtime_pay' => $overtimeCompensation,
+                'total_undertime_minutes' => $undertimeMinutes,
+                'total_undertime_deductions' => $undertimeDeductions,
+                'total_hours_worked' => $hoursWorkedMinutes / self::MINUTES_60,
+                'total_leave_hours' => $leaveHours,
+                'total_leave_compensation' => $leaveCompensation,
+                'sss_contribution' => $calculateContributions['sss'],
+                'philhealth_contribution' => $calculateContributions['philHealth'],
+                'pagibig_contribution' => $calculateContributions['pagIbig'],
+                'total_contributions' => $calculateContributions['total'],
+                'taxable_income' => $taxableIncome,
+                'base_tax' => $this->taxService->getBaseTax(),
+                'compensation_level' => $this->taxService->getCompensationLevel(),
+                'tax_rate' => $this->taxService->getTaxRate(),
+                'income_tax' => $incomeTax,
+                'net_salary' => $netPay
+            ]);
+
+            PayrollTaxesContributions::create([
+                'payroll_id' => $payroll->id,
+                'company_id' => $employee->company->id,
+                'withholding_tax' => $this->taxService->getBaseTax(),
+                'sss_contribution' => $this->sssService->getEmployerShare(),
+                'pagibig_contribution' => $this->pagIbigService->getEmployerShare()
+            ]);
+            DB::commit();
+            return $payroll;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception($e->getMessage());
         }
     }
 

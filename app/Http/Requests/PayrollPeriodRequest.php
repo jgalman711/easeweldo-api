@@ -8,8 +8,10 @@ class PayrollPeriodRequest extends BaseRequest
     {
         return [
             'type' => 'required',
+            'start_date' => 'required_if:type,final_pay|date',
+            'end_date' => 'required_if:type,final_pay|date|after:start_date',
             'period_id' => 'required_if:type,regular|numeric',
-            'employees' => 'required_if:type,thirteenth_month_pay|array'
+            'employees' => 'required_if:type,final_pay,thirteenth_month_pay|array'
         ];
     }
 }
