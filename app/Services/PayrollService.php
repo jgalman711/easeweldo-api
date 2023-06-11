@@ -79,7 +79,7 @@ class PayrollService
             $lateMinutes,
             $overtimeMinutes,
             $undertimeMinutes,
-            $hoursWorkedMinutes,
+            $actualWorkedMinutes,
             $totalExpectedWorkedHours
         ) = $this->calculateAttendanceRecords($timeRecords, $leaves, $settings);
         
@@ -128,7 +128,7 @@ class PayrollService
                 'total_overtime_pay' => $overtimeCompensation,
                 'total_undertime_minutes' => $undertimeMinutes,
                 'total_undertime_deductions' => $undertimeDeductions,
-                'total_hours_worked' => $hoursWorkedMinutes / self::MINUTES_60,
+                'total_hours_worked' => $actualWorkedMinutes / self::MINUTES_60,
                 'total_leave_hours' => $leaveHours,
                 'total_leave_compensation' => $leaveCompensation,
                 'sss_contribution' => $calculateContributions['sss'],
@@ -208,7 +208,7 @@ class PayrollService
             $lateMinutes,
             $overtimeMinutes,
             $undertimeMinutes,
-            $hoursWorkedMinutes,
+            $actualWorkedMinutes,
             $totalExpectedWorkedHours
         ) = $this->calculateAttendanceRecords($timeRecords, $leaves, $settings);
 
@@ -229,7 +229,9 @@ class PayrollService
         $compensations = $overtimeCompensation + $leaveCompensation;
         $deductions = $absencesDeductions - $latesDeductions - $undertimeDeductions;
 
-        $grossPay = $basicPay - $deductions + $compensations;
+        $thirteenthMonthPay = $this->generateThirteenthMonthPay($employee);
+
+        $grossPay = $basicPay - $deductions + $compensations + $thirteenthMonthPay->net_salary;
 
         $calculateContributions = $this->calculateContributions($grossPay, Period::TYPE_MONTHLY);
 
@@ -251,7 +253,8 @@ class PayrollService
                 'total_overtime_pay' => $overtimeCompensation,
                 'total_undertime_minutes' => $undertimeMinutes,
                 'total_undertime_deductions' => $undertimeDeductions,
-                'total_hours_worked' => $hoursWorkedMinutes / self::MINUTES_60,
+                'total_hours_worked' => $actualWorkedMinutes / self::MINUTES_60,
+                'total_expected_hours_worked' => $totalExpectedWorkedHours,
                 'total_leave_hours' => $leaveHours,
                 'total_leave_compensation' => $leaveCompensation,
                 'sss_contribution' => $calculateContributions['sss'],
@@ -302,7 +305,7 @@ class PayrollService
         $lateMinutes = 0;
         $overtimeMinutes = 0;
         $undertimeMinutes = 0;
-        $hoursWorkedMinutes = 0;
+        $actualWorkedMinutes = 0;
         $totalExpectedWorkedHours = 0;
         $expectedWorkedHours = 0;
 
@@ -326,7 +329,7 @@ class PayrollService
                 $overtimeMinutes += $clockOut->gt($expectedClockOut)
                     && $clockOut->diffInMinutes($expectedClockOut) > $settings->minimum_overtime
                     ? $clockOut->diffInMinutes($expectedClockOut) : 0;
-                $hoursWorkedMinutes += $clockIn->diffInMinutes($clockOut);
+                $actualWorkedMinutes += $clockIn->diffInMinutes($clockOut);
             }
         }
 
@@ -337,9 +340,8 @@ class PayrollService
             $lateMinutes,
             $overtimeMinutes,
             $undertimeMinutes,
-            $hoursWorkedMinutes,
-            $totalExpectedWorkedHours,
-            $expectedWorkedHours
+            $actualWorkedMinutes,
+            $totalExpectedWorkedHours
         ];
     }
 
