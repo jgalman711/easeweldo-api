@@ -7,6 +7,7 @@ use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Models\WorkSchedule;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class WorkScheduleController extends Controller
 {
@@ -32,39 +33,16 @@ class WorkScheduleController extends Controller
 
     public function store(WorkScheduleRequest $request, Company $company): JsonResponse
     {
-        $workSchedule = WorkSchedule::where([
-            'name' => $request->name,
-            'company_id' => $company->id
-        ])->first();
-
-        if ($workSchedule) {
-            return $this->sendError("Work schedule name already exists.");
-        }
-        
         $input = $request->validated();
         $input['company_id'] = $company->id;
         $workSchedule = WorkSchedule::create($input);
         return $this->sendResponse(new BaseResource($workSchedule), 'Work schedule created successfully.');
     }
 
-    public function update(WorkScheduleRequest $request, Company $company, int $workScheduleId): JsonResponse
+    public function update(WorkScheduleRequest $request, Company $company, WorkSchedule $workSchedule): JsonResponse
     {
-        $workSchedule = $company->getWorkScheduleById($workScheduleId);
-        if (!$workSchedule) {
-            return $this->sendError(self::WORK_SCHEDULE_DOES_NOT_EXIST);
-        }
-
-        $sameWorkScheduleName = WorkSchedule::where([
-            ['id', '!=', $workScheduleId],
-            ['name', $request->name],
-            ['company_id', $company->id],
-        ])->first();
-        
-        if (!$sameWorkScheduleName) {
-            return $this->sendError("Work schedule name already exists.");
-        }
-        $input = $request->validated();
-        $workSchedule->update($input);
+        $company->getWorkScheduleById($workSchedule->id);
+        $workSchedule->update($request->all());
         return $this->sendResponse(new BaseResource($workSchedule), 'Work schedule updated successfully.');
     }
 
