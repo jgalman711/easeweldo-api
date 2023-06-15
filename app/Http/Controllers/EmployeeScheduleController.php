@@ -73,4 +73,17 @@ class EmployeeScheduleController extends Controller
             return $this->sendError($e->getMessage());
         }
     }
+
+    public function destroy(Company $company, int $employeeId, int $scheduleId): JsonResponse
+    {
+        try {
+            $employee = $company->getEmployeeById($employeeId);
+            $employee->schedules()->detach($scheduleId);
+            return response()->json([
+                'message' =>  'Employee schedule deleted successfully.'
+            ], 200);
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
+    }
 }
