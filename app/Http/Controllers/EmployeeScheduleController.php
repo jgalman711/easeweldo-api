@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\EmployeeScheduleRequest;
 use App\Http\Resources\BaseResource;
+use App\Http\Resources\EmployeeScheduleResource;
 use App\Models\Company;
 use App\Models\EmployeeSchedule;
 use App\Traits\Filter;
@@ -22,7 +23,10 @@ class EmployeeScheduleController extends Controller
             $employeeSchedule = $this->applyFilters($request, $employee->schedules()->withPivot('start_date'), [
                 'name'
             ]);
-            return $this->sendResponse($employeeSchedule, 'Employee schedules retrieved successfully.');
+            return $this->sendResponse(
+                EmployeeScheduleResource::collection($employeeSchedule),
+                'Employee schedules retrieved successfully.'
+            );
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
