@@ -10,6 +10,8 @@ class SalaryComputationRequest extends BaseRequest
             'basic_salary' => 'filled|required_without_all:hourly_rate',
             'hourly_rate' => 'filled|required_without_all:basic_salary',
             'daily_rate' => self::NUMERIC,
+            'working_hours_per_day' => self::NUMERIC,
+            'working_days_per_week' =>  self::NUMERIC,
             'overtime_rate' => self::REQUIRED_NUMERIC,
             'night_diff_rate' => self::REQUIRED_NUMERIC,
             'regular_holiday_rate' => self::REQUIRED_NUMERIC,

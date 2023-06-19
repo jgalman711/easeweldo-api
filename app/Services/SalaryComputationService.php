@@ -12,11 +12,12 @@ class SalaryComputationService
     public function initialize(Employee $employee, array $data): SalaryComputation
     {
         if ($employee->employment_type == Employee::FULL_TIME) {
-            $workDaysPerWeek = Employee::FIVE_DAYS_PER_WEEK
-                ? SalaryComputation::FIVE_DAYS_PER_WEEK_WORK_DAYS
-                : SalaryComputation::SIX_DAYS_PER_WEEK_WORK_DAYS;
-            $data['daily_rate'] = $data['basic_salary'] * self::MONTHS_12 / $workDaysPerWeek;
-            $data['hourly_rate'] = $data['daily_rate'] / $employee->working_hours_per_day;
+            $data['working_hours_per_day'] = $data['working_hours_per_day'] ?? Employee::EIGHT_HOURS_PER_DAY;
+            $data['working_days_per_week'] = $data['working_days_per_week'] ?? Employee::FIVE_DAYS_PER_WEEK;
+            $data['daily_rate'] = $data['basic_salary']
+                * self::MONTHS_12
+                / SalaryComputation::FIVE_DAYS_PER_WEEK_WORK_DAYS;
+            $data['hourly_rate'] = $data['daily_rate'] / Employee::EIGHT_HOURS_PER_DAY;
         }
         return SalaryComputation::create($data);
     }
