@@ -31,7 +31,7 @@ return new class extends Migration
             $table->integer('undertime_minutes')->nullable();
             $table->decimal('undertime_deductions', 10, 2)->nullable();
             $table->decimal('undertime_deductions_ytd', 10, 2)->nullable();
-            $table->json('leave')->nullable();
+            $table->json('leaves')->nullable();
             $table->json('allowances')->nullable();
             $table->json('commissions')->nullable();
             $table->json('other_compensations')->nullable();

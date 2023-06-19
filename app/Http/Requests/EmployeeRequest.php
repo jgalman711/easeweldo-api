@@ -44,7 +44,7 @@ class EmployeeRequest extends BaseRequest
                 'sometimes',
                 Rule::unique('users', 'email_address')
                     ->whereNull('deleted_at')
-                    ->ignore($this->employee->user),
+                    ->ignore(optional($this->employee)->user),
             ],
             'mobile_number' => [
                 'nullable',
