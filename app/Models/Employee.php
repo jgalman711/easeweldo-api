@@ -45,6 +45,8 @@ class Employee extends Model
     public const SIX_DAYS_PER_WEEK = 6;
     public const AS_NEEDED = 0;
 
+    public const EIGHT_HOURS_PER_DAY = 8;
+
     public const ACTIVE = 'active';
     public const INACTIVE = 'inactive';
     public const PROBATIONARY = 'probationary';
