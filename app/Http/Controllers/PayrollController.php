@@ -36,9 +36,7 @@ class PayrollController extends Controller
     {
         $input = $request->validated();
         $employee = $company->getEmployeeById($employeeId);
-        $input['company_id'] = $company->id;
-        $input['employee_id'] = $employee->id;
-        $payroll = Payroll::create($input);
+        $payroll = $this->payrollService->generate($employee, $input);
         return $this->sendResponse(new BaseResource($payroll), 'Payroll created successfully');
     }
 

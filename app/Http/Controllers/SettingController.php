@@ -28,7 +28,6 @@ class SettingController extends Controller
         $input = $request->validated();
         $companyPreviousPeriod = $company->periods()->latest()->first();
         if ($companyPreviousPeriod) {
-            // return $this->sendError('Existing period found. Please contact ES Administrator.');
             $companyPreviousPeriod->delete();
         }
         $settings = Setting::updateOrCreate(

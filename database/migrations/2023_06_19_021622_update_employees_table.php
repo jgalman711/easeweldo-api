@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
          Schema::table('employees', function (Blueprint $table) {
-            $table->dropColumnIfExists('working_days_per_week');
-            $table->dropColumnIfExists('working_hours_per_day');
+            $table->dropColumn('working_days_per_week');
+            $table->dropColumn('working_hours_per_day');
         });
 
         Schema::table('salary_computations', function (Blueprint $table) {
@@ -22,14 +22,13 @@ return new class extends Migration
 
     public function down(): void
     {
-       Schema::table('employees', function (Blueprint $table) {
-        $table->integer('working_days_per_week')->after('profile_picture')->nullable();
-        $table->integer('working_hours_per_day')->after('profile_picture')->nullable();
-    });
-
-    Schema::table('salary_computations', function (Blueprint $table) {
-        $table->dropColumnIfExists('working_days_per_week');
-        $table->dropColumnIfExists('working_hours_per_day');
-    });
+        Schema::table('employees', function (Blueprint $table) {
+            $table->integer('working_days_per_week')->after('profile_picture')->nullable();
+            $table->integer('working_hours_per_day')->after('profile_picture')->nullable();
+        });
+        Schema::table('salary_computations', function (Blueprint $table) {
+            $table->dropColumn('working_days_per_week');
+            $table->dropColumn('working_hours_per_day');
+        });
     }
 };

@@ -15,11 +15,20 @@ class SalaryComputation extends Model
 
     public const SIX_DAYS_PER_WEEK_WORK_DAYS = 313;
 
+    protected $casts = [
+        'allowances' => 'array',
+        'commissions' => 'array',
+        'other_compensations' => 'array'
+    ];
+
     protected $fillable = [
         'employee_id',
         'basic_salary',
         'hourly_rate',
         'daily_rate',
+        'allowances',
+        'commissions',
+        'other_compensations',
         'working_hours_per_day',
         'working_days_per_week',
         'overtime_rate',
