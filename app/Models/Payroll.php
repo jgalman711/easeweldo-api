@@ -19,6 +19,7 @@ class Payroll extends Model
     protected $casts = [
         'leaves' => 'json',
         'allowances' => 'json',
+        'commissions' => 'json',
         'other_compensations' => 'json'
     ];
 
