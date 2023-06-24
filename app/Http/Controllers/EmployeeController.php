@@ -11,11 +11,14 @@ use App\Services\UserService;
 use App\Traits\Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class EmployeeController extends Controller
 {
     use Filter;
+
+    protected const PUBLIC_PATH = 'public/';
 
     protected $employeeService;
 
@@ -73,7 +76,11 @@ class EmployeeController extends Controller
                 'Employee password reset successfully. Temporary password: ' . $temporaryPassword
             );
         }
+
         if (isset($input['profile_picture']) && $input['profile_picture']) {
+            if ($employee->profile_picture) {
+                Storage::delete(self::PUBLIC_PATH . $employee->profile_picture);
+            }
             $filename = time() . '.' . $request->profile_picture->extension();
             $request->profile_picture->storeAs(Employee::ABSOLUTE_STORAGE_PATH, $filename);
             $input['profile_picture'] = Employee::STORAGE_PATH . $filename;

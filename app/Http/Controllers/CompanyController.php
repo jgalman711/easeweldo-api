@@ -9,10 +9,13 @@ use App\Services\CompanyService;
 use App\Traits\Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CompanyController extends Controller
 {
     use Filter;
+
+    protected const PUBLIC_PATH = 'public/';
 
     protected $companyService;
 
@@ -51,8 +54,10 @@ class CompanyController extends Controller
     public function update(CompanyRequest $request, Company $company): JsonResponse
     {
         $input = $request->validated();
-        $input['slug'] = strtolower(str_replace(' ', '-', $input['name']));
         if (isset($input['logo']) && $input['logo']) {
+            if ($company->logo) {
+                Storage::delete(self::PUBLIC_PATH . $company->logo);
+            }
             $filename = time() . '.' . $request->logo->extension();
             $request->logo->storeAs(Company::ABSOLUTE_STORAGE_PATH, $filename);
             $input['logo'] = Company::STORAGE_PATH . $filename;
