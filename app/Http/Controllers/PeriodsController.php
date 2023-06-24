@@ -24,15 +24,21 @@ class PeriodsController extends Controller
         return $this->sendResponse(BaseResource::collection($periods), 'Payroll periods retrieved successfully.');
     }
 
-    public function show(Company $company, int $periodId): JsonResponse
+    public function show(Company $company, int $companyPeriodId): JsonResponse
     {
-        $period = $company->getPeriodById($periodId);
+        $period = Period::where([
+            ['company_id', $company->id],
+            ['company_period_id', $companyPeriodId]
+        ])->firstOrFail();
         return $this->sendResponse(new BaseResource($period), 'Payroll period retrieved successfully.');
     }
 
-    public function update(PeriodRequest $request, Company $company, int $periodId): JsonResponse
+    public function update(PeriodRequest $request, Company $company, int $companyPeriodId): JsonResponse
     {
-        $period = $company->getPeriodById($periodId);
+        $period = Period::where([
+            ['company_id', $company->id],
+            ['company_period_id', $companyPeriodId]
+        ])->firstOrFail();
         $input = $request->validated();
         if ($period->status != Period::STATUS_PENDING) {
             return $this->sendError('This period cannot be edited as it is already ' . $period->status);
