@@ -50,8 +50,15 @@ class EmployeeService
 
     public function generateUniqueUsername(Employee $employee)
     {
-        $username = strtolower(substr($employee->first_name, 0, 1) . $employee->last_name);
         $company = $employee->company;
+
+        $firstName = $employee->first_name;
+        $firstNameParts = explode(' ', $firstName);
+        $firstNameInitial = substr($firstNameParts[0], 0, 1);
+        if (count($firstNameParts) > 1) {
+            $firstNameInitial .= substr($firstNameParts[1], 0, 1);
+        }
+        $username = strtolower($firstNameInitial . str_replace(' ', '', strtolower($employee->last_name)));
 
         $existingUser = User::where('username', $username)
             ->whereHas('employee', function ($query) use ($company) {
