@@ -38,7 +38,7 @@ class InitializeNextPeriod extends Command
                 DB::commit();
             } catch (Exception $e) {
                 DB::rollBack();
-                throw $e->getMessage();
+                $this->error("Unable to initialize next period for company {$company->name}.");
             }
         }
     }

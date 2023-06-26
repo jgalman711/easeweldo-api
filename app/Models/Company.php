@@ -59,6 +59,11 @@ class Company extends Model
         return $this->hasManyThrough(Payroll::class, Employee::class);
     }
 
+    public function period(int $periodId): Period
+    {
+        return $this->periods()->findOrFail($periodId);
+    }
+
     public function periods(): HasMany
     {
         return $this->hasMany(Period::class);

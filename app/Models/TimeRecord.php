@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -25,4 +26,24 @@ class TimeRecord extends Model
     {
         return $this->belongsTo(Employee::class);
     }
+
+    public function scopeByRange(Builder $timeRecordsQuery, array $range): Builder
+    {
+        if (isset($range['dateTo']) && $range['dateTo']) {
+            $timeRecordsQuery->where(function ($query) use ($range) {
+                $query->whereDate('expected_clock_in', '>=', $range['dateTo'])
+                        ->orWhereDate('clock_in', '>=', $range['dateTo']);
+            });
+        }
+
+        if (isset($range['dateFrom']) && $range['dateFrom']) {
+            $timeRecordsQuery->where(function ($query) use ($range) {
+                $query->whereDate('expected_clock_out', '<=', $range['dateFrom'])
+                    ->orWhereDate('clock_out', '<=', $range['dateFrom']);
+            });
+        }
+
+        return $timeRecordsQuery;
+    }
+
 }

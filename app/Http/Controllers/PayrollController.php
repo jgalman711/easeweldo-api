@@ -6,6 +6,7 @@ use App\Http\Requests\PayrollRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Models\Payroll;
+use App\Models\Period;
 use App\Services\PayrollService;
 use App\Traits\Filter;
 use Illuminate\Http\JsonResponse;
@@ -36,7 +37,8 @@ class PayrollController extends Controller
     {
         $input = $request->validated();
         $employee = $company->getEmployeeById($employeeId);
-        $payroll = $this->payrollService->generate($employee, $input);
+        $period = $company->period($request->period_id);
+        $payroll = $this->payrollService->generate($period, $employee, $input);
         return $this->sendResponse(new BaseResource($payroll), 'Payroll created successfully');
     }
 

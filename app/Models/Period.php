@@ -57,13 +57,6 @@ class Period extends Model
         'status'
     ];
 
-    protected $casts = [
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
-        'salary_date' => 'datetime',
-        'status' => 'string'
-    ];
-
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);

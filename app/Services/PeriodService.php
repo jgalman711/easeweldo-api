@@ -65,7 +65,8 @@ class PeriodService
     {
         $currentDate = Carbon::now()->toDateString();
         $companyPreviousPeriod = $company->periods()->latest()->first();
-        if ($companyPreviousPeriod && $companyPreviousPeriod->end_date->copy()->subDays(2) <= $currentDate) {
+        $salaryDate = Carbon::parse($companyPreviousPeriod->salary_date);
+        if ($companyPreviousPeriod && $salaryDate->copy()->subDays(2) <= $currentDate) {
             $data['company_id'] = $company->id;
             $data['company_period_number'] = $companyPreviousPeriod->company_period_number + 1;
             $data['type'] = $companyPreviousPeriod->type;

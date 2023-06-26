@@ -114,6 +114,11 @@ class Employee extends Model
         return $this->hasMany(Leave::class);
     }
 
+    public function yearToDate()
+    {
+        return $this->hasOne(EmployeeYearToDate::class);
+    }
+
     public function getSickLeaveAttribute(): float
     {
         return $this->salaryComputation->available_sick_leaves;

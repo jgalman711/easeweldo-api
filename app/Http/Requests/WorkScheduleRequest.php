@@ -8,7 +8,7 @@ class WorkScheduleRequest extends BaseRequest
 {
     public function rules(): array
     {
-        $companyId = $this->work_schedule->company_id;
+        $companyId = optional($this->work_schedule)->company_id;
         return [
             'name' => [
                 'required',
