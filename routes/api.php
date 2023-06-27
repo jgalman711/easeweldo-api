@@ -52,13 +52,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {
         Route::resource('companies', CompanyController::class)->only('view', 'update');
         Route::prefix('companies/{company}')->group(function () {
-            Route::resource('/payrolls', PayrollController::class)->only('index');
+            Route::resource('/payrolls', PayrollController::class);
             Route::resource('/employees', EmployeeController::class);
             Route::prefix('employees/{employee}')->group(function () {
                 Route::get('/qrcode', [QrController::class, 'show']);
                 Route::post('/clock', [TimeRecordController::class, 'clock']);
                 Route::resource('/leaves', LeaveController::class);
-                Route::resource('/payrolls', PayrollController::class);
                 Route::resource('/time-records', TimeRecordController::class);
                 Route::resource('/work-schedules', EmployeeScheduleController::class);
                 Route::prefix('/salary-computation')->group(function () {
