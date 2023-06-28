@@ -14,9 +14,19 @@ class Company extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const STATUSES = [
+        self::STATUS_ACTIVE,
+        self::STATUS_INACTIVE,
+        self::STATUS_PENDING
+    ];
+
     public const STATUS_ACTIVE = 'active';
 
     public const STATUS_INACTIVE = 'inactive';
+
+    public const STATUS_PENDING = 'pending';
+
+    public const STATUS_TRIAL = 'trial';
 
     public const ABSOLUTE_STORAGE_PATH = 'public/companies/images';
 
