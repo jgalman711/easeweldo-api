@@ -27,6 +27,7 @@ class RegisterController extends BaseController
         $user->assignRole($role);
 
         $success['token'] =  $user->createToken(env('APP_NAME'))->plainTextToken;
+        $success['user'] = $user;
         $success['company_name'] = $company->name;
         return $this->sendResponse($success, 'Company registered successfully.');
     }
