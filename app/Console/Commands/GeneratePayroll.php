@@ -21,20 +21,20 @@ class GeneratePayroll extends Command
         $payrollService = app()->make(PayrollService::class);
         $searchDate = Carbon::now()->subDay()->format('Y-m-d');
         $periods = Period::where('end_date', $searchDate)->get();
-        $errors = [];
         foreach ($periods as $period) {
             $employees = $period->company->employees;
             foreach ($employees as $employee) {
                 try {
                     DB::beginTransaction();
                     $payrollService->generate($period, $employee);
+                    $this->info("Processed payroll for employee {$employee->fullName}");
                     DB::commit();
                 } catch (Exception $e) {
-                    array_push($errors, [
+                    $errors[] = [
                         'employee_id' => $employee->id,
                         'employee_full_name' => $employee->fullName,
                         'error' => $e->getMessage()
-                    ]);
+                    ];
                     $this->error($e->getMessage());
                     DB::rollBack();
                 }

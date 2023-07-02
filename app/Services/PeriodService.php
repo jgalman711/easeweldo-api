@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Company;
 use App\Models\Period;
+use App\Models\Setting;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
@@ -55,8 +56,8 @@ class PeriodService
 
         $data['status'] = Period::STATUS_PENDING;
         $data['company_id'] = $company->id;
-        $data['company_period_number'] = $companyPreviousPeriod
-            ? $companyPreviousPeriod->company_period_number + 1
+        $data['company_period_id'] = $companyPreviousPeriod
+            ? $companyPreviousPeriod->company_period_id + 1
             : 1;
         return Period::create($data);
     }
@@ -65,10 +66,17 @@ class PeriodService
     {
         $currentDate = Carbon::now()->toDateString();
         $companyPreviousPeriod = $company->periods()->latest()->first();
-        $salaryDate = Carbon::parse($companyPreviousPeriod->salary_date);
+        if ($companyPreviousPeriod) {
+            $salaryDate = Carbon::parse($companyPreviousPeriod->salary_date);
+        } else {
+            $settings = Setting::where('company_id', $company->id)->first();
+            throw_unless($settings, new Exception("No settings found for {$company->name}"));
+            $salaryDate = $this->convertSalaryDayToDate($settings->salary_day, $settings->period_cycle);
+            return $this->initializeFromSalaryDate($company, $salaryDate, $settings->period_cycle);
+        }
         if ($companyPreviousPeriod && $salaryDate->copy()->subDays(2) <= $currentDate) {
             $data['company_id'] = $company->id;
-            $data['company_period_number'] = $companyPreviousPeriod->company_period_number + 1;
+            $data['company_period_id'] = $companyPreviousPeriod->company_period_id + 1;
             $data['type'] = $companyPreviousPeriod->type;
             $data['status'] = Period::STATUS_PENDING;
             if ($data['type'] == Period::TYPE_SEMI_MONTHLY) {
@@ -142,7 +150,8 @@ class PeriodService
                 break;
             }
         }
-        if (!$this->salaryDate) {
+
+        if (!isset($salaryDate)) {
             $this->currentMonth += 1;
             if ($this->currentMonth > 12) {
                 $this->currentMonth = 1;

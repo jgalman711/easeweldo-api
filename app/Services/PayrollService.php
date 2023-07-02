@@ -9,6 +9,7 @@ use App\Models\Period;
 use App\Services\Contributions\PagIbigService;
 use App\Services\Contributions\PhilHealthService;
 use App\Services\Contributions\SSSService;
+use Carbon\Carbon;
 use Exception;
 
 class PayrollService
@@ -29,6 +30,8 @@ class PayrollService
 
     protected const YTD_SUFFIX = "_ytd";
 
+    protected const SIXTY_MINUTES = 60;
+
     protected $timeRecordService;
 
     protected $pagIbigService;
@@ -46,6 +49,8 @@ class PayrollService
     protected $employeeYTD;
 
     protected $salaryData;
+
+    protected $settings;
 
     protected $timesheet;
 
@@ -67,7 +72,7 @@ class PayrollService
 
     public function generate(Period $period, Employee $employee, array $data = null): Payroll
     {
-        $payrollCycle = $employee->company->setting->period_cycle;
+        $this->settings = $employee->company->setting;
         $this->employeeYTD = $employee->yearToDate()->firstOrNew();
         $this->salaryData = $employee->salaryComputation;
 
@@ -89,16 +94,17 @@ class PayrollService
             'dateFrom' => $period->end_date
         ])->get();
 
-        if ($this->timesheet->isNotEmpty()) {
-            // Time records are optional. It can be csv or from the attendance record.
-            $this->calculateAttendanceRecords();
-        } else {
-            $this->payroll->basic_salary = $this->salaryData->basic_salary / self::CYCLE_DIVISOR[$payrollCycle];
-        }
+        $this->payroll->basic_salary
+            = $this->salaryData->basic_salary
+            / self::CYCLE_DIVISOR[$this->settings->period_cycle];
+
+        throw_if($this->timesheet->isEmpty(), new Exception('Time records not found.'));
+
+        $this->calculateAttendanceRecords();
 
         self::setPayrollHolidays();
         self::setPayrollContributions();
-        self::setPayrollCompensations($data, $payrollCycle);
+        self::setPayrollCompensations($data, $this->settings->period_cycle);
 
         $this->payroll->gross_income = $this->payroll->basic_salary;
         $this->payroll->gross_income_ytd = $this->employeeYTD->gross_income + $this->payroll->gross_income;
@@ -107,7 +113,10 @@ class PayrollService
             + $this->payroll->total_commissions
             - $this->payroll->total_contributions;
 
-        $this->payroll->withheld_tax = $this->taxService->compute($this->payroll->taxable_income, $payrollCycle);
+        $this->payroll->withheld_tax = $this->taxService->compute(
+                $this->payroll->taxable_income,
+                $this->settings->period_cycle
+            );
         $this->payroll->withheld_tax = $this->employeeYTD->withheld_tax + $this->payroll->withheld_tax;
         $this->payroll->net_income = $this->payroll->taxable_income
             - $this->payroll->withheld_tax
@@ -120,39 +129,68 @@ class PayrollService
 
     private function calculateAttendanceRecords(): void
     {
+        $absentMinutes = 0;
+        $lateMinutes = 0;
+        $underMinutes = 0;
+        $overtimeMinutes = 0;
+        $minutesWorked = 0;
         foreach ($this->timesheet as $record) {
-            dd($record->expected_clock_in);
-            // $expectedClockIn = Carbon::parse($timeRecord->expected_clock_in);
-            // $expectedClockOut = Carbon::parse($timeRecord->expected_clock_out);
-            // $clockIn = Carbon::parse($timeRecord->clock_in);
-            // $clockOut = Carbon::parse($timeRecord->clock_out);
-            // $expectedWorkedHours = $expectedClockIn->diffInHours($expectedClockOut);
-            // $totalExpectedWorkedHours += $expectedWorkedHours;
-            // if (!$timeRecord->clock_in && !$timeRecord->clock_out) {
-            //     $absences ++;
-            //     $absentHours += $expectedWorkedHours;
-            //     $leaveHours += $this->calculateLeaveHours($leaves, $expectedWorkedHours, $expectedClockIn);
-            // } else {
-            //     $lateMinutes += $clockIn->gt($expectedClockIn)
-            //         && $clockIn->diffInMinutes($expectedClockIn) > $settings->grace_period
-            //         ? $clockIn->diffInMinutes($expectedClockIn) : 0;
-            //     $undertimeMinutes += $clockOut->lt($expectedClockOut)
-            //         ? $clockOut->diffInMinutes($expectedClockOut) : 0;
-            //     $overtimeMinutes += $clockOut->gt($expectedClockOut)
-            //         && $clockOut->diffInMinutes($expectedClockOut) > $settings->minimum_overtime
-            //         ? $clockOut->diffInMinutes($expectedClockOut) : 0;
-            //     $hoursWorkedMinutes += $clockIn->diffInMinutes($clockOut);
-            // }
+            $expectedClockIn = Carbon::parse($record->expected_clock_in);
+            $expectedClockOut = Carbon::parse($record->expected_clock_out);
+            $clockIn = Carbon::parse($record->clock_in);
+            $clockOut = Carbon::parse($record->clock_out);
+            $minutesWorked += $clockIn->diffInMinutes($clockOut);
+            $expectedClockIn->addMinutes($this->settings->grace_period);
+            if (!$record->clock_in && !$record->clock_out) {
+                $absentMinutes += $this->salaryData->working_hours_per_day * self::SIXTY_MINUTES;
+            } else {
+                $lateMinutes += $clockIn->gt($expectedClockIn)
+                    ? $clockIn->diffInMinutes($expectedClockIn)
+                    : 0;
+
+                $underMinutes += $clockOut->lt($expectedClockOut)
+                    ? $clockOut->diffInMinutes($expectedClockOut)
+                    : 0;
+
+                $expectedClockOut->addMinutes($this->settings->minimum_overtime);
+                $overtimeMinutes += $clockOut->gt($expectedClockOut)
+                    ? $clockOut->diffInMinutes($expectedClockOut)
+                    : 0;
+            }
         }
+        $this->payroll->absent_minutes = $absentMinutes;
+        $this->payroll->absent_deductions = $absentMinutes / self::SIXTY_MINUTES * $this->salaryData->hourly_rate;
+        $this->payroll->absent_deductions_ytd
+            = $this->payroll->absent_deductions
+            + $this->employeeYTD->absent_deductions;
+
+        $this->payroll->late_minutes = $lateMinutes;
+        $this->payroll->late_deductions = $lateMinutes / self::SIXTY_MINUTES * $this->salaryData->hourly_rate;
+        $this->payroll->late_deductions_ytd
+            = $this->payroll->late_deductions
+            + $this->employeeYTD->late_deductions;
+
+        $this->payroll->undertime_minutes = $underMinutes;
+        $this->payroll->undertime_deductions = $underMinutes / self::SIXTY_MINUTES * $this->salaryData->hourly_rate;
+        $this->payroll->undertime_deductions_ytd
+            = $this->payroll->undertime_deductions
+            + $this->employeeYTD->undertime_deductions;
+
+        $this->payroll->overtime_minutes = $overtimeMinutes;
+        $this->payroll->overtime_pay = $overtimeMinutes / self::SIXTY_MINUTES * $this->salaryData->hourly_rate;
+        $this->payroll->overtime_pay_ytd = $this->payroll->overtime_pay + $this->employeeYTD->overtime_pay;
+
+        $this->payroll->expected_hours_worked = $this->timesheet->count() * $this->salaryData->working_hours_per_day;
+        $this->payroll->hours_worked = $minutesWorked / self::SIXTY_MINUTES;
     }
 
-    private function setPayrollCompensations(array $data, string $payrollCycle): void
+    private function setPayrollCompensations(array $data): void
     {
         foreach (self::COMPENSATION_TYPES as $compensationType) {
             if (empty($data[$compensationType])) {
                 $compensations = $this->salaryData->$compensationType;
                 foreach($compensations as &$compensation) {
-                    $compensation['pay'] /= self::CYCLE_DIVISOR[$payrollCycle];
+                    $compensation['pay'] /= self::CYCLE_DIVISOR[$this->settings->period_cycle];
                 }
                 $this->payroll->$compensationType = $compensations;
             } else {

@@ -71,6 +71,7 @@ class TimeRecordController extends Controller
                 'expected_clock_in' => $currentDate,
                 'attendance_status' => null
             ]);
+
             $timeRecord->company_id = $company->id;
             if (!$timeRecord) {
                 $timeRecord = new TimeRecord();

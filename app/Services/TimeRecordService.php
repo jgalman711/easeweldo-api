@@ -60,8 +60,8 @@ class TimeRecordService
         $dayClockOutProperty = strtolower($clockOutDate->dayName) . self::CLOCK_OUT_TIME_SUFFIX;
 
         return [
-            $workSchedule->$dayClockInProperty,
-            $workSchedule->$dayClockOutProperty
+            'expected_clock_in' => $workSchedule->$dayClockInProperty,
+            'expected_clock_out' => $workSchedule->$dayClockOutProperty
         ];
     }
 
@@ -114,5 +114,18 @@ class TimeRecordService
             'restDay' => $restDay,
             'leaves' => $leaves->count()
         ];
+    }
+
+    public function setExpectedScheduleOf(Employee $employee): TimeRecord
+    {
+        $expectedSchedule = $this->getExpectedScheduleOf($employee);
+        $expectedSchedule['expected_clock_in'] = Carbon::parse($expectedSchedule['expected_clock_in'])
+            ->setDate(now()->year, now()->month, now()->day);
+        $expectedSchedule['expected_clock_out'] = Carbon::parse($expectedSchedule['expected_clock_out'])
+            ->setDate(now()->year, now()->month, now()->day);
+        return TimeRecord::updateOrCreate($expectedSchedule, [
+            'company_id' => $employee->company_id,
+            'employee_id' => $employee->id
+        ]);
     }
 }
