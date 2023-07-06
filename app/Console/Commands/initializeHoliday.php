@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Http;
 
 class InitializeHoliday extends Command{
 
-    protected $signature =  'app:initialize-holiday {year}';
+    protected $signature =  'app:initialize-holiday {year?}';
 
     protected $description = 'Fetches Philippine holidays from Calendarific API';
 
@@ -16,7 +16,7 @@ class InitializeHoliday extends Command{
     {
         $apiUrl = env('CALENDARIFIC_API_URL');
         $apiKey = env('CALENDARIFIC_API_KEY');
-        $year = $this->argument('year');
+        $year = $this->argument('year') ?? date('Y');
         $response = Http::get("{$apiUrl}?api_key={$apiKey}&country=PH&year={$year}");
 
         $data = $response->json();

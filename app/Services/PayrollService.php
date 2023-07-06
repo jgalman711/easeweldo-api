@@ -10,6 +10,7 @@ use App\Services\Contributions\PagIbigService;
 use App\Services\Contributions\PhilHealthService;
 use App\Services\Contributions\SSSService;
 use Carbon\Carbon;
+use DateTime;
 use Exception;
 
 class PayrollService
@@ -127,7 +128,7 @@ class PayrollService
         return $this->payroll;
     }
 
-    private function calculateAttendanceRecords(): void
+    public function calculateAttendanceRecords(): void
     {
         $absentMinutes = 0;
         $lateMinutes = 0;
@@ -135,12 +136,14 @@ class PayrollService
         $overtimeMinutes = 0;
         $minutesWorked = 0;
         foreach ($this->timesheet as $record) {
-            $expectedClockIn = Carbon::parse($record->expected_clock_in);
-            $expectedClockOut = Carbon::parse($record->expected_clock_out);
+            $expectedClockIn = $record->expected_clock_in ? Carbon::parse($record->expected_clock_in) : null;
+            $expectedClockOut = $record->expected_clock_out ? Carbon::parse($record->expected_clock_out) : null;
             $clockIn = Carbon::parse($record->clock_in);
             $clockOut = Carbon::parse($record->clock_out);
             $minutesWorked += $clockIn->diffInMinutes($clockOut);
-            $expectedClockIn->addMinutes($this->settings->grace_period);
+            if ($expectedClockIn) {
+                $expectedClockIn->addMinutes($this->settings->grace_period);
+            }
             if (!$record->clock_in && !$record->clock_out) {
                 $absentMinutes += $this->salaryData->working_hours_per_day * self::SIXTY_MINUTES;
             } else {
@@ -152,7 +155,10 @@ class PayrollService
                     ? $clockOut->diffInMinutes($expectedClockOut)
                     : 0;
 
-                $expectedClockOut->addMinutes($this->settings->minimum_overtime);
+                if ($expectedClockOut) {
+                    $expectedClockOut->addMinutes($this->settings->minimum_overtime);
+                }
+
                 $overtimeMinutes += $clockOut->gt($expectedClockOut)
                     ? $clockOut->diffInMinutes($expectedClockOut)
                     : 0;
@@ -206,19 +212,18 @@ class PayrollService
 
     private function setPayrollHolidays(): void
     {
-        $regularHolidays = Holiday::whereBetween('date', [
-                $this->payroll->period->start_date,
-                $this->payroll->period->end_date
-            ])
-            ->where('type', Holiday::REGULAR_HOLIDAY)
-            ->count();
+        $expectedClockInDates = $this->timesheet->pluck('expected_clock_in')->map(function ($dateTimeString) {
+            $dateTime = new DateTime($dateTimeString);
+            return $dateTime->format('Y-m-d');
+        });
 
-        $specialHolidays = Holiday::whereBetween('date', [
-                $this->payroll->period->start_date,
-                $this->payroll->period->end_date
-            ])
-            ->where('type', Holiday::SPECIAL_HOLIDAY)
-            ->count();
+        $holidays = Holiday::whereBetween('date', [
+            $this->payroll->period->start_date,
+            $this->payroll->period->end_date
+        ])->whereNotIn('date', $expectedClockInDates);
+
+        $regularHolidays = $holidays->where('type', Holiday::REGULAR_HOLIDAY)->count();
+        $specialHolidays = $holidays->where('type', Holiday::SPECIAL_HOLIDAY)->count();
 
         $regularHolidayWorkedPay = $this->payroll->regular_holiday_hours_worked
             * $this->salaryData->hourly_rate

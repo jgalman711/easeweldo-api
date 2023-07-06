@@ -116,13 +116,14 @@ class TimeRecordService
         ];
     }
 
-    public function setExpectedScheduleOf(Employee $employee): TimeRecord
+    public function setExpectedScheduleOf(Employee $employee, Carbon $day = null): TimeRecord
     {
+        $day = $day ?? now();
         $expectedSchedule = $this->getExpectedScheduleOf($employee);
         $expectedSchedule['expected_clock_in'] = Carbon::parse($expectedSchedule['expected_clock_in'])
-            ->setDate(now()->year, now()->month, now()->day);
+            ->setDate($day->year, $day->month, $day->day);
         $expectedSchedule['expected_clock_out'] = Carbon::parse($expectedSchedule['expected_clock_out'])
-            ->setDate(now()->year, now()->month, now()->day);
+            ->setDate($day->year, $day->month, $day->day);
         return TimeRecord::updateOrCreate($expectedSchedule, [
             'company_id' => $employee->company_id,
             'employee_id' => $employee->id

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Services\TimeRecordService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
 
