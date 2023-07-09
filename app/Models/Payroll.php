@@ -69,7 +69,8 @@ class Payroll extends Model
         'income_tax',
         'income_tax_ytd',
         'net_salary',
-        'net_income_ytd'
+        'net_income_ytd',
+        'remarks'
     ];
 
     public function getLeavesAttribute($value)

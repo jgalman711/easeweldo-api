@@ -4,13 +4,13 @@ namespace App\Services;
 
 use App\Models\Employee;
 use App\Models\Holiday;
+use App\Models\Leave;
 use App\Models\Payroll;
 use App\Models\Period;
 use App\Services\Contributions\PagIbigService;
 use App\Services\Contributions\PhilHealthService;
 use App\Services\Contributions\SSSService;
 use Carbon\Carbon;
-use DateTime;
 use Exception;
 
 class PayrollService
@@ -51,6 +51,8 @@ class PayrollService
 
     protected $salaryData;
 
+    protected $data;
+
     protected $settings;
 
     protected $timesheet;
@@ -75,6 +77,7 @@ class PayrollService
 
     public function generate(Period $period, Employee $employee, array $data = null): Payroll
     {
+        $this->data = $data;
         $this->settings = $employee->company->setting;
         $this->employeeYTD = $employee->yearToDate()->firstOrNew();
         $this->salaryData = $employee->salaryComputation;
@@ -92,14 +95,14 @@ class PayrollService
             $data
         );
 
+        $this->payroll->basic_salary
+            = $this->salaryData->basic_salary
+            / self::CYCLE_DIVISOR[$this->settings->period_cycle];
+
         $this->timesheet = $employee->timeRecords()->byRange([
             'dateTo' => $period->start_date,
             'dateFrom' => $period->end_date
         ])->get();
-
-        $this->payroll->basic_salary
-            = $this->salaryData->basic_salary
-            / self::CYCLE_DIVISOR[$this->settings->period_cycle];
 
         throw_if($this->timesheet->isEmpty(), new Exception('Time records not found.'));
 
@@ -110,11 +113,17 @@ class PayrollService
 
         self::calculateAttendanceRecords();
         self::setPayrollContributions();
-        self::setPayrollCompensations($data, $this->settings->period_cycle);
+        self::setPayrollCompensations();
 
-        $this->payroll->gross_income = $this->payroll->basic_salary;
+        $this->payroll->gross_income = $this->payroll->basic_salary
+            - $this->payroll->absent_deductions
+            - $this->payroll->undertime_deductions
+            - $this->payroll->late_deductions
+            + $this->payroll->overtime_pay;
         $this->payroll->gross_income_ytd = $this->employeeYTD->gross_income + $this->payroll->gross_income;
+
         $this->payroll->taxable_income = $this->payroll->gross_income
+            + $this->payroll->leaves_pay
             + $this->payroll->total_allowances
             + $this->payroll->total_commissions
             - $this->payroll->total_contributions;
@@ -123,6 +132,8 @@ class PayrollService
                 $this->payroll->taxable_income,
                 $this->settings->period_cycle
             );
+        $this->payroll->withheld_tax_ytd = $this->employeeYTD->withheld_tax_ytd + $this->payroll->withheld_tax;
+
         $this->payroll->withheld_tax = $this->employeeYTD->withheld_tax + $this->payroll->withheld_tax;
         $this->payroll->net_income = $this->payroll->taxable_income
             - $this->payroll->withheld_tax
@@ -140,6 +151,8 @@ class PayrollService
         $underMinutes = 0;
         $overtimeMinutes = 0;
         $minutesWorked = 0;
+        $leavePay = 0;
+        $leaves = [];
 
         foreach (Holiday::HOLIDAY_TYPES as $type) {
             $holidaysHours[$type] = 0;
@@ -162,29 +175,47 @@ class PayrollService
                 }
                 $expectedClockIn->addMinutes($this->settings->grace_period);
             }
+
             if (!$record->clock_in && !$record->clock_out) {
                 $absentMinutes += $this->salaryData->working_hours_per_day * self::SIXTY_MINUTES;
             } else {
                 if ($holiday) {
                     $holidaysHoursWorked[$holiday->type] += $clockIn->diffInHours($clockOut);
                 }
-                $lateMinutes += $clockIn->gt($expectedClockIn)
-                    ? $clockIn->diffInMinutes($expectedClockIn)
-                    : 0;
 
-                $underMinutes += $clockOut->lt($expectedClockOut)
-                    ? $clockOut->diffInMinutes($expectedClockOut)
-                    : 0;
+                if ($expectedClockIn && $expectedClockOut) {
+                    $lateMinutes += $clockIn->gt($expectedClockIn)
+                        ? $clockIn->diffInMinutes($expectedClockIn)
+                        : 0;
 
-                if ($expectedClockOut) {
-                    $expectedClockOut->addMinutes($this->settings->minimum_overtime);
+                    $underMinutes += $clockOut->lt($expectedClockOut)
+                        ? $clockOut->diffInMinutes($expectedClockOut)
+                        : 0;
+
+                    if ($expectedClockOut) {
+                        $expectedClockOut->addMinutes($this->settings->minimum_overtime);
+                    }
+
+                    $overtimeMinutes += $clockOut->gt($expectedClockOut)
+                        ? $clockOut->diffInMinutes($expectedClockOut)
+                        : 0;
                 }
+            }
 
-                $overtimeMinutes += $clockOut->gt($expectedClockOut)
-                    ? $clockOut->diffInMinutes($expectedClockOut)
-                    : 0;
+            if (isset($this->data['leaves']) && $this->data['leaves']) {
+                foreach ($this->data['leaves'] as $leave) {
+                    if ($record->expected_clock_in && $leave['date'] == $formattedExpectedClockIn) {
+                        $leave[Leave::PAY] = $leave[Leave::HOURS] * $this->salaryData->hourly_rate;
+                        $leavePay += $leave[Leave::PAY];
+                        $leaves[] = $leave;
+                    }
+                }
             }
         }
+
+        $this->payroll->leaves = $leaves;
+        $this->payroll->leaves_pay = $leavePay;
+        $this->payroll->leaves_pay_ytd = $this->payroll->leaves_pay + $this->employeeYTD->late_deductions;
 
         $this->payroll->regular_holiday_hours = $holidaysHours[Holiday::REGULAR_HOLIDAY];
         $this->payroll->regular_holiday_hours_worked = $holidaysHoursWorked[Holiday::REGULAR_HOLIDAY];
@@ -238,17 +269,17 @@ class PayrollService
         $this->payroll->hours_worked = $minutesWorked / self::SIXTY_MINUTES;
     }
 
-    private function setPayrollCompensations(array $data): void
+    private function setPayrollCompensations(): void
     {
         foreach (self::COMPENSATION_TYPES as $compensationType) {
-            if (empty($data[$compensationType])) {
-                $compensations = $this->salaryData->$compensationType;
+            if (empty($this->data[$compensationType])) {
+                $compensations = $this->salaryData->{$compensationType};
                 foreach($compensations as &$compensation) {
                     $compensation['pay'] /= self::CYCLE_DIVISOR[$this->settings->period_cycle];
                 }
-                $this->payroll->$compensationType = $compensations;
+                $this->payroll->{$compensationType} = $compensations;
             } else {
-                $this->payroll->compensationType = $data[$compensationType];
+                $this->payroll->{$compensationType} = $this->data[$compensationType];
             }
             $this->payroll->{self::TOTAL_PREFIX . $compensationType}
                 = collect($this->payroll->$compensationType)->sum('pay');

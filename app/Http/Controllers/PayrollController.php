@@ -47,10 +47,10 @@ class PayrollController extends Controller
         return $this->sendResponse(new BaseResource($payroll), 'Payroll retrieved successfully.');
     }
     
-    public function store(PayrollRequest $request, Company $company, int $employeeId): JsonResponse
+    public function store(PayrollRequest $request, Company $company): JsonResponse
     {
         $input = $request->validated();
-        $employee = $company->getEmployeeById($employeeId);
+        $employee = $company->getEmployeeById($request->employee_id);
         $period = $company->period($request->period_id);
         $payroll = $this->payrollService->generate($period, $employee, $input);
         return $this->sendResponse(new BaseResource($payroll), 'Payroll created successfully.');

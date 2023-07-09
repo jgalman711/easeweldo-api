@@ -7,6 +7,7 @@ class PayrollRequest extends BaseRequest
     public function rules(): array
     {
         return [
+            'employee_id' => 'exists:employees,id',
             'period_id' => 'required|exists:periods,id',
             'description' => self::NULLABLE_STRING,
             'overtime_minutes' => self::NULLABLE_NUMERIC,
@@ -28,6 +29,7 @@ class PayrollRequest extends BaseRequest
             'other_compensations' => self::PRESENT_NULLABLE_ARRAY,
             'other_compensations.*.type' => self::NULLABLE_STRING,
             'other_compensations.*.pay' => self::NULLABLE_NUMERIC,
+            'remarks' => self::NULLABLE_STRING
         ];
     }
 }

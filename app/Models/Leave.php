@@ -18,6 +18,18 @@ class Leave extends Model
     public const TYPE_VACATION_LEAVE = 'vacation_leave';
     public const TYPE_EMERGENCY_LEAVE = 'emergency_leave';
 
+    public const TYPE = 'type';
+    public const HOURS = 'hours';
+    public const DATE = 'date';
+    public const PAY = 'pay';
+
+    public const ATTRIBUTES = [
+        self::TYPE,
+        self::HOURS,
+        self::DATE,
+        self::PAY
+    ];
+
     protected $fillable = [
         'company_id',
         'employee_id',
