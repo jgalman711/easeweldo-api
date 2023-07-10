@@ -55,24 +55,4 @@ class PayrollController extends Controller
         $payroll = $this->payrollService->generate($period, $employee, $input);
         return $this->sendResponse(new BaseResource($payroll), 'Payroll created successfully.');
     }
-
-    public function update(PayrollRequest $request, Company $company, int $employeeId, int $payrollId): JsonResponse
-    {
-        $input = $request->validated();
-        $employee = $company->getEmployeeById($employeeId);
-        $input['company_id'] = $company->id;
-        $input['employee_id'] = $employee->id;
-        $payroll = $employee->payrolls()->where('id', $payrollId)->first();
-        $payroll->update($input);
-        return $this->sendResponse(new BaseResource($payroll), 'Payroll updated successfully.');
-    }
-
-    public function destroy(Company $company, Payroll $payroll): JsonResponse
-    {
-        if (!$company->payrolls->contains($payroll)) {
-            return $this->sendError('Payroll not found.');
-        }
-        $payroll->delete();
-        return $this->sendResponse(new BaseResource($payroll), 'Payroll deleted successfully.');
-    }
 }

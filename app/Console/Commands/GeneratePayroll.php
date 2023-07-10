@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Period;
 use App\Services\PayrollService;
+use App\Services\PeriodService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
@@ -19,6 +20,7 @@ class GeneratePayroll extends Command
     {
         $this->info("Processing payroll of company");
         $payrollService = app()->make(PayrollService::class);
+        $periodService = app()->make(PeriodService::class);
         $searchDate = Carbon::now()->subDay()->format('Y-m-d');
         $searchDate = '2023-07-10';
         $periods = Period::where('end_date', $searchDate)->get();
@@ -40,6 +42,7 @@ class GeneratePayroll extends Command
                     DB::rollBack();
                 }
             }
+            $periodService->calculatePeriod($period);
         }
     }
 }

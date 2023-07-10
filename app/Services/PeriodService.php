@@ -31,6 +31,17 @@ class PeriodService
         $this->salaryDate = null;
     }
 
+    public function calculatePeriod(Period $period): void
+    {
+        $payrolls = $period->payrolls();
+        $period->employees_count = $payrolls->count();
+        $period->employees_net_pay = $payrolls->sum('net_income');
+        $period->withheld_taxes = $payrolls->sum('withheld_tax');
+        $period->total_contributions = $payrolls->sum('total_contributions');
+        $period->payroll_cost = $period->employees_net_pay + $period->withheld_taxes + $period->total_contributions;
+        $period->save();
+    }
+
     public function initializeFromSalaryDate(Company $company, DateTime $salaryDate, string $periodCycle): Period
     {
         $salaryDate = Carbon::parse($salaryDate);

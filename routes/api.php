@@ -52,7 +52,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {
         Route::resource('companies', CompanyController::class)->only('view', 'update');
         Route::prefix('companies/{company}')->group(function () {
-            Route::resource('/payrolls', PayrollController::class);
+            Route::resource('/payrolls', PayrollController::class)->only(['view', 'show', 'store']);
             Route::resource('/employees', EmployeeController::class);
             Route::prefix('employees/{employee}')->group(function () {
                 Route::get('/qrcode', [QrController::class, 'show']);
