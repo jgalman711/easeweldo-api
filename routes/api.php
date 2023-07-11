@@ -72,7 +72,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('/dashboard', [DashboardController::class, 'index']);
             Route::get('/settings', [SettingController::class, 'index']);
             Route::post('/settings', [SettingController::class, 'store']);
-            Route::post('/generate-payroll', [PayrollGeneratorController::class, 'store']);
         });
     });
     Route::get('/user/qrcode', [UserController::class, 'qrcode']);

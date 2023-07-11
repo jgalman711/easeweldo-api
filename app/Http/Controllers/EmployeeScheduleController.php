@@ -14,15 +14,20 @@ use Illuminate\Http\Request;
 
 class EmployeeScheduleController extends Controller
 {
-    use Filter;
+    public function __construct()
+    {
+        $this->setCacheIdentifier('employee-schedules');
+    }
 
     public function index(Request $request, Company $company, int $employeeId)
     {
         try {
-            $employee = $company->getEmployeeById($employeeId);
-            $employeeSchedule = $this->applyFilters($request, $employee->schedules()->withPivot('start_date'), [
-                'name'
-            ]);
+            $employeeSchedule = $this->remember($company, function () use ($request, $company, $employeeId) {
+                $employee = $company->getEmployeeById($employeeId);
+                return $this->applyFilters($request, $employee->schedules()->withPivot('start_date'), [
+                    'name'
+                ]);
+            }, $request);
             return $this->sendResponse(
                 EmployeeScheduleResource::collection($employeeSchedule),
                 'Employee schedules retrieved successfully.'
@@ -40,6 +45,7 @@ class EmployeeScheduleController extends Controller
             $company->getWorkScheduleById($request->work_schedule_id);
             $input['employee_id'] = $employee->id;
             $employeeSchedule = EmployeeSchedule::firstOrCreate($input);
+            $this->forget($company);
             return $this->sendResponse(new BaseResource($employeeSchedule), 'Employee schedule created successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
@@ -49,8 +55,10 @@ class EmployeeScheduleController extends Controller
     public function show(Company $company, int $employeeId, int $scheduleId): JsonResponse
     {
         try {
-            $employee = $company->getEmployeeById($employeeId);
-            $employeeSchedule = $employee->schedules->where('id', $scheduleId);
+            $employeeSchedule = $this->remember($company, function () use ($company, $employeeId, $scheduleId) {
+                $employee = $company->getEmployeeById($employeeId);
+                return $employee->schedules->where('id', $scheduleId);
+            }, $scheduleId);
             return $this->sendResponse(
                 new BaseResource($employeeSchedule),
                 'Employee schedule retrieved successfully.'
@@ -65,6 +73,7 @@ class EmployeeScheduleController extends Controller
         try {
             $employee = $company->getEmployeeById($employeeId);
             $employeeSchedule = $employee->schedules->where('id', $scheduleId);
+            $this->forget($company, $scheduleId);
             return $this->sendResponse(
                 new BaseResource($employeeSchedule),
                 'Employee schedule updated successfully.'
@@ -79,6 +88,7 @@ class EmployeeScheduleController extends Controller
         try {
             $employee = $company->getEmployeeById($employeeId);
             $employee->schedules()->detach($scheduleId);
+            $this->forget($company, $scheduleId);
             return response()->json([
                 'message' =>  'Employee schedule deleted successfully.'
             ], 200);
