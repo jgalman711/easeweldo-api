@@ -8,7 +8,6 @@ use App\Models\Company;
 use App\Models\Employee;
 use App\Services\EmployeeService;
 use App\Services\UserService;
-use App\Traits\Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -16,8 +15,6 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class EmployeeController extends Controller
 {
-    use Filter;
-
     protected const PUBLIC_PATH = 'public/';
 
     protected $employeeService;
@@ -28,17 +25,20 @@ class EmployeeController extends Controller
     {
         $this->employeeService = $employeeService;
         $this->userService = $userService;
+        $this->setCacheIdentifier('employees');
     }
     
     public function index(Request $request, Company $company): JsonResponse
     {
-        $employees = $this->applyFilters($request, $company->employees()->with('user'), [
-            'first_name',
-            'last_name',
-            'job_title',
-            'employment_status',
-            'department'
-        ]);
+        $employees = $this->remember($company, function () use ($request, $company) {
+            return $this->applyFilters($request, $company->employees()->with('user'), [
+                'first_name',
+                'last_name',
+                'job_title',
+                'employment_status',
+                'department'
+            ]);
+        }, $request);
         return $this->sendResponse($employees, 'Employees retrieved successfully.');
     }
 
@@ -52,13 +52,16 @@ class EmployeeController extends Controller
             $input['profile_picture'] = Employee::STORAGE_PATH . $filename;
         }
         $employee = $this->employeeService->create($input);
+        $this->forget($company);
         $message = $this->employeeService->getEmployeeTemporaryCredentials();
         return $this->sendResponse(new BaseResource($employee), $message);
     }
 
     public function show(Company $company, int $employeeId): JsonResponse
     {
-        $employee = $company->getEmployeeById($employeeId);
+        $employee = $this->remember($company, function () use ($company, $employeeId) {
+            return $company->getEmployeeById($employeeId);
+        }, $employeeId);
         return $this->sendResponse(new BaseResource($employee), 'Employee retrieved successfully.');
     }
 
@@ -93,6 +96,7 @@ class EmployeeController extends Controller
                 'email_address' => $request->email_address
             ]);
         }
+        $this->forget($company, $employee->id);
         return $this->sendResponse(new BaseResource($employee), 'Employee updated successfully.');
     }
 
@@ -100,6 +104,7 @@ class EmployeeController extends Controller
     {
         $employee = $company->getEmployeeById($employeeId);
         $employee->delete();
+        $this->forget($company, $employee->id);
         return $this->sendResponse(new BaseResource($employee), 'Employee deleted successfully.');
     }
 
