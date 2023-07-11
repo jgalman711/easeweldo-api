@@ -11,7 +11,7 @@ trait Cache
 {
     protected $identifier;
 
-    protected const CACHE_DURATION = 3600;
+    protected $cacheDuration = 3600;
 
     public function setCacheIdentifier(string $identifier): void
     {
@@ -24,7 +24,7 @@ trait Cache
             return $closure();
         }
         $cacheKey = $this->makeCacheKey($company->slug, $unique);
-        return FacadesCache::remember($cacheKey, self::CACHE_DURATION, function () use ($closure) {
+        return FacadesCache::remember($cacheKey, $this->cacheDuration, function () use ($closure) {
             return $closure();
         });
     }
