@@ -44,8 +44,10 @@ trait Cache
 
     private function makeCacheKey(string $slug, $unique = null): string
     {
-        $unique = $unique instanceof Request ? $unique->all() : $unique;
-        $unique = "-" . md5(serialize($unique));
+        if ($unique) {
+            $unique = $unique instanceof Request ? $unique->all() : $unique;
+            $unique = "-" . md5(serialize($unique));
+        }
         return "company-{$slug}:{$this->identifier}{$unique}";
     }
 }
