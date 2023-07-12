@@ -7,7 +7,6 @@ use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Models\TimeRecord;
 use App\Services\TimeRecordService;
-use App\Traits\Filter;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -15,8 +14,6 @@ use Illuminate\Http\Request;
 
 class TimeRecordController extends Controller
 {
-    use Filter;
-
     protected $timeRecordService;
 
     public function __construct(TimeRecordService $timeRecordService)
