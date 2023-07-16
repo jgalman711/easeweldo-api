@@ -22,7 +22,6 @@ class GeneratePayroll extends Command
         $payrollService = app()->make(PayrollService::class);
         $periodService = app()->make(PeriodService::class);
         $searchDate = Carbon::now()->subDay()->format('Y-m-d');
-        $searchDate = '2023-07-10';
         $periods = Period::where('end_date', $searchDate)->get();
         foreach ($periods as $period) {
             $employees = $period->company->employees;
