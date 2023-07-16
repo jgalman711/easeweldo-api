@@ -17,6 +17,7 @@ use App\Http\Controllers\QrController;
 use App\Http\Controllers\SalaryComputationController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TimeRecordController;
+use App\Http\Controllers\TimesheetUploadController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkScheduleController;
 use Illuminate\Support\Facades\Artisan;
@@ -72,6 +73,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('/dashboard', [DashboardController::class, 'index']);
             Route::get('/settings', [SettingController::class, 'index']);
             Route::post('/settings', [SettingController::class, 'store']);
+            Route::post('/timesheet/upload', [TimesheetUploadController::class, 'store']);
         });
     });
     Route::get('/user/qrcode', [UserController::class, 'qrcode']);
