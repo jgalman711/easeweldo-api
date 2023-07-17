@@ -13,7 +13,7 @@ class QrService
     {
         return QrCode::size(self::M_SIZE)
             ->format('png')
-            ->merge('/storage/app/es-logo.jpg')
+            ->merge('/storage/app/qr-logo.png')
             ->errorCorrection('M')
             ->generate(url('api/companies/' . $companyId . '/employees/' . $employeeId . '/clock'));
     }

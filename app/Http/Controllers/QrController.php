@@ -13,12 +13,15 @@ class QrController extends Controller
     public function __construct(QrService $qrService)
     {
         $this->qrService = $qrService;
+        $this->setCacheIdentifier('qr');
     }
 
     public function show(Company $company, int $employeeId): Response
     {
-        $employee = $company->getEmployeeById($employeeId);
-        $data = $this->qrService->generate($company->id, $employee->id);
+        $data = $this->remember($company, function () use ($company, $employeeId) {
+            $employee = $company->getEmployeeById($employeeId);
+            return $this->qrService->generate($company->id, $employee->id);
+        });
         return response($data)->header('Content-type', 'image/png');
     }
 }
