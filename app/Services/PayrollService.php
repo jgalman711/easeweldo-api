@@ -171,7 +171,7 @@ class PayrollService
             $holiday = $this->holidays->where('date', $formattedExpectedClockIn)->first();
             if ($expectedClockIn) {
                 if ($holiday) {
-                    $holidaysHours[$holiday->type] += $expectedClockIn->diffInHours($expectedClockOut);
+                    $holidaysHours[$holiday->simplifiedType] += $expectedClockIn->diffInHours($expectedClockOut);
                 }
                 $expectedClockIn->addMinutes($this->settings->grace_period);
             }
@@ -180,7 +180,7 @@ class PayrollService
                 $absentMinutes += $this->salaryData->working_hours_per_day * self::SIXTY_MINUTES;
             } else {
                 if ($holiday) {
-                    $holidaysHoursWorked[$holiday->type] += $clockIn->diffInHours($clockOut);
+                    $holidaysHoursWorked[$holiday->simplifiedType] += $clockIn->diffInHours($clockOut);
                 }
 
                 if ($expectedClockIn && $expectedClockOut) {
@@ -217,31 +217,7 @@ class PayrollService
         $this->payroll->leaves_pay = $leavePay;
         $this->payroll->leaves_pay_ytd = $this->payroll->leaves_pay + $this->employeeYTD->late_deductions;
 
-        $this->payroll->regular_holiday_hours = $holidaysHours[Holiday::REGULAR_HOLIDAY];
-        $this->payroll->regular_holiday_hours_worked = $holidaysHoursWorked[Holiday::REGULAR_HOLIDAY];
-        $this->payroll->regular_holiday_hours_pay_ytd
-            = $this->payroll->regular_holiday_hours_pay
-            + $this->employeeYTD->regular_holiday_hours_pay;
-        $this->payroll->regular_holiday_hours_pay
-            = ($holidaysHours[Holiday::REGULAR_HOLIDAY] * $this->salaryData->hourly_rate)
-            + (
-                $holidaysHours[Holiday::REGULAR_HOLIDAY]
-                * $this->salaryData->hourly_rate
-                * $this->salaryData->regular_holiday_rate
-            );
-
-        $this->payroll->special_holiday_hours = $holidaysHours[Holiday::SPECIAL_HOLIDAY];
-        $this->payroll->special_holiday_hours_worked = $holidaysHoursWorked[Holiday::SPECIAL_HOLIDAY];
-        $this->payroll->special_holiday_hours_pay_ytd
-            = $this->payroll->special_holiday_hours_pay
-            + $this->employeeYTD->special_holiday_hours_pay;
-        $this->payroll->special_holiday_hours_pay
-            = ($holidaysHours[Holiday::SPECIAL_HOLIDAY] * $this->salaryData->hourly_rate)
-            + (
-                $holidaysHours[Holiday::SPECIAL_HOLIDAY]
-                * $this->salaryData->hourly_rate
-                * $this->salaryData->special_holiday_rate
-            );
+        $this->calculateRegularHolidayPay($holidaysHours, $holidaysHoursWorked);
 
         $this->payroll->absent_minutes = $absentMinutes;
         $this->payroll->absent_deductions = $absentMinutes / self::SIXTY_MINUTES * $this->salaryData->hourly_rate;
@@ -267,6 +243,28 @@ class PayrollService
 
         $this->payroll->expected_hours_worked = $this->timesheet->count() * $this->salaryData->working_hours_per_day;
         $this->payroll->hours_worked = $minutesWorked / self::SIXTY_MINUTES;
+    }
+
+    private function calculateRegularHolidayPay(array $holidaysHours, array $holidaysHoursWorked): void
+    {
+        foreach (Holiday::HOLIDAY_TYPES as $holidayType) {
+            $this->payroll->{$holidayType . "_holiday_hours"} = $holidaysHours[$holidayType];
+            $this->payroll->{$holidayType . "_holiday_hours_pay"}
+                = $this->payroll->{$holidayType . "_holiday_hours"}
+                * $this->salaryData->hourly_rate;
+            $this->payroll->{$holidayType . "_holiday_hours_pay_ytd"}
+                = $this->payroll->{$holidayType . "_holiday_hours_pay"}
+                + $this->employeeYTD->{$holidayType . "_holiday_hours_pay"};
+
+            $this->payroll->{$holidayType . "_holiday_hours_worked"} = $holidaysHoursWorked[$holidayType];
+            $this->payroll->{$holidayType . "_holiday_hours_worked_pay"}
+                = $this->payroll->{$holidayType . "_holiday_hours_worked"}
+                * $this->salaryData->hourly_rate;
+
+            $this->payroll->{$holidayType . "_holiday_hours_worked_pay_ytd"}
+                = $this->payroll->{$holidayType . "_holiday_hours_worked_pay"}
+                + $this->employeeYTD->{$holidayType . "_holiday_hours_worked_pay"};
+        }
     }
 
     private function setPayrollCompensations(): void
