@@ -25,7 +25,7 @@ class PayrollService
         Period::TYPE_MONTHLY => 1,
     ];
 
-    protected const COMPENSATION_TYPES = ['allowances', 'commissions', 'other_compensations'];
+    protected const COMPENSATION_TYPES = ['allowances', 'commissions', 'other_compensations', 'non_taxable_earnings'];
 
     protected const TOTAL_PREFIX = "total_";
 
@@ -137,7 +137,7 @@ class PayrollService
         $this->payroll->withheld_tax = $this->employeeYTD->withheld_tax + $this->payroll->withheld_tax;
         $this->payroll->net_income = $this->payroll->taxable_income
             - $this->payroll->withheld_tax
-            + $this->payroll->total_other_compensations;
+            + $this->payroll->total_non_taxable_earnings;
         $this->payroll->net_income_ytd = $this->employeeYTD->net_income_ytd + $this->payroll->net_income;
 
         $this->payroll->save();
