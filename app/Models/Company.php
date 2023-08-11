@@ -59,6 +59,11 @@ class Company extends Model
         return 'slug';
     }
 
+    public function biometrics(): HasMany
+    {
+        return $this->hasMany(Biometrics::class);
+    }
+
     public function employees(): HasMany
     {
         return $this->HasMany(Employee::class);

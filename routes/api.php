@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\BiometricsController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
@@ -11,7 +12,6 @@ use App\Http\Controllers\EmployeeScheduleController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\PayrollController;
-use App\Http\Controllers\PayrollGeneratorController;
 use App\Http\Controllers\PeriodsController;
 use App\Http\Controllers\QrController;
 use App\Http\Controllers\ReportController;
@@ -69,9 +69,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
                     Route::delete('/', [SalaryComputationController::class, 'delete']);
                 });
             });
+
             Route::resource('/work-schedules', WorkScheduleController::class);
             Route::resource('/periods', PeriodsController::class)->except('store');
             Route::resource('/reports', ReportController::class);
+            Route::resource('/biometrics', BiometricsController::class);
+
             Route::get('/dashboard', [DashboardController::class, 'index']);
             Route::get('/settings', [SettingController::class, 'index']);
             Route::post('/settings', [SettingController::class, 'store']);
