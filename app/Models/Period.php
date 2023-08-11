@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -65,5 +66,39 @@ class Period extends Model
     public function payrolls(): HasMany
     {
         return $this->hasMany(Payroll::class);
+    }
+
+    public function getEmployeesCountAttribute(): int
+    {
+        return $this->payrolls->count();
+    }
+
+    public function getEmployeesNetPayAttribute(): float
+    {
+        return $this->payrolls->sum('net_income');
+    }
+
+    public function getWithheldTaxesAttribute(): float
+    {
+        return $this->payrolls->sum('withheld_tax');
+    }
+
+    public function getTotalContributionsAttribute(): float
+    {
+        return $this->payrolls->sum('total_contributions');
+    }
+
+    public function getPayrollCostAttribute(): float
+    {
+        return $this->employees_net_pay +  $this->withheld_taxes +  $this->total_contributions;
+    }
+
+    public function scopeByRange(Builder $periodsQuery, array $range): Builder
+    {
+        return $periodsQuery->when(isset($range['dateTo']) && $range['dateTo'], function ($query) use ($range) {
+            $query->whereDate('start_date', '>=', $range['dateTo']);
+        })->when(isset($range['dateFrom']) && $range['dateFrom'], function ($query) use ($range) {
+            $query->whereDate('end_date', '<=', $range['dateFrom']);
+        });
     }
 }

@@ -32,7 +32,7 @@ class TimeRecord extends Model
         if (isset($range['dateTo']) && $range['dateTo']) {
             $timeRecordsQuery->where(function ($query) use ($range) {
                 $query->whereDate('expected_clock_in', '>=', $range['dateTo'])
-                        ->orWhereDate('clock_in', '>=', $range['dateTo']);
+                    ->orWhereDate('clock_in', '>=', $range['dateTo']);
             });
         }
 
@@ -45,5 +45,4 @@ class TimeRecord extends Model
 
         return $timeRecordsQuery;
     }
-
 }
