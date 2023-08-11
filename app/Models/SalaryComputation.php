@@ -30,6 +30,7 @@ class SalaryComputation extends Model
         'allowances',
         'commissions',
         'other_compensations',
+        'non_taxable_earnings',
         'working_hours_per_day',
         'working_days_per_week',
         'overtime_rate',
