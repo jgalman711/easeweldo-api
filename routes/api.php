@@ -14,6 +14,7 @@ use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\PayrollGeneratorController;
 use App\Http\Controllers\PeriodsController;
 use App\Http\Controllers\QrController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalaryComputationController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TimeRecordController;
@@ -70,6 +71,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             });
             Route::resource('/work-schedules', WorkScheduleController::class);
             Route::resource('/periods', PeriodsController::class)->except('store');
+            Route::resource('/reports', ReportController::class);
             Route::get('/dashboard', [DashboardController::class, 'index']);
             Route::get('/settings', [SettingController::class, 'index']);
             Route::post('/settings', [SettingController::class, 'store']);

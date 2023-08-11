@@ -29,6 +29,9 @@ class PayrollRequest extends BaseRequest
             'other_compensations' => self::PRESENT_NULLABLE_ARRAY,
             'other_compensations.*.type' => self::NULLABLE_STRING,
             'other_compensations.*.pay' => self::NULLABLE_NUMERIC,
+            'non_taxable_earnings' => self::PRESENT_NULLABLE_ARRAY,
+            'non_taxable_earnings.*.type' => self::NULLABLE_STRING,
+            'non_taxable_earnings.*.pay' => self::NULLABLE_NUMERIC,
             'remarks' => self::NULLABLE_STRING
         ];
     }

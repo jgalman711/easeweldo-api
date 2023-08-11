@@ -2,11 +2,14 @@
 
 namespace App\Helpers;
 
+use App\Models\Employee;
 use Illuminate\Support\Collection;
 
 class PayrollSummaryReport
 {
     protected $periods;
+
+    protected $employee;
 
     protected $attributes  = [
         'overtime_minutes' => 0,
@@ -40,16 +43,20 @@ class PayrollSummaryReport
         'net_income' => 0
     ];
 
-    public function __construct(Collection $periods)
+    public function __construct(Collection $periods, Employee $employee = null)
     {
         $this->periods = $periods;
-        
+        $this->employee = $employee;
     }
 
     public function get()
     {
         foreach ($this->periods as $period) {
-            foreach ($period->payrolls as $payroll) {
+            $payrolls = $period->payrolls;
+            if ($this->employee) {
+                $payrolls = $payrolls->where('employee_id', $this->employee->id);
+            }
+            foreach ($payrolls as $payroll) {
                 foreach ($this->attributes as $reportKey => $reportAttribute) {
                     $this->attributes[$reportKey] += $payroll->$reportKey;
                 }

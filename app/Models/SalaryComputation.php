@@ -18,7 +18,8 @@ class SalaryComputation extends Model
     protected $casts = [
         'allowances' => 'array',
         'commissions' => 'array',
-        'other_compensations' => 'array'
+        'other_compensations' => 'array',
+        'non_taxable_earnings' => 'array'
     ];
 
     protected $fillable = [

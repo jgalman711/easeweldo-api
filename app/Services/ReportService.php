@@ -24,6 +24,12 @@ class ReportService
 
         if ($type == ReportType::PAYROLL_SUMMARY) {
             $report = new PayrollSummaryReport($periods);
+        } elseif ($type == ReportType::EMPLOYEE_PAYROLL_DETAILS) {
+            if (!$request->has('employee_id')) {
+                throw new Exception('Employee ID is required.');
+            }
+            $employee = $company->getEmployeeById($request->employee_id);
+            $report = new PayrollSummaryReport($periods, $employee);
         } else {
             throw new Exception('Invalid report type ' . $type);
         }
