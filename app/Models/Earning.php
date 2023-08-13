@@ -10,6 +10,16 @@ class Earning extends Model
 {
     use SoftDeletes;
 
+    public const CATEGORY_SUFFIX_EARNINGS = '_earnings';
+
+    public const CATEGORIES = [
+        self::TAXABLE,
+        self::NON_TAXABLE
+    ];
+
+    public const TAXABLE = 'taxable';
+    public const NON_TAXABLE = 'non_taxable';
+
     public const TYPES = [
         self::ALLOWANCE,
         self::COMPENSATION,
@@ -21,8 +31,8 @@ class Earning extends Model
     public const COMMISSION = 'commission';
 
     protected $casts = [
-        'taxable' => 'array',
-        'non_taxable' => 'array'
+        self::TAXABLE => 'array',
+        self::NON_TAXABLE => 'array'
     ];
 
     protected $fillable = [

@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\EarningTypeJsonRule;
+
 class PayrollRequest extends BaseRequest
 {
     public function rules(): array
@@ -20,18 +22,8 @@ class PayrollRequest extends BaseRequest
             'leaves.*.type' => self::NULLABLE_STRING,
             'leaves.*.hours' => self::NULLABLE_NUMERIC,
             'leaves.*.date' => 'nullable|date',
-            'allowances' => self::PRESENT_NULLABLE_ARRAY,
-            'allowances.*.type' => self::NULLABLE_STRING,
-            'allowances.*.pay' => self::NULLABLE_NUMERIC,
-            'commissions' => self::PRESENT_NULLABLE_ARRAY,
-            'commissions.*.type' => self::NULLABLE_STRING,
-            'commissions.*.pay' => self::NULLABLE_NUMERIC,
-            'other_compensations' => self::PRESENT_NULLABLE_ARRAY,
-            'other_compensations.*.type' => self::NULLABLE_STRING,
-            'other_compensations.*.pay' => self::NULLABLE_NUMERIC,
-            'non_taxable_earnings' => self::PRESENT_NULLABLE_ARRAY,
-            'non_taxable_earnings.*.type' => self::NULLABLE_STRING,
-            'non_taxable_earnings.*.pay' => self::NULLABLE_NUMERIC,
+            'taxable_earnings' => [new EarningTypeJsonRule()],
+            'non_taxable_earnings' => [new EarningTypeJsonRule()],
             'remarks' => self::NULLABLE_STRING
         ];
     }

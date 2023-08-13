@@ -18,9 +18,7 @@ class Payroll extends Model
 
     protected $casts = [
         'leaves' => 'json',
-        'allowances' => 'json',
-        'commissions' => 'json',
-        'other_compensations' => 'json',
+        'taxable_earnings' => 'json',
         'non_taxable_earnings' => 'json'
     ];
 
@@ -28,6 +26,8 @@ class Payroll extends Model
         'employee_id',
         'period_id'
     ];
+
+    protected $appends = ['non_taxable_total_earnings', 'taxable_total_earnings'];
 
     public function getLeavesAttribute($value)
     {
@@ -39,24 +39,38 @@ class Payroll extends Model
         $this->attributes['leaves'] = json_encode($value);
     }
 
-    public function getAllowancesAttribute($value)
+    public function getTaxableTotalEarningsAttribute()
     {
-        return json_decode($value, true);
+        $taxableEarnings = isset($this->attributes['taxable_earnings'])
+            ? json_decode($this->attributes['taxable_earnings'], true)
+            : [];
+
+        $totalTaxableEarnings = 0;
+
+        foreach ($taxableEarnings as $item) {
+            if (isset($item['pay']) && is_numeric($item['pay'])) {
+                $totalTaxableEarnings += $item['pay'];
+            }
+        }
+
+        return $totalTaxableEarnings;
     }
 
-    public function setAllowancesAttribute($value)
+    public function getNonTaxableTotalEarningsAttribute()
     {
-        $this->attributes['allowances'] = json_encode($value);
-    }
+        $nonTaxableEarnings = isset($this->attributes['non_taxable_earnings'])
+            ? json_decode($this->attributes['non_taxable_earnings'], true)
+            : [];
 
-    public function getOtherCompensationsAttribute($value)
-    {
-        return json_decode($value, true);
-    }
+        $totalNonTaxableEarnings = 0;
 
-    public function setOtherCompensationsAttribute($value)
-    {
-        $this->attributes['other_compensations'] = json_encode($value);
+        foreach ($nonTaxableEarnings as $item) {
+            if (isset($item['pay']) && is_numeric($item['pay'])) {
+                $totalNonTaxableEarnings += $item['pay'];
+            }
+        }
+
+        return $totalNonTaxableEarnings;
     }
 
     public function employee()
