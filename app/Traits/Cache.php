@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\Models\Company;
 use Closure;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache as FacadesCache;
 
@@ -20,9 +21,7 @@ trait Cache
 
     public function remember(Company $company, Closure $closure, $unique = null)
     {
-        if (!$this->identifier) {
-            return $closure();
-        }
+        throw_unless($this->identifier, new Exception('Must define identifier.'));
         $cacheKey = $this->makeCacheKey($company->slug, $unique);
         return FacadesCache::remember($cacheKey, $this->cacheDuration, function () use ($closure) {
             return $closure();

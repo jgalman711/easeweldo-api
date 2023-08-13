@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BiometricsController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EarningController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeScheduleController;
 use App\Http\Controllers\HolidayController;
@@ -74,6 +75,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::resource('/periods', PeriodsController::class)->except('store');
             Route::resource('/reports', ReportController::class);
             Route::resource('/biometrics', BiometricsController::class);
+            Route::resource('/earnings', EarningController::class)->only('index', 'store');
 
             Route::get('/dashboard', [DashboardController::class, 'index']);
             Route::get('/settings', [SettingController::class, 'index']);
