@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\EarningTypeJsonRule;
+
 class SalaryComputationRequest extends BaseRequest
 {
     public function rules(): array
@@ -10,18 +12,8 @@ class SalaryComputationRequest extends BaseRequest
             'basic_salary' => 'filled|required_without_all:hourly_rate',
             'hourly_rate' => 'filled|required_without_all:basic_salary',
             'daily_rate' => self::NUMERIC,
-            'allowances' => self::PRESENT_NULLABLE_ARRAY,
-            'allowances.*.type' => self::NULLABLE_STRING,
-            'allowances.*.pay' => self::NULLABLE_NUMERIC,
-            'commissions' => self::PRESENT_NULLABLE_ARRAY,
-            'commissions.*.type' => self::NULLABLE_STRING,
-            'commissions.*.pay' => self::NULLABLE_NUMERIC,
-            'other_compensations' => self::PRESENT_NULLABLE_ARRAY,
-            'other_compensations.*.type' => self::NULLABLE_STRING,
-            'other_compensations.*.pay' => self::NULLABLE_NUMERIC,
-            'non_taxable_earnings' => self::PRESENT_NULLABLE_ARRAY,
-            'non_taxable_earnings.*.type' => self::NULLABLE_STRING,
-            'non_taxable_earnings.*.pay' => self::NULLABLE_NUMERIC,
+            'taxable_earnings' => [new EarningTypeJsonRule()],
+            'non_taxable_earnings' => [new EarningTypeJsonRule()],
             'working_hours_per_day' => self::NUMERIC,
             'working_days_per_week' =>  self::NUMERIC,
             'overtime_rate' => self::REQUIRED_NUMERIC,
