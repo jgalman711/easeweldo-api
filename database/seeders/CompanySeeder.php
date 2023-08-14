@@ -34,7 +34,7 @@ class CompanySeeder extends Seeder
         $subscription = Subscription::find(1);
         CompanySubscription::create([
             'company_id' => $company->id,
-            'subscription_id' => $subscription->id,
+            'subscriptions' => json_encode([$subscription->id], true),
             'start_date' => Carbon::now(),
             'end_date' => Carbon::now()->addYear(),
         ]);

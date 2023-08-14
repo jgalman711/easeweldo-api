@@ -18,6 +18,7 @@ use App\Http\Controllers\QrController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalaryComputationController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\SynchBiometricsController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\TimesheetUploadController;
 use App\Http\Controllers\UserController;
@@ -70,17 +71,17 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
                     Route::delete('/', [SalaryComputationController::class, 'delete']);
                 });
             });
-
             Route::resource('/work-schedules', WorkScheduleController::class);
             Route::resource('/periods', PeriodsController::class)->except('store');
             Route::resource('/reports', ReportController::class);
-            Route::resource('/biometrics', BiometricsController::class);
             Route::resource('/earnings', EarningController::class)->only('index', 'store');
-
+            Route::resource('/settings', SettingController::class)->only('index', 'store');
             Route::get('/dashboard', [DashboardController::class, 'index']);
-            Route::get('/settings', [SettingController::class, 'index']);
-            Route::post('/settings', [SettingController::class, 'store']);
             Route::post('/timesheet/upload', [TimesheetUploadController::class, 'store']);
+
+            // Add middleware here to check if the company's plan includes time and attendance
+            Route::post('/synch-biometrics/{module}/', [SynchBiometricsController::class, 'store']);
+            Route::resource('/biometrics', BiometricsController::class);
         });
     });
     Route::get('/user/qrcode', [UserController::class, 'qrcode']);

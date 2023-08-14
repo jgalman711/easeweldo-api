@@ -15,4 +15,8 @@ class Subscription extends Model
         'amount',
         'details'
     ];
+
+    protected $casts = [
+        'subscriptions' => 'array'
+    ];
 }

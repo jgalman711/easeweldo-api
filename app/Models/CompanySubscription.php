@@ -13,7 +13,7 @@ class CompanySubscription extends Model
 
     protected $fillable = [
         'company_id',
-        'subscription_id',
+        'subscriptions',
         'amount',
         'start_date',
         'end_date',

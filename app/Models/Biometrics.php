@@ -9,6 +9,12 @@ class Biometrics extends Model
 {
     use SoftDeletes;
 
+    public const PROVIDERS = [
+        self::ZKTECO_PROVIDER
+    ];
+
+    public const ZKTECO_PROVIDER = 'ZKTeco';
+
     public const STATUS_INACTIVE = 'inactive';
 
     protected $fillable = [

@@ -38,7 +38,7 @@ class BiometricsController extends Controller
             'status' => Biometrics::STATUS_INACTIVE,
             ...$request->validated(),
         ]);
-        return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data retrieved successfully.');
+        return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data saved successfully.');
     }
 
     public function update(BiometricsRequest $request, Company $company, int $biometricsId): JsonResponse
