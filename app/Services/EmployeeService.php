@@ -20,6 +20,14 @@ class EmployeeService
     {
         try {
             DB::beginTransaction();
+            $data['company_id'] = 1;
+            if (isset($data['company_id'])) {
+                $latestEmployee = Employee::where('company_id', $data['company_id'])
+                                     ->orderByDesc('id')
+                                     ->first();
+                $nextId = $latestEmployee ? $latestEmployee->id + 1 : 1;
+                $data['company_employee_id'] = $nextId;
+            }
             $employee = Employee::create($data);
             $username = $this->generateUniqueUsername($employee);
             $temporaryPassword = Str::random(self::PASSWORD_LENGTH);

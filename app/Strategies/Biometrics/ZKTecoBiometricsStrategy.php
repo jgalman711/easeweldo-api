@@ -42,7 +42,7 @@ class ZKTecoBiometricsStrategy implements BiometricsStrategy
 
     public function addEmployee(Employee $employee): void
     {
-        $this->zkTeco->setUser($employee->id, $employee->id, $employee->full_name, '', 0);
+        $this->zkTeco->setUser($employee->id, $employee->company_id, $employee->full_name, '', 0);
     }
 
     public function deleteEmployee(Employee $employee): void
