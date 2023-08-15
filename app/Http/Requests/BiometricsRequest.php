@@ -7,6 +7,7 @@ class BiometricsRequest extends BaseRequest
     public function rules(): array
     {
         return [
+            'name' => self::REQUIRED_STRING,
             'ip_address' => 'required|ip',
             'port' => self::REQUIRED_NUMERIC,
             'provider' => self::REQUIRED_STRING,

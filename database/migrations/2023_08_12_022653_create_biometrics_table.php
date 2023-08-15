@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('biometrics', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('company_id');
+            $table->string('name');
             $table->string('ip_address');
             $table->integer('port');
             $table->string('provider');

@@ -47,6 +47,14 @@ class BiometricsController extends Controller
         $biometrics = $company->biometrics()->find($biometricsId);
         $biometrics->update($input);
         $this->forget($company, $biometricsId);
-        return $this->sendResponse(new BaseResource($biometrics), 'Leave updated successfully.');
+        return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data updated successfully.');
+    }
+
+    public function destroy(Company $company, int $biometricsId): JsonResponse
+    {
+        $biometrics = $company->biometrics()->find($biometricsId);
+        $biometrics->delete();
+        $this->forget($company, $biometricsId);
+        return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data deleted successfully.');
     }
 }
