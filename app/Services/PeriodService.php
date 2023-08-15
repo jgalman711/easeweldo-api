@@ -80,8 +80,8 @@ class PeriodService
             $data['type'] = $companyPreviousPeriod->type;
             $data['status'] = Period::STATUS_PENDING;
             if ($data['type'] == Period::TYPE_SEMI_MONTHLY) {
-                $data['start_date'] = $companyPreviousPeriod->end_date->addDay();
-                $data['end_date'] = $companyPreviousPeriod->start_date->addMonth()->subDay();
+                $data['start_date'] = Carbon::parse($companyPreviousPeriod->end_date)->addDay();
+                $data['end_date'] = Carbon::parse($companyPreviousPeriod->start_date)->addMonth()->subDay();
                 $data['salary_date'] = $data['end_date']->copy()->addDays(self::PAYROLL_ALLOWANCE_DAY);
             } elseif ($data['type'] == Period::TYPE_MONTHLY) {
                 $data['start_date'] = $companyPreviousPeriod->start_date->addMonth();

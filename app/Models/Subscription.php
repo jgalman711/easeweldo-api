@@ -10,6 +10,10 @@ class Subscription extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const PAID_STATUS = 'paid';
+
+    public const TIME_ATTENDANCE = 'Time and Attendance 49';
+
     protected $fillable = [
         'name',
         'amount',

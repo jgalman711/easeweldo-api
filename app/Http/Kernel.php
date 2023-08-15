@@ -2,7 +2,6 @@
 
 namespace App\Http;
 
-use App\Http\Middleware\EmployeeOfCompany;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -67,7 +66,8 @@ class Kernel extends HttpKernel
         'role' => \Spatie\Permission\Middlewares\RoleMiddleware::class,
         'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,
-        'employee-of-company' => EmployeeOfCompany::class,
+        'employee-of-company' => \App\Http\Middleware\EmployeeOfCompany::class,
         'same-company-as-admin-user' => \App\Http\Middleware\SameCompanyAsAdminUser::class,
+        'check-company-subscriptions' => \App\Http\Middleware\CheckCompanySubscriptions::class,
     ];
 }

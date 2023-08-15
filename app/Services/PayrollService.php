@@ -48,6 +48,8 @@ class PayrollService
 
     protected $data;
 
+    protected $company;
+
     protected $settings;
 
     protected $timesheet;
@@ -73,6 +75,7 @@ class PayrollService
     public function generate(Period $period, Employee $employee, array $data = null): Payroll
     {
         $this->data = $data;
+        $this->company = $employee->company;
         $this->settings = $employee->company->setting;
         $this->salaryData = $employee->salaryComputation;
 
@@ -93,12 +96,9 @@ class PayrollService
             = $this->salaryData->basic_salary
             / self::CYCLE_DIVISOR[$this->settings->period_cycle];
 
-        $this->timesheet = $employee->timeRecords()->byRange([
-            'dateTo' => $period->start_date,
-            'dateFrom' => $period->end_date
-        ])->get();
-
-        throw_if($this->timesheet->isEmpty(), new Exception('Time records not found.'));
+        if ($this->company->hasTimeAndAttendanceSubscription()) {
+            $this->getTimesheet($employee, $period);
+        }
 
         $this->holidays = Holiday::whereBetween('date', [
             $this->payroll->period->start_date,
@@ -136,6 +136,10 @@ class PayrollService
 
     public function calculateAttendanceRecords(): void
     {
+        if (!$this->company->hasTimeAndAttendanceSubscription()) {
+            return;
+        }
+
         $absentMinutes = 0;
         $lateMinutes = 0;
         $underMinutes = 0;
@@ -222,6 +226,15 @@ class PayrollService
 
         $this->payroll->expected_hours_worked = $this->timesheet->count() * $this->salaryData->working_hours_per_day;
         $this->payroll->hours_worked = $minutesWorked / self::SIXTY_MINUTES;
+    }
+
+    private function getTimesheet(Employee $employee, Period $period)
+    {
+        $this->timesheet = $employee->timeRecords()->byRange([
+            'dateTo' => $period->start_date,
+            'dateFrom' => $period->end_date
+        ])->get();
+        throw_if($this->timesheet->isEmpty(), new Exception('Time records not found.'));
     }
 
     private function calculateRegularHolidayPay(array $holidaysHours, array $holidaysHoursWorked): void

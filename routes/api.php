@@ -79,9 +79,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('/dashboard', [DashboardController::class, 'index']);
             Route::post('/timesheet/upload', [TimesheetUploadController::class, 'store']);
 
-            // Add middleware here to check if the company's plan includes time and attendance
-            Route::post('/synch-biometrics/{module}/', [SynchBiometricsController::class, 'store']);
-            Route::resource('/biometrics', BiometricsController::class);
+            Route::middleware('check-company-subscriptions')->group(function () {
+                Route::post('/synch-biometrics/{module}/', [SynchBiometricsController::class, 'store']);
+                Route::resource('/biometrics', BiometricsController::class);
+            });
         });
     });
     Route::get('/user/qrcode', [UserController::class, 'qrcode']);

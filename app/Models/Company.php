@@ -111,14 +111,14 @@ class Company extends Model
         return $this->hasOne(Setting::class);
     }
 
-    public function companySubscription(): HasOne
+    public function companySubscriptions(): HasMany
     {
-        return $this->hasOne(CompanySubscription::class);
+        return $this->hasMany(CompanySubscription::class);
     }
 
-    public function subscription(): HasOneThrough
+    public function subscriptions(): HasManyThrough
     {
-        return $this->hasOneThrough(
+        return $this->hasManyThrough(
             Subscription::class,
             CompanySubscription::class,
             'company_id',
@@ -153,5 +153,18 @@ class Company extends Model
             throw new \Exception('Work schedule not found');
         }
         return $workSchedule;
+    }
+
+    public function hasTimeAndAttendanceSubscription()
+    {
+        $subscriptionId = Subscription::where('name', Subscription::TIME_ATTENDANCE)->first()->id;
+        foreach ($this->companySubscriptions as $subscription) {
+            if ($subscription->subscription_id == $subscriptionId
+                && $subscription->status == Subscription::PAID_STATUS
+            ) {
+                return true;
+            }
+        }
+        return false;
     }
 }
