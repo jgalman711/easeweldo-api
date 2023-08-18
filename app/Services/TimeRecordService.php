@@ -140,15 +140,62 @@ class TimeRecordService
     {
         foreach ($attendance as $record) {
             $employee = $company->employees()->where('company_employee_id', $record['id'])->first();
-            $clock = $record['type'] == Biometrics::TYPE_CLOCK_IN ? self::CLOCK_IN : self::CLOCK_OUT;
-            TimeRecord::firstOrCreate([
+
+            if ($record['type'] == Biometrics::TYPE_CLOCK_IN) {
+                $clock = self::CLOCK_IN;
+                self::timeRecordFirstOrCreate($company, $employee, $record, $clock);
+            } elseif ($record['type'] == Biometrics::TYPE_CLOCK_OUT) {
+                $clock = self::CLOCK_OUT;
+                $timeRecord = TimeRecord::where([
+                    'company_id' => $company->id,
+                    'employee_id' => $employee->id
+                ])->where(function ($query) use ($clock, $record) {
+                    $query->where("original_{$clock}", $record['timestamp'])
+                        ->orWhere($clock, $record['timestamp']);
+                })->first();
+
+                if (!$timeRecord) {
+                    $latestTimeRecord = TimeRecord::where([
+                        'company_id' => $company->id,
+                        'employee_id' => $employee->id
+                    ])
+                    ->whereNull(self::CLOCK_OUT)
+                    ->latest('id')
+                    ->first();
+
+                    if ($latestTimeRecord && $latestTimeRecord->clock_in && !$latestTimeRecord->clock_out) {
+                        $latestTimeRecord->update([
+                            'clock_out' => $record['timestamp']
+                        ]);
+                    } else {
+                        self::timeRecordFirstOrCreate($company, $employee, $record, $clock);
+                    }
+                }
+            }
+        }
+    }
+
+    protected function timeRecordFirstOrCreate(
+        Company $company,
+        Employee $employee,
+        array $record,
+        string $clock
+    ): TimeRecord {
+        $timeRecord = TimeRecord::where([
+            'company_id' => $company->id,
+            'employee_id' => $employee->id
+        ])->where(function ($query) use ($clock, $record) {
+            $query->where("original_{$clock}", $record['timestamp'])
+                ->orWhere($clock, $record['timestamp']);
+        })->first();
+
+        if (!$timeRecord) {
+            $timeRecord = TimeRecord::create([
                 'company_id' => $company->id,
                 'employee_id' => $employee->id,
-                function ($query) use ($clock, $record) {
-                    $query->where("original_{$clock}", $record)
-                        ->orWhere($clock, $record);
-                },
+                $clock => $record['timestamp']
             ]);
         }
+        return $timeRecord;
     }
 }

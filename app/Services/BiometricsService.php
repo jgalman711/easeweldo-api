@@ -45,23 +45,29 @@ class BiometricsService
 
     public function getAttendance(Biometrics $biometrics, Request $request): array
     {
-        $startDate = $request->has('start_date') ? new DateTime($request->start_date) : null;
-        $endDate = $request->has('end_date') ? new DateTime($request->end_date) : null;
-        $biometrics = self::initialize($biometrics);
-        $attendance = $this->filterDate($biometrics->getAttendance(), $startDate, $endDate);
-        $biometrics->finalize();
-        return $attendance;
+        try {
+            $startDate = $request->has('start_date') ? new DateTime($request->start_date) : null;
+            $endDate = $request->has('end_date') ? new DateTime($request->end_date) : null;
+            $biometrics = self::initialize($biometrics);
+            $attendance = $this->filterDate($biometrics->getAttendance(), $startDate, $endDate);
+            $biometrics->finalize();
+            return $attendance;
+        } catch (Exception) {
+            throw new Exception("Unable to get attendance record. Please try again. If the issue still persists please contact the Easeweldo administrator.");
+        }
     }
 
     private function filterDate(array $attendance, ?DateTime $startDate, ?DateTime $endDate): array
     {
+        if (!$startDate && !$endDate) {
+            return $attendance;
+        }
+
         return array_filter($attendance, function ($item) use ($startDate, $endDate) {
             $timestamp = new DateTime($item['timestamp']);
-
             if ($startDate && $timestamp >= $startDate && !$endDate) {
                 return true;
             }
-
             if ($endDate && $timestamp <= $endDate && !$startDate) {
                 return true;
             }
