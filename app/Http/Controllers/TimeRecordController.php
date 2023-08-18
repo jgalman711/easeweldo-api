@@ -46,6 +46,15 @@ class TimeRecordController extends Controller
         $employee = $company->getEmployeeById($employeeId);
         $timeRecord = $employee->timeRecords()->findOrFail($timeRecordId);
         $input = $request->validated();
+
+        if (!$timeRecord->original_clock_in && $timeRecord->clock_in != $input['clock_in']) {
+            $input['original_clock_in'] = $timeRecord->clock_in;
+        }
+
+        if (!$timeRecord->original_clock_out && $timeRecord->clock_out != $input['clock_out']) {
+            $input['original_clock_out'] = $timeRecord->clock_out;
+        }
+
         $timeRecord->update($input);
         return $this->sendResponse(new BaseResource($timeRecord), 'Time records updated successfully.');
     }

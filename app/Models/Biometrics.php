@@ -13,6 +13,10 @@ class Biometrics extends Model
         self::ZKTECO_PROVIDER
     ];
 
+    public const TYPE_CLOCK_IN = 0;
+
+    public const TYPE_CLOCK_OUT = 1;
+
     public const ZKTECO_PROVIDER = 'ZKTeco';
 
     public const STATUS_INACTIVE = 'inactive';

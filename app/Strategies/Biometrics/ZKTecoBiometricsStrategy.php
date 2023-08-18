@@ -33,6 +33,19 @@ class ZKTecoBiometricsStrategy implements BiometricsStrategy
                 $retry++;
             }
         } while ($retry <= self::RETRIES);
+        throw new Exception(
+            "Please ensure your device is connected to the network and try again. Check the device's IP configuration if needed."
+        );
+    }
+
+    public function disconnect(): void
+    {
+        $this->zkTeco->disconnect();
+    }
+
+    public function enableDevice(): void
+    {
+        $this->zkTeco->enableDevice();
     }
 
     public function disableDevice(): void
@@ -42,11 +55,28 @@ class ZKTecoBiometricsStrategy implements BiometricsStrategy
 
     public function addEmployee(Employee $employee): void
     {
-        $this->zkTeco->setUser($employee->id, $employee->company_id, $employee->full_name, '', 0);
+        $this->zkTeco->setUser(
+            $employee->company_employee_id,
+            $employee->company_employee_id,
+            $employee->full_name,
+            '',
+            0
+        );
     }
 
     public function deleteEmployee(Employee $employee): void
     {
         $this->zkTeco->deleteUser($employee->id);
+    }
+
+    public function getAttendance(): array
+    {
+        return $this->zkTeco->getAttendance();
+    }
+
+    public function finalize(): void
+    {
+        $this->zkTeco->enableDevice();
+        $this->zkTeco->disconnect();
     }
 }

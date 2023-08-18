@@ -13,4 +13,6 @@ interface BiometricsStrategy
     public function addEmployee(Employee $employee);
 
     public function deleteEmployee(Employee $employee);
+
+    public function getAttendance();
 }

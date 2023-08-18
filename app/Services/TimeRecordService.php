@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Biometrics;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Leave;
@@ -14,7 +15,12 @@ use Illuminate\Http\Request;
 class TimeRecordService
 {
     protected const CLOCK_IN_TIME_SUFFIX = '_clock_in_time';
+
     protected const CLOCK_OUT_TIME_SUFFIX = '_clock_out_time';
+
+    protected const CLOCK_IN = 'clock_in';
+
+    protected const CLOCK_OUT= 'clock_out';
 
     public function create(
         Employee $employee,
@@ -128,5 +134,21 @@ class TimeRecordService
             'company_id' => $employee->company_id,
             'employee_id' => $employee->id
         ]);
+    }
+
+    public function synchFromBiometrics(array $attendance, Company $company)
+    {
+        foreach ($attendance as $record) {
+            $employee = $company->employees()->where('company_employee_id', $record['id'])->first();
+            $clock = $record['type'] == Biometrics::TYPE_CLOCK_IN ? self::CLOCK_IN : self::CLOCK_OUT;
+            TimeRecord::firstOrCreate([
+                'company_id' => $company->id,
+                'employee_id' => $employee->id,
+                function ($query) use ($clock, $record) {
+                    $query->where("original_{$clock}", $record)
+                        ->orWhere($clock, $record);
+                },
+            ]);
+        }
     }
 }

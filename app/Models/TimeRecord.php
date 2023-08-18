@@ -18,7 +18,9 @@ class TimeRecord extends Model
         'clock_out',
         'expected_clock_in',
         'expected_clock_out',
-        'attendance_status',
+        'original_clock_in',
+        'original_clock_out',
+        'source',
         'remarks'
     ];
 
