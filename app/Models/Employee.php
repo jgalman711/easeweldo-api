@@ -29,12 +29,16 @@ class Employee extends Model
     public const CONTRACT = 'contract';
 
     public const EMPLOYMENT_STATUS = [
-        self::ACTIVE,
-        self::INACTIVE,
-        self::PROBATIONARY,
         self::REGULAR,
-        self::TERMINATED
+        self::PROBATIONARY,
+        self::TERMINATED,
+        self::SEPARATED
     ];
+
+    public const REGULAR = 'regular';
+    public const PROBATIONARY = 'probationary';
+    public const TERMINATED = 'terminated';
+    public const SEPARATED = 'separated';
 
     public const FULL_TIME_WORKING_DAYS_PER_WEEK = [
         self::FIVE_DAYS_PER_WEEK,
@@ -47,11 +51,15 @@ class Employee extends Model
 
     public const EIGHT_HOURS_PER_DAY = 8;
 
+    public const STATUS = [
+        self::INACTIVE,
+        self::ACTIVE,
+        self::PENDING
+    ];
+
     public const ACTIVE = 'active';
     public const INACTIVE = 'inactive';
-    public const PROBATIONARY = 'probationary';
-    public const REGULAR = 'full-time';
-    public const TERMINATED = 'part-time';
+    public const PENDING = 'pending';
 
     protected $fillable = [
         'company_id',

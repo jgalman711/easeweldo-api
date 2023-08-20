@@ -17,7 +17,7 @@ class EmployeeRequest extends BaseRequest
             'date_of_hire' => self::REQUIRED_DATE,
             'date_of_birth' => self::REQUIRED_DATE,
             'employment_status' => self::REQUIRED_STRING,
-            'employment_type' => 'nullable|string|in:Full-time,Part-time,Contract',
+            'employment_type' => 'nullable|string|in:' . implode(',', Employee::EMPLOYMENT_TYPE),
             'working_days_per_week' => [
                 'nullable',
                 'integer',
