@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PayrollRequest;
 use App\Http\Resources\PayrollResource;
 use App\Models\Company;
+use App\Models\Employee;
 use App\Models\Payroll;
 use App\Services\PayrollService;
 use Illuminate\Http\JsonResponse;
@@ -54,6 +55,9 @@ class PayrollController extends Controller
     {
         $input = $request->validated();
         $employee = $company->getEmployeeById($request->employee_id);
+        if ($employee->staus !== Employee::ACTIVE) {
+            return $this->sendError("Unable to generate payroll for {$employee->status} employee.");
+        }
         $period = $company->period($request->period_id);
         $payroll = $this->payrollService->generate($period, $employee, $input);
         $this->forget($company);

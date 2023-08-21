@@ -89,6 +89,11 @@ class EmployeeController extends Controller
         } else {
             unset($input['profile_picture']);
         }
+
+        if ($company->isInSettlementPeriod()) {
+            $input['status'] = $employee->status;
+        }
+
         $employee->update($input);
         if ($request->has('email_address')) {
             $employee->user->update([

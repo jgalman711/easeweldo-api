@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Employee;
 use App\Models\Period;
 use App\Services\PayrollService;
 use Carbon\Carbon;
@@ -32,7 +33,7 @@ class GeneratePayroll extends Command
 
         $payrollService = app()->make(PayrollService::class);
         foreach ($periods as $period) {
-            $employees = $period->company->employees;
+            $employees = $period->company->employees->where('status', Employee::ACTIVE);
             foreach ($employees as $employee) {
                 try {
                     DB::beginTransaction();
