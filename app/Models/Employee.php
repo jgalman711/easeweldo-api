@@ -68,6 +68,7 @@ class Employee extends Model
         'last_name',
         'department',
         'job_title',
+        'status',
         'employment_status',
         'employment_type',
         'working_days_per_week',

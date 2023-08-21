@@ -45,13 +45,12 @@ class EmployeeController extends Controller
     public function store(EmployeeRequest $request, Company $company): JsonResponse
     {
         $input = $request->validated();
-        $input['company_id'] = $company->id;
         if (isset($input['profile_picture']) && $input['profile_picture']) {
             $filename = time() . '.' . $request->profile_picture->extension();
             $request->profile_picture->storeAs(Employee::ABSOLUTE_STORAGE_PATH, $filename);
             $input['profile_picture'] = Employee::STORAGE_PATH . $filename;
         }
-        $employee = $this->employeeService->create($input);
+        $employee = $this->employeeService->create($company, $input);
         $this->forget($company);
         $message = $this->employeeService->getEmployeeTemporaryCredentials();
         return $this->sendResponse(new BaseResource($employee), $message);

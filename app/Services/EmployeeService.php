@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\Company;
 use App\Models\Employee;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
@@ -16,33 +18,22 @@ class EmployeeService
 
     protected $credentials;
 
-    public function create(array $data): Employee
+    public function create(Company $company, array $data): Employee
     {
         try {
             DB::beginTransaction();
-            $data['company_id'] = 1;
-            if (isset($data['company_id'])) {
-                $latestEmployee = Employee::where('company_id', $data['company_id'])
-                                     ->orderByDesc('id')
-                                     ->first();
-                $nextId = $latestEmployee ? $latestEmployee->id + 1 : 1;
-                $data['company_employee_id'] = $nextId;
+            $data['company_id'] = $company->id;
+            $data['company_employee_id'] = $this->generateCompanyEmployeeId($company);
+            $data['status'] = $company->isInSettlementPeriod() ? Employee::PENDING : Employee::ACTIVE;
+            $employees = $company->employees()->where('status', Employee::ACTIVE)->get();
+            foreach ($company->companySubscriptions as $companySubscription) {
+                $companySubscription->amount = $employees->count() * $companySubscription->amount_per_employee;
+                $companySubscription->balance = $companySubscription->amount - $companySubscription->amount_paid;
+                $companySubscription->save();
             }
+
             $employee = Employee::create($data);
-            $username = $this->generateUniqueUsername($employee);
-            $temporaryPassword = Str::random(self::PASSWORD_LENGTH);
-            $data['username'] = $username;
-            $data['password'] = bcrypt($temporaryPassword);
-            $data['employee_id'] = $employee->id;
-            $user = User::create($data);
-            if ($this->isRoleBusinessAdmin($data)) {
-                $role = Role::where('name', self::BUSINESS_ADMIN_ROLE)->first();
-                $user->assignRole($role);
-            }
-            $this->credentials = [
-                'username' => $username,
-                'password' => $temporaryPassword
-            ];
+            $this->createUser($employee);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
@@ -93,5 +84,31 @@ class EmployeeService
     private function isRoleBusinessAdmin($data): bool
     {
         return isset($data['role']) && $data['role'] == self::BUSINESS_ADMIN_ROLE;
+    }
+
+    private function generateCompanyEmployeeId(Company $company): int
+    {
+        $latestEmployee = $company->employees()->orderByDesc('id')->first();
+        return $latestEmployee ? $latestEmployee->company_employee_id + 1 : 1;
+    }
+
+    private function createUser(Employee $employee): void
+    {
+        $username = $this->generateUniqueUsername($employee);
+        $temporaryPassword = Str::random(self::PASSWORD_LENGTH);
+        $data['username'] = $username;
+        $data['password'] = bcrypt($temporaryPassword);
+        $data['employee_id'] = $employee->id;
+        $user = User::create($data);
+
+        if ($this->isRoleBusinessAdmin($data)) {
+            $role = Role::where('name', self::BUSINESS_ADMIN_ROLE)->first();
+            $user->assignRole($role);
+        }
+
+        $this->credentials = [
+            'username' => $username,
+            'password' => $temporaryPassword
+        ];
     }
 }

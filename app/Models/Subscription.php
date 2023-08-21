@@ -12,6 +12,10 @@ class Subscription extends Model
 
     public const PAID_STATUS = 'paid';
 
+    public const UNPAID_STATUS = 'paid';
+
+    public const CORE = 'Basic Ease 200';
+
     public const TIME_ATTENDANCE = 'Time and Attendance 49';
 
     protected $fillable = [

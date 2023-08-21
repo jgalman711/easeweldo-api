@@ -10,6 +10,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('app:initialize-expected-schedule')->daily();
+        $schedule->command('app:check-subscription-expiry')->daily();
         $schedule->command('app:generate-payroll')->dailyAt('00:05');
         $schedule->command('app:initialize-holiday')->yearly();
     }

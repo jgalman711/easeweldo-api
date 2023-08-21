@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -146,6 +147,24 @@ class Company extends Model
         return $period;
     }
 
+    public function currentPeriod(): ?Period
+    {
+        $now = Carbon::now();
+        return $this->periods()
+            ->where('start_date', '<=', $now)
+            ->where('end_date', '>=', $now)
+            ->first();
+    }
+
+    public function isInSettlementPeriod(): bool
+    {
+        $now = Carbon::now();
+        return $this->periods()
+            ->where('end_date', '<=', $now)
+            ->where('salary_date', '>=', $now)
+            ->exists();
+    }
+
     public function getWorkScheduleById(int $workScheduleId): ?WorkSchedule
     {
         $workSchedule = $this->workSchedules->where('id', $workScheduleId)->first();
@@ -161,6 +180,21 @@ class Company extends Model
         foreach ($this->companySubscriptions as $subscription) {
             if ($subscription->subscription_id == $subscriptionId
                 && $subscription->status == Subscription::PAID_STATUS
+                && Carbon::now()->lte($subscription->end_date)
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function hasCoreSubscription(): bool
+    {
+        $subscriptionId = Subscription::where('name', Subscription::CORE)->first()->id;
+        foreach ($this->companySubscriptions as $subscription) {
+            if ($subscription->subscription_id == $subscriptionId
+                && $subscription->status == Subscription::PAID_STATUS
+                && Carbon::now()->lte($subscription->end_date)
             ) {
                 return true;
             }
