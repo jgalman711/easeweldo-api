@@ -7,7 +7,6 @@ use App\Http\Resources\BaseResource;
 use App\Http\Resources\EmployeeScheduleResource;
 use App\Models\Company;
 use App\Models\EmployeeSchedule;
-use App\Traits\Filter;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

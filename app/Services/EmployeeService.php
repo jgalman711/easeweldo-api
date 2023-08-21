@@ -25,13 +25,6 @@ class EmployeeService
             $data['company_id'] = $company->id;
             $data['company_employee_id'] = $this->generateCompanyEmployeeId($company);
             $data['status'] = $company->isInSettlementPeriod() ? Employee::PENDING : Employee::ACTIVE;
-            $employees = $company->employees()->where('status', Employee::ACTIVE)->get();
-            foreach ($company->companySubscriptions as $companySubscription) {
-                $companySubscription->amount = $employees->count() * $companySubscription->amount_per_employee;
-                $companySubscription->balance = $companySubscription->amount - $companySubscription->amount_paid;
-                $companySubscription->save();
-            }
-
             $employee = Employee::create($data);
             $this->createUser($employee);
             DB::commit();
