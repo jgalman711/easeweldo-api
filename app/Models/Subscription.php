@@ -12,7 +12,7 @@ class Subscription extends Model
 
     public const PAID_STATUS = 'paid';
 
-    public const UNPAID_STATUS = 'paid';
+    public const UNPAID_STATUS = 'unpaid';
 
     public const CORE = 'Basic Ease 200';
 

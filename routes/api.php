@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BiometricsController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\CompanySubscriptionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EarningController;
 use App\Http\Controllers\EmployeeController;
@@ -18,7 +19,6 @@ use App\Http\Controllers\QrController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalaryComputationController;
 use App\Http\Controllers\SettingController;
-use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SynchBiometricsController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\TimesheetUploadController;
@@ -77,7 +77,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::resource('/reports', ReportController::class);
             Route::resource('/earnings', EarningController::class)->only('index', 'store');
             Route::resource('/settings', SettingController::class)->only('index', 'store');
-            Route::resource('/subscriptions', SubscriptionController::class)->only('index', 'store');
+            Route::resource('/subscriptions', CompanySubscriptionController::class)->only('index', 'store');
             Route::get('/dashboard', [DashboardController::class, 'index']);
             Route::post('/timesheet/upload', [TimesheetUploadController::class, 'store']);
 

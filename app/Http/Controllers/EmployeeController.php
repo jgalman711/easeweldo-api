@@ -39,7 +39,7 @@ class EmployeeController extends Controller
                 'department'
             ]);
         }, $request);
-        return $this->sendResponse($employees, 'Employees retrieved successfully.');
+        return $this->sendResponse(BaseResource::collection($employees), 'Employees retrieved successfully.');
     }
 
     public function store(EmployeeRequest $request, Company $company): JsonResponse

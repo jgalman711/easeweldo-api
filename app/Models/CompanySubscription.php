@@ -15,6 +15,7 @@ class CompanySubscription extends Model
         'company_id',
         'subscription_id',
         'amount',
+        'amount_per_employee',
         'start_date',
         'end_date',
     ];

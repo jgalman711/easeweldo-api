@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SubscriptionRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
+use App\Models\CompanySubscription;
 use App\Models\Employee;
+use App\Models\Subscription;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 
-class SubscriptionController extends Controller
+class CompanySubscriptionController extends Controller
 {
     public function __construct()
     {
@@ -16,7 +20,6 @@ class SubscriptionController extends Controller
 
     public function index(Company $company): JsonResponse
     {
-        $this->forget($company);
         $subscriptions = $this->remember($company, function () use ($company) {
             if (!$company->isInSettlementPeriod()) {
                 $employeeCount = $company->employees()->where('status', Employee::ACTIVE)->count() - 1;
@@ -35,5 +38,30 @@ class SubscriptionController extends Controller
             return $company->companySubscriptions()->with('subscription')->get();
         });
         return $this->sendResponse(new BaseResource($subscriptions), 'Company subscriptions retrieved successfully.');
+    }
+
+    public function store(SubscriptionRequest $request, Company $company)
+    {
+        $input = $request->validated();
+        $employeeCount = $company->employees()->where('status', Employee::ACTIVE)->count();
+        $now = Carbon::now();
+
+        foreach ($input['subscriptions'] as $subscriptionId) {
+            $subscription = Subscription::find($subscriptionId);
+            CompanySubscription::updateOrCreate([
+                'company_id' => $company->id,
+                'subscription_id' => $subscription->id
+            ], [
+                'status' => Subscription::UNPAID_STATUS,
+                'amount_per_employee' => $subscription->amount,
+                'amount' => $subscription->amount * $employeeCount,
+                'start_date' => $now,
+                'end_date' => $now->clone()->addMonth($input['months'])
+            ]);
+        }
+        return $this->sendResponse(
+            BaseResource::collection($company->companySubscriptions),
+            'Company subscribed successfully.'
+        );
     }
 }
