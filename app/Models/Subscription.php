@@ -14,9 +14,11 @@ class Subscription extends Model
 
     public const UNPAID_STATUS = 'unpaid';
 
-    public const CORE = 'Basic Ease 200';
+    public const CORE = 'basic-ease';
 
-    public const TIME_ATTENDANCE = 'Time and Attendance 49';
+    public const TIME_ATTENDANCE = 'time-and-attendance';
+
+    protected $appends = ['discounted_amount'];
 
     protected $fillable = [
         'name',
@@ -27,4 +29,9 @@ class Subscription extends Model
     protected $casts = [
         'subscriptions' => 'array'
     ];
+
+    public function getDiscountedAmountAttribute()
+    {
+        return number_format($this->amount - $this->discount, 2);
+    }
 }

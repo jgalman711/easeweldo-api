@@ -13,6 +13,7 @@ return new class extends Migration
             $table->text('title')->after('type');
             $table->text('description')->after('title');
             $table->json('features')->after('description');
+            $table->decimal('discount', 10, 2)->default(0)->after('amount');
             $table->dropColumn('details');
         });
     }
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->dropColumn('title');
             $table->dropColumn('features');
             $table->dropColumn('description');
+            $table->dropColumn('discount');
             $table->text('details')->after('name');
         });
     }
