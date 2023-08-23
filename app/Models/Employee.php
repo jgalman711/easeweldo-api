@@ -32,13 +32,13 @@ class Employee extends Model
         self::REGULAR,
         self::PROBATIONARY,
         self::TERMINATED,
-        self::SEPARATED
+        self::RESIGNED
     ];
 
     public const REGULAR = 'regular';
     public const PROBATIONARY = 'probationary';
+    public const RESIGNED = 'resigned';
     public const TERMINATED = 'terminated';
-    public const SEPARATED = 'separated';
 
     public const FULL_TIME_WORKING_DAYS_PER_WEEK = [
         self::FIVE_DAYS_PER_WEEK,
