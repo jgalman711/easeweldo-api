@@ -131,7 +131,7 @@ class Company extends Model
 
     public function getEmployeeById(int $employeeId): ?Employee
     {
-        $employee = $this->employees->where('id', $employeeId)->first();
+        $employee = $this->employees()->with('user')->where('id', $employeeId)->first();
         if (!$employee) {
             throw new \Exception('Employee not found');
         }
