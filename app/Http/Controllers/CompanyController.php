@@ -9,7 +9,6 @@ use App\Services\CompanyService;
 use App\Traits\Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class CompanyController extends Controller
@@ -27,7 +26,6 @@ class CompanyController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-
         $companies = $this->applyFilters($request, Company::query(), [
             'name'
         ]);

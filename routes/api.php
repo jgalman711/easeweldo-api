@@ -59,7 +59,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('employees', [EmployeeController::class, 'all']);
     });
     Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {
-        Route::resource('companies', CompanyController::class)->only('view', 'update');
+        Route::resource('companies', CompanyController::class)->only('index', 'show', 'update');
         Route::prefix('companies/{company}')->group(function () {
             Route::resource('/payrolls', PayrollController::class)->only('index', 'show', 'store');
             Route::resource('/employees', EmployeeController::class);

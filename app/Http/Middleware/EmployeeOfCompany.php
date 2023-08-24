@@ -25,7 +25,7 @@ class EmployeeOfCompany
             ? $request->route('company')->id
             : Company::where('slug', $request->route('company'))->first()->id;
 
-        if ($user->employee && $user->employee->company_id == $companyId) {
+        if ($user->companies()->where('company_id', $companyId)->exists()) {
             return $next($request);
         }
         return response()->json([
