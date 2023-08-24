@@ -26,6 +26,8 @@ class User extends Authenticatable
         'employee_id'
     ];
 
+    protected $appends = ['email'];
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -48,5 +50,10 @@ class User extends Authenticatable
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    public function getEmailAttribute(): string
+    {
+        return $this->email_address;
     }
 }
