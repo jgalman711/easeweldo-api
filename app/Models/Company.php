@@ -90,6 +90,11 @@ class Company extends Model
         return $this->hasMany(Period::class);
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'company_users', 'company_id', 'user_id');
+    }
+
     public function workSchedules(): HasMany
     {
         return $this->hasMany(WorkSchedule::class);

@@ -47,6 +47,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function companies()
+    {
+        return $this->belongsToMany(Company::class, 'company_users', 'user_id', 'company_id');
+    }
+
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
