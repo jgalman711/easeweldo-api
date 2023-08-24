@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\Recaptcha;
 use Illuminate\Validation\Rule;
 
 class CompanyRegistrationRequest extends BaseRequest
@@ -25,7 +26,8 @@ class CompanyRegistrationRequest extends BaseRequest
                     $query->whereNull('deleted_at');
                 }),
             ],
-            'password' => 'required|confirmed|min:6'
+            'password' => 'required|confirmed|min:6',
+            'g-recaptcha-response' => ['required', new Recaptcha]
         ];
     }
 }
