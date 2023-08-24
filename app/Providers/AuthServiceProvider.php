@@ -31,7 +31,7 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         ResetPassword::createUrlUsing(function (User $user, string $token) {
-            return env('AUTH_APP_URL') . '/reset-password?token=' . $token;
+            return env('AUTH_APP_URL') . '/reset-password?token=' . $token . '&email_address=' . $user->email_address;
         });
     }
 }

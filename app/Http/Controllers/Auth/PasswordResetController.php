@@ -2,42 +2,61 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\BaseController;
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
-use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Support\Str;
 
-class PasswordResetController extends BaseController
+class PasswordResetController extends Controller
 {
-    public function reset(Request $request)
+    public const INVALID_TOKEN_MESSAGE = 'Token is invalid.';
+
+    public function index(Request $request): JsonResponse
+    {
+        $token = DB::table('password_reset_tokens')
+            ->where('email', $request->email_address)
+            ->first();
+        if ($token) {
+            return $this->sendResponse($token, 'Reset password token retrieved successfullly.');
+        }
+        return $this->sendError(self::INVALID_TOKEN_MESSAGE);
+    }
+
+    public function reset(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required_without:username',
-            'username' => 'required_without:email',
-            'old_password' => 'required',
-            'new_password' => 'required|confirmed|min:6'
+            'token' => 'required',
+            'email_address' => 'required|email',
+            'password' => 'required|min:6|confirmed',
         ]);
         if ($validator->fails()) {
             return $this->sendError('Validation Error.', $validator->errors());
         }
-        $credentials = $request->only(['username', 'email', 'password']);
-        $credentials['password'] = $request->old_password;
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            $user->forceFill([
-                'password' => Hash::make($request->new_password)
-            ])->save();
-            $success['token'] =  $user->createToken(env('APP_NAME'))->plainTextToken;
-            PersonalAccessToken::where('tokenable_id', $user->id)
-                ->where('tokenable_type', get_class($user))
-                ->delete();
-            return $this->sendResponse($success, 'Password reset successfully.');
+
+        $status = Password::reset(
+            $request->only('email_address', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->setRememberToken(Str::random(60));
+                $user->save();
+                event(new PasswordReset($user));
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            $response = $this->sendResponse($status, 'Password reset successfully.');
+        } elseif($status === Password::INVALID_TOKEN) {
+            $response = $this->sendError(self::INVALID_TOKEN_MESSAGE);
         } else {
-            return $this->sendError('Unauthorised.', [
-                'error' => 'The provided username/email does not match the old password.'
-            ]);
+            $response = $this->sendError('Unable to reset password.');
         }
+        return $response;
     }
 }

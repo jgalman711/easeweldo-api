@@ -47,6 +47,7 @@ Route::get('artisan-migrate', function () {
 Route::post('register', [RegisterController::class, 'register']);
 Route::post('login', [LoginController::class, 'login']);
 Route::post('reset-password', [PasswordResetController::class, 'reset'])->name('password.reset');
+Route::get('reset-password', [PasswordResetController::class, 'index']);
 Route::post('forgot-password', [ForgotPasswordController::class, 'forgot']);
 
 Route::resource('/subscriptions', SubscriptionController::class)->only('index', 'show');

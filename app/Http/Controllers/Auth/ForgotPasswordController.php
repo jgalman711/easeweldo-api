@@ -17,7 +17,7 @@ class ForgotPasswordController extends Controller
         if ($validator->fails()) {
             return $this->sendError('Validation Error.', $validator->errors());
         }
-        
+
         $status = Password::sendResetLink([
             'email_address' => $request->email_address
         ]);
@@ -25,7 +25,7 @@ class ForgotPasswordController extends Controller
         if ($status === Password::RESET_LINK_SENT) {
             $response = $this->sendResponse($status, 'Reset password link sent to your email.');
         } elseif ($status === Password::RESET_THROTTLED) {
-            $response =$this->sendError('Please wait before trying again.');
+            $response = $this->sendError('Please wait before trying again.');
         } else {
             $response = $this->sendError('Unable to send reset password link.');
         }
