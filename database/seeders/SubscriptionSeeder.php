@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Enumerators\SubscriptionEnumerator;
+use App\Enumerators\Subscriptions;
 use App\Models\Subscription;
 use Illuminate\Database\Seeder;
 
@@ -10,9 +12,9 @@ class SubscriptionSeeder extends Seeder
     public function run(): void
     {
         Subscription::create([
-            'name' => 'basic-ease',
-            'type' => 'core',
-            'title' => 'Basic Ease 200',
+            'name' => SubscriptionEnumerator::CORE,
+            'title' => 'Standard',
+            'type' => SubscriptionEnumerator::TYPE_CORE,
             'description' => 'Enjoy essential features and tools with our "Basic Ease" subscription. Perfect for startups and small businesses, this plan provides access to core functionalities that streamline your operations. Stay organized, manage employees, and track time effortlessly. Upgrade your efficiency with the "Basic Ease" subscription.',
             'amount' => 200,
             'features' => json_encode([
@@ -32,9 +34,9 @@ class SubscriptionSeeder extends Seeder
         ]);
 
         Subscription::create([
-            'name' => 'time-and-attendance',
-            'type' => 'add-on',
-            'title' => 'Time and Attendance 49',
+            'name' => SubscriptionEnumerator::CORE_TIME,
+            'title' => 'Premium',
+            'type' => SubscriptionEnumerator::TYPE_BUNDLE,
             'description' => 'Elevate your workforce management with the "Time and Attendance 49" subscription. Unlock advanced time tracking and attendance features that empower your business to optimize productivity. Seamlessly manage employee schedules, monitor attendance trends, and ensure accurate payroll. Elevate your team\'s efficiency with the "Time and Attendance 49" subscription.',
             'amount' => 49,
             'features' => json_encode([
@@ -55,9 +57,9 @@ class SubscriptionSeeder extends Seeder
         ]);
 
         Subscription::create([
-            'name' => 'auto-disburse',
-            'type' => 'add-on',
-            'title' => 'Auto Disbursement 49',
+            'name' => SubscriptionEnumerator::CORE_TIME_DISBURSE,
+            'title' => 'Ultimate',
+            'type' => SubscriptionEnumerator::TYPE_BUNDLE,
             'description' => "Simplify payroll processes and enhance financial efficiency with the 'Auto-Disburse' subscription. Say goodbye to manual disbursements and embrace automated salary payments. Seamlessly distribute salaries, benefits, and incentives to your employees with precision and ease. Enhance your payroll management with the streamlined 'Auto-Disburse' subscription.",
             'amount' => 49,
             'features' => json_encode([

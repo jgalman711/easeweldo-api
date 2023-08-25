@@ -10,20 +10,13 @@ class Subscription extends Model
 {
     use HasFactory, SoftDeletes;
 
-    public const PAID_STATUS = 'paid';
-
-    public const UNPAID_STATUS = 'unpaid';
-
-    public const CORE = 'basic-ease';
-
-    public const TIME_ATTENDANCE = 'time-and-attendance';
-
     protected $appends = ['discounted_amount'];
 
     protected $fillable = [
-        'name',
+        'title',
         'amount',
-        'details'
+        'description',
+        'features'
     ];
 
     protected $casts = [

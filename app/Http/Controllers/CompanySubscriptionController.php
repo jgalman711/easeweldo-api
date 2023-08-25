@@ -47,7 +47,7 @@ class CompanySubscriptionController extends Controller
         $now = Carbon::now();
 
         foreach ($input['subscriptions'] as $subscriptionId) {
-            $subscription = Subscription::find($subscriptionId);
+            $subscription = Subscription::findOrFail($subscriptionId);
             CompanySubscription::updateOrCreate([
                 'company_id' => $company->id,
                 'subscription_id' => $subscription->id

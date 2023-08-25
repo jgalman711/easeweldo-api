@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enumerators\SubscriptionEnumerator;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -181,10 +182,13 @@ class Company extends Model
 
     public function hasTimeAndAttendanceSubscription()
     {
-        $subscriptionId = Subscription::where('name', Subscription::TIME_ATTENDANCE)->first()->id;
-        foreach ($this->companySubscriptions as $subscription) {
-            if ($subscription->subscription_id == $subscriptionId
-                && $subscription->status == Subscription::PAID_STATUS
+        $subscription = Subscription::where('name', SubscriptionEnumerator::CORE_TIME)
+            ->orWhere('name', SubscriptionEnumerator::CORE_TIME_DISBURSE)
+            ->first();
+
+        foreach ($this->companySubscriptions as $companySubscription) {
+            if ($companySubscription->subscription_id == $subscription->id
+                && $companySubscription->status == SubscriptionEnumerator::PAID_STATUS
                 && Carbon::now()->lte($subscription->end_date)
             ) {
                 return true;
@@ -195,11 +199,15 @@ class Company extends Model
 
     public function hasCoreSubscription(): bool
     {
-        $subscriptionId = Subscription::where('name', Subscription::CORE)->first()->id;
-        foreach ($this->companySubscriptions as $subscription) {
-            if ($subscription->subscription_id == $subscriptionId
-                && $subscription->status == Subscription::PAID_STATUS
-                && Carbon::now()->lte($subscription->end_date)
+        $subscription = Subscription::where('name', SubscriptionEnumerator::CORE)
+            ->orWhere('name', SubscriptionEnumerator::CORE_TIME)
+            ->orWhere('name', SubscriptionEnumerator::CORE_TIME_DISBURSE)
+            ->first();
+
+        foreach ($this->companySubscriptions as $companySubscription) {
+            if ($companySubscription->subscription_id == $subscription->id
+                && $companySubscription->status == SubscriptionEnumerator::PAID_STATUS
+                && Carbon::now()->lte($companySubscription->end_date)
             ) {
                 return true;
             }
