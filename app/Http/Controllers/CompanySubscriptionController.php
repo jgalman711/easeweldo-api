@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enumerators\SubscriptionEnumerator;
 use App\Http\Requests\SubscriptionRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
@@ -40,28 +41,51 @@ class CompanySubscriptionController extends Controller
         return $this->sendResponse(new BaseResource($subscriptions), 'Company subscriptions retrieved successfully.');
     }
 
-    public function store(SubscriptionRequest $request, Company $company)
+    public function store(SubscriptionRequest $request, Company $company): JsonResponse
     {
         $input = $request->validated();
-        $employeeCount = $company->employees()->where('status', Employee::ACTIVE)->count();
+        $employeeCount = $input['employee_count'] ?? $company->employees()->where('status', Employee::ACTIVE)->count();
         $now = Carbon::now();
 
-        foreach ($input['subscriptions'] as $subscriptionId) {
-            $subscription = Subscription::findOrFail($subscriptionId);
-            CompanySubscription::updateOrCreate([
-                'company_id' => $company->id,
-                'subscription_id' => $subscription->id
-            ], [
-                'status' => Subscription::UNPAID_STATUS,
-                'amount_per_employee' => $subscription->amount,
-                'amount' => $subscription->amount * $employeeCount,
-                'start_date' => $now,
-                'end_date' => $now->clone()->addMonth($input['months'])
-            ]);
+        $subscription = Subscription::findOrFail($input['subscription_id']);
+        $companySubscription = CompanySubscription::firstOrCreate([
+            'company_id' => $company->id,
+            'subscription_id' => $subscription->id
+        ], [
+            'status' => SubscriptionEnumerator::UNPAID_STATUS,
+            'amount_per_employee' => $subscription->amount,
+            'amount' => $subscription->amount * $employeeCount,
+            'start_date' => $now,
+            'end_date' => $now->clone()->addMonth($input['months'])
+        ]);
+
+        if ($companySubscription->wasRecentlyCreated) {
+            $message = "Company subscribed successfully to {$subscription->title}";
+        } else {
+            $message = "Company already subscribed to {$subscription->title}";
         }
+        return $this->sendResponse(new BaseResource($companySubscription), $message);
+    }
+
+    public function update(SubscriptionRequest $request, Company $company): JsonResponse
+    {
+        $input = $request->validated();
+        $companySubscription = $company->companySubscriptions()->first();
+        $input['end_date'] = Carbon::parse($companySubscription->end_date)->addMonths($input['months']);
+        $companySubscription->update($input);
         return $this->sendResponse(
-            BaseResource::collection($company->companySubscriptions),
-            'Company subscribed successfully.'
+            new BaseResource($companySubscription),
+            'Company subscription successfully updated.'
+        );
+    }
+
+    public function delete(Company $company): JsonResponse
+    {
+        $companySubscription = $company->companySubscriptions()->first();
+        $companySubscription->delete();
+        return $this->sendResponse(
+            new BaseResource($companySubscription),
+            'Company subscription successfully deleted.'
         );
     }
 }
