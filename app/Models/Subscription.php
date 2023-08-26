@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Subscription extends Model
@@ -23,7 +24,12 @@ class Subscription extends Model
         'subscriptions' => 'array'
     ];
 
-    public function getDiscountedAmountAttribute()
+    public function subscriptionPrices(): HasMany
+    {
+        return $this->hasMany(SubscriptionPrices::class);
+    }
+
+    public function getDiscountedAmountAttribute(): float
     {
         return number_format($this->amount - $this->discount, 2);
     }
