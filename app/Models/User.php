@@ -57,7 +57,7 @@ class User extends Authenticatable
         return $this->belongsTo(Employee::class);
     }
 
-    public function getEmailAttribute(): string
+    public function getEmailAttribute(): ?string
     {
         return $this->email_address;
     }
