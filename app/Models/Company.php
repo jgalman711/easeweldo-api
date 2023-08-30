@@ -22,6 +22,11 @@ class Company extends Model
         self::STATUS_PENDING
     ];
 
+    protected $appends = [
+        'has_time_and_attendance_subscription',
+        'has_core_subscription'
+    ];
+
     public const STATUS_ACTIVE = 'active';
 
     public const STATUS_INACTIVE = 'inactive';
@@ -213,5 +218,15 @@ class Company extends Model
             }
         }
         return false;
+    }
+
+    public function getHasTimeAndAttendanceSubscriptionAttribute()
+    {
+        return self::hasTimeAndAttendanceSubscription();
+    }
+
+    public function gethasCoreSubscriptionAttribute()
+    {
+        return self::hasCoreSubscription();
     }
 }

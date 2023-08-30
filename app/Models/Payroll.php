@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -24,7 +23,18 @@ class Payroll extends Model
 
     protected $fillable = [
         'employee_id',
-        'period_id'
+        'period_id',
+        'description',
+        'overtime_minutes',
+        'late_minutes',
+        'absent_minutes',
+        'undertime_minutes',
+        'regular_holiday_hours_worked',
+        'special_holiday_hours_worked',
+        'leaves',
+        'taxable_earnings',
+        'non_taxable_earnings',
+        'remarks'
     ];
 
     protected $appends = ['non_taxable_total_earnings', 'taxable_total_earnings'];
