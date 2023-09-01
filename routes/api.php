@@ -61,7 +61,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {
         Route::resource('companies', CompanyController::class)->only('index', 'show', 'update');
         Route::prefix('companies/{company}')->group(function () {
-            Route::resource('/payrolls', PayrollController::class)->only('index', 'show', 'store');
+            Route::resource('/payrolls', PayrollController::class)->except('delete');
             Route::resource('/employees', EmployeeController::class);
             Route::prefix('employees/{employee}')->group(function () {
                 Route::get('/qrcode', [QrController::class, 'show']);

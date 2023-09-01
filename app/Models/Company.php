@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Company extends Model
@@ -88,7 +87,7 @@ class Company extends Model
 
     public function period(int $periodId): Period
     {
-        return $this->periods()->findOrFail($periodId);
+        return $this->periods()->where('company_period_id', $periodId)->first();
     }
 
     public function periods(): HasMany
@@ -104,18 +103,6 @@ class Company extends Model
     public function workSchedules(): HasMany
     {
         return $this->hasMany(WorkSchedule::class);
-    }
-
-    public function employeeSchedule(int $employeeId)
-    {
-        return $this->hasManyThrough(
-            WorkSchedule::class,
-            Employee::class,
-            'company_id',
-            'employee_id',
-            'id',
-            'id'
-        );
     }
 
     public function setting(): HasOne
@@ -185,7 +172,7 @@ class Company extends Model
         return $workSchedule;
     }
 
-    public function hasTimeAndAttendanceSubscription()
+    public function getHasTimeAndAttendanceSubscriptionAttribute()
     {
         $subscription = Subscription::where('name', SubscriptionEnumerator::CORE_TIME)
             ->orWhere('name', SubscriptionEnumerator::CORE_TIME_DISBURSE)
@@ -202,15 +189,11 @@ class Company extends Model
         return false;
     }
 
-    public function hasCoreSubscription(): bool
+    public function getHasCoreSubscriptionAttribute()
     {
-        $subscription = Subscription::where('name', SubscriptionEnumerator::CORE)
-            ->orWhere('name', SubscriptionEnumerator::CORE_TIME)
-            ->orWhere('name', SubscriptionEnumerator::CORE_TIME_DISBURSE)
-            ->first();
-
+        $subscriptions = Subscription::whereIn('name', SubscriptionEnumerator::NAMES)->pluck('id');
         foreach ($this->companySubscriptions as $companySubscription) {
-            if ($companySubscription->subscription_id == $subscription->id
+            if (in_array($companySubscription->subscription_id, $subscriptions->toArray())
                 && $companySubscription->status == SubscriptionEnumerator::PAID_STATUS
                 && Carbon::now()->lte($companySubscription->end_date)
             ) {
@@ -218,15 +201,5 @@ class Company extends Model
             }
         }
         return false;
-    }
-
-    public function getHasTimeAndAttendanceSubscriptionAttribute()
-    {
-        return self::hasTimeAndAttendanceSubscription();
-    }
-
-    public function gethasCoreSubscriptionAttribute()
-    {
-        return self::hasCoreSubscription();
     }
 }

@@ -15,7 +15,7 @@ class CheckCompanySubscriptions
             ? $request->route('company')
             : Company::where('slug', $request->route('company'))->first();
 
-        if ($company && $company->hasTimeAndAttendanceSubscription()) {
+        if ($company && $company->hasTimeAndAttendanceSubscription) {
             return $next($request);
         }
         return response()->json(['message' => 'Company does not have required subscriptions'], 403);

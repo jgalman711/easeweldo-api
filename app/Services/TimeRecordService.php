@@ -6,8 +6,10 @@ use App\Models\Biometrics;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Leave;
+use App\Models\Period;
 use App\Models\TimeRecord;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
@@ -130,11 +132,29 @@ class TimeRecordService
             ->setDate($day->year, $day->month, $day->day);
         $expectedSchedule['expected_clock_out'] = Carbon::parse($expectedSchedule['expected_clock_out'])
             ->setDate($day->year, $day->month, $day->day);
+
+        $timeRecord = TimeRecord::whereDate('clock_in', $expectedSchedule['expected_clock_in'])->first();
+        if ($timeRecord) {
+            $timeRecord->update($expectedSchedule);
+            return $timeRecord;
+        }
         return TimeRecord::updateOrCreate($expectedSchedule, [
             'company_id' => $employee->company_id,
             'employee_id' => $employee->id
         ]);
     }
+
+    public function setExpectedScheduleByPeriod(Employee $employee, Period $period): void
+    {
+        $period = CarbonPeriod::create($period->start_date, $period->end_date);
+        foreach ($period as $date) {
+            $expectedSchedule = $this->getExpectedScheduleOf($employee, $date, $date);
+            if (self::isExpected($expectedSchedule)) {
+                $this->setExpectedScheduleOf($employee, $date);
+            }
+        }
+    }
+
 
     public function synchFromBiometrics(array $attendance, Company $company)
     {
@@ -197,5 +217,14 @@ class TimeRecordService
             ]);
         }
         return $timeRecord;
+    }
+
+    private function isExpected(array $expectedSchedule): bool
+    {
+        return isset(
+            $expectedSchedule['expected_clock_in']) &&
+            $expectedSchedule['expected_clock_in'] &&
+            isset($expectedSchedule['expected_clock_out']) &&
+            $expectedSchedule['expected_clock_out'];
     }
 }

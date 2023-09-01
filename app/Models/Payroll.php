@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payroll extends Model
@@ -18,7 +19,12 @@ class Payroll extends Model
     protected $casts = [
         'leaves' => 'json',
         'taxable_earnings' => 'json',
-        'non_taxable_earnings' => 'json'
+        'non_taxable_earnings' => 'json',
+        'holidays' => 'json'
+    ];
+
+    protected $hidden = [
+        'holidays'
     ];
 
     protected $fillable = [
@@ -37,19 +43,63 @@ class Payroll extends Model
         'remarks'
     ];
 
-    protected $appends = ['non_taxable_total_earnings', 'taxable_total_earnings'];
+    protected $appends = [
+        'regular_holiday_hours_worked',
+        'regular_holiday_hours_worked_pay',
+        'regular_holiday_hours',
+        'regular_holiday_hours_pay',
+        'special_holiday_hours_worked',
+        'special_holiday_hours_worked_pay',
+        'special_holiday_hours',
+        'special_holiday_hours_pay',
+        'total_non_taxable_earnings',
+        'total_taxable_earnings',
+        'total_contributions',
+        'total_deductions',
+        'gross_income'
+    ];
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
+    }
+
+    public function period(): BelongsTo
+    {
+        return $this->belongsTo(Period::class);
+    }
 
     public function getLeavesAttribute($value)
     {
         return json_decode($value, true);
     }
 
-    public function setLeavesAttribute($value)
+    public function getTotalContributionsAttribute(): float
     {
-        $this->attributes['leaves'] = json_encode($value);
+        return $this->sss_contributions + $this->philhealth_contributions + $this->pagibig_contributions;
     }
 
-    public function getTaxableTotalEarningsAttribute()
+    public function getTotalDeductionsAttribute(): float
+    {
+        return $this->absent_deductions - $this->undertime_deductions - $this->late_deductions;
+    }
+
+    public function getGrossIncomeAttribute(): float
+    {
+        return $this->basic_salary - $this->total_deductions + $this->overtime_pay;
+    }
+
+    public function getTaxableIncomeAttribute(): float
+    {
+        return $this->gross_income - $this->total_contributions + $this->total_taxable_earnings;
+    }
+
+    public function getNetIncomeAttribute(): float
+    {
+        return $this->taxable_income - $this->withheld_tax + $this->total_non_taxable_earnings;
+    }
+
+    public function getTotalTaxableEarningsAttribute(): float
     {
         $taxableEarnings = isset($this->attributes['taxable_earnings'])
             ? json_decode($this->attributes['taxable_earnings'], true)
@@ -66,7 +116,7 @@ class Payroll extends Model
         return $totalTaxableEarnings;
     }
 
-    public function getNonTaxableTotalEarningsAttribute()
+    public function getTotalNonTaxableEarningsAttribute(): float
     {
         $nonTaxableEarnings = isset($this->attributes['non_taxable_earnings'])
             ? json_decode($this->attributes['non_taxable_earnings'], true)
@@ -83,13 +133,43 @@ class Payroll extends Model
         return $totalNonTaxableEarnings;
     }
 
-    public function employee()
+    public function getRegularHolidayHoursAttribute(): float
     {
-        return $this->belongsTo(Employee::class);
+        return $this->holidays[Holiday::REGULAR_HOLIDAY]['hours'];
     }
 
-    public function period()
+    public function getRegularHolidayHoursPayAttribute(): float
     {
-        return $this->belongsTo(Period::class);
+        return $this->holidays[Holiday::REGULAR_HOLIDAY]['hours_pay'];
+    }
+
+    public function getRegularHolidayHoursWorkedAttribute(): float
+    {
+        return $this->holidays[Holiday::REGULAR_HOLIDAY]['hours_worked'];
+    }
+
+    public function getRegularHolidayHoursWorkedPayAttribute(): float
+    {
+        return $this->holidays[Holiday::REGULAR_HOLIDAY]['hours_worked_pay'];
+    }
+
+    public function getSpecialHolidayHoursAttribute(): float
+    {
+        return $this->holidays[Holiday::SPECIAL_HOLIDAY]['hours'];
+    }
+
+    public function getSpecialHolidayHoursPayAttribute(): float
+    {
+        return $this->holidays[Holiday::SPECIAL_HOLIDAY]['hours_pay'];
+    }
+
+    public function getSpecialHolidayHoursWorkedAttribute(): float
+    {
+        return $this->holidays[Holiday::SPECIAL_HOLIDAY]['hours_worked'];
+    }
+
+    public function getSpecialHolidayHoursWorkedPayAttribute(): float
+    {
+        return $this->holidays[Holiday::SPECIAL_HOLIDAY]['hours_worked_pay'];
     }
 }

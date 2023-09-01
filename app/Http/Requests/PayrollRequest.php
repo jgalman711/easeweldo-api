@@ -18,7 +18,7 @@ class PayrollRequest extends BaseRequest
             'undertime_minutes' => self::NULLABLE_NUMERIC,
             'regular_holiday_hours_worked' => self::NULLABLE_NUMERIC,
             'special_holiday_hours_worked' => self::NULLABLE_NUMERIC,
-            'leaves' => self::PRESENT_NULLABLE_ARRAY,
+            'leaves' => self::NULLABLE_ARRAY,
             'leaves.*.type' => self::NULLABLE_STRING,
             'leaves.*.hours' => self::NULLABLE_NUMERIC,
             'leaves.*.date' => 'nullable|date',

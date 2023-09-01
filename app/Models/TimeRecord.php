@@ -31,20 +31,21 @@ class TimeRecord extends Model
 
     public function scopeByRange(Builder $timeRecordsQuery, array $range): Builder
     {
-        if (isset($range['dateTo']) && $range['dateTo']) {
-            $timeRecordsQuery->where(function ($query) use ($range) {
-                $query->whereDate('expected_clock_in', '>=', $range['dateTo'])
-                    ->orWhereDate('clock_in', '>=', $range['dateTo']);
+        $timeRecordsQuery->where(function ($query) use ($range) {
+            $query->when($range['dateFrom'] ?? false, function ($dateFromQuery) use ($range) {
+                $dateFromQuery->where('expected_clock_out', '>=', $range['dateFrom']);
             });
-        }
-
-        if (isset($range['dateFrom']) && $range['dateFrom']) {
-            $timeRecordsQuery->where(function ($query) use ($range) {
-                $query->whereDate('expected_clock_out', '<=', $range['dateFrom'])
-                    ->orWhereDate('clock_out', '<=', $range['dateFrom']);
+            $query->when($range['dateTo'] ?? false, function ($dateToQuery) use ($range) {
+                $dateToQuery->where('expected_clock_in', '<=', $range['dateTo']);
             });
-        }
-
+        })->orWhere(function ($query) use ($range) {
+            $query->when($range['dateFrom'] ?? false, function ($dateFromQuery) use ($range) {
+                $dateFromQuery->where('clock_out', '>=', $range['dateFrom']);
+            });
+            $query->when($range['dateTo'] ?? false, function ($dateToQuery) use ($range) {
+                $dateToQuery->where('clock_in', '<=', $range['dateTo']);
+            });
+        });
         return $timeRecordsQuery;
     }
 }
