@@ -86,6 +86,8 @@ class PayrollController extends Controller
         }
         $this->forget($company);
         if (empty($errors)) {
+            $payroll->makeHidden('employee');
+            $payroll->makeHidden('period');
             return $this->sendResponse(new PayrollResource($payroll), 'Payroll created successfully.');
         } else {
             return $this->sendError(ErrorMessagesEnumerator::PAYROLL_GENERATION_FAILED, $errors);
@@ -95,12 +97,19 @@ class PayrollController extends Controller
     public function update(PayrollRequest $request, Company $company, int $payrollId): JsonResponse
     {
         $input = $request->validated();
-        $employee = $company->getEmployeeById($request->employee_id);
-        if ($employee->status != Employee::ACTIVE) {
-            return $this->sendError("Unable to generate payroll for {$employee->status} employee.");
+        $payroll = $company->payrolls->where('id', $payrollId)->first();
+        if (!$payroll) {
+            return $this->sendError("Payroll not found");
         }
-        $payroll = $this->payrollService->regenerate($period, $employee, $input);
-        $this->forget($company);
-        return $this->sendResponse(new PayrollResource($payroll), 'Payroll created successfully.');
+
+        try {
+            $payroll = $this->payrollService->update($payroll, $input);
+            $payroll->makeHidden('employee');
+            $payroll->makeHidden('period');
+            $this->forget($company);
+            return $this->sendResponse(new PayrollResource($payroll), 'Payroll updated successfully.');
+        } catch (Exception $e) {
+            return $this->sendError("Failed to update payroll.", $e->getMessage());
+        }
     }
 }

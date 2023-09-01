@@ -13,6 +13,7 @@ use App\Services\Contributions\PhilHealthService;
 use App\Services\Contributions\SSSService;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
 class PayrollService
@@ -109,7 +110,25 @@ class PayrollService
             $timesheet = $this->getTimesheet($employee, $period);
             $payroll = self::calculateAttendanceRecords($payroll, $timesheet);
         }
-        $payroll = self::calculateHolidayPay($payroll, $timesheet);
+        $payroll = self::calculateAttendancePay($payroll, $this->salaryData->hourly_rate);
+        $payroll = self::calculateHolidayHours($payroll, $timesheet);
+        $payroll = self::calculateHolidayPay($payroll);
+        $payroll = self::calculateLeaves($payroll);
+        $payroll = self::calculateContributions($payroll);
+        $payroll = self::calculateOtherEarnings($payroll);
+        $payroll = self::calculateWithheldTax($payroll);
+        $payroll->save();
+        return $payroll;
+    }
+
+    public function update(Payroll $payroll, array $data)
+    {
+        $this->initializePayroll($payroll->employee, $payroll->period);
+        $data = self::parseHoliday($payroll, $data);
+        $data = self::parseAttendance($data);
+        $payroll->update($data);
+        $payroll = self::calculateAttendancePay($payroll, $this->salaryData->hourly_rate);
+        $payroll = self::calculateHolidayPay($payroll);
         $payroll = self::calculateLeaves($payroll);
         $payroll = self::calculateContributions($payroll);
         $payroll = self::calculateOtherEarnings($payroll);
@@ -129,7 +148,6 @@ class PayrollService
         $underMinutes = 0;
         $overtimeMinutes = 0;
         $minutesWorked = 0;
-        $hourlyRate = $this->salaryData->hourly_rate;
         $working_hours_per_day = $this->salaryData->working_hours_per_day;
 
         foreach (Holiday::HOLIDAY_TYPES as $type) {
@@ -138,11 +156,11 @@ class PayrollService
         }
 
         foreach ($timesheet as $record) {
-            $expectedClockIn = $record->expected_clock_in ? Carbon::parse($record->expected_clock_in) : null;
-            $expectedClockOut = $record->expected_clock_out ? Carbon::parse($record->expected_clock_out) : null;
-            $clockIn = Carbon::parse($record->clock_in);
-            $clockOut = Carbon::parse($record->clock_out);
-            $minutesWorked += $clockIn->diffInMinutes($clockOut);
+            $expectedClockIn = self::parseClockRecord($record->expected_clock_in);
+            $expectedClockOut = self::parseClockRecord($record->expected_clock_out);
+            $clockIn = self::parseClockRecord($record->clock_in);
+            $clockOut = self::parseClockRecord($record->clock_out);
+            $minutesWorked = self::getMinutesWorked($clockIn, $clockOut);
 
             if (!$record->clock_in && !$record->clock_out) {
                 $absentMinutes += $this->attendanceService->calculateAbsences($working_hours_per_day);
@@ -159,20 +177,20 @@ class PayrollService
         }
 
         $payroll->absent_minutes = $absentMinutes;
-        $payroll->absent_deductions = $this->attendanceService->formatHourly($absentMinutes, $hourlyRate);
-
         $payroll->late_minutes = $lateMinutes;
-        $payroll->late_deductions = $this->attendanceService->formatHourly($lateMinutes, $hourlyRate);
-
         $payroll->undertime_minutes = $underMinutes;
-        $payroll->undertime_deductions = $this->attendanceService->formatHourly($underMinutes, $hourlyRate);
-
         $payroll->overtime_minutes = $overtimeMinutes;
-        $payroll->overtime_pay = $this->attendanceService->formatHourly($overtimeMinutes, $hourlyRate);
-
         $payroll->expected_hours_worked = $timesheet->count() * $working_hours_per_day;
         $payroll->hours_worked = $minutesWorked / self::SIXTY_MINUTES;
+        return $payroll;
+    }
 
+    public function calculateAttendancePay(Payroll $payroll, float $hourlyRate): Payroll
+    {
+        $payroll->absent_deductions = $this->attendanceService->formatHourly($payroll->absent_minutes, $hourlyRate);
+        $payroll->late_deductions = $this->attendanceService->formatHourly($payroll->late_minutes, $hourlyRate);
+        $payroll->undertime_deductions = $this->attendanceService->formatHourly($payroll->undertime_minutes, $hourlyRate);
+        $payroll->overtime_pay = $this->attendanceService->formatHourly($payroll->overtime_minutes, $hourlyRate);
         return $payroll;
     }
 
@@ -200,20 +218,14 @@ class PayrollService
         return $payroll;
     }
 
-    private function calculateHolidayPay(Payroll $payroll, Collection $timesheet = null): Payroll
+    private function calculateHolidayHours(Payroll $payroll, Collection $timesheet = null): Payroll
     {
-        $hourlyRate = $this->salaryData->hourly_rate;
         foreach (Holiday::HOLIDAY_TYPES as $type) {
             $holidays = $this->holidays->where('simplified_type', $type);
             $hours = 0;
-            $hoursPay = 0;
             $hoursWorked = 0;
-            $hoursWorkedPay = 0;
-            $rate = $this->salaryData->{"{$type}_holiday_rate"};
             foreach ($holidays as $holiday) {
                 $hours += $this->salaryData->working_hours_per_day;
-                $hoursPay += $this->salaryData->daily_rate;
-
                 $filteredCollection = $timesheet->where(function ($item) use ($holiday) {
                     $clockInDate = substr($item['clock_in'], 0, 10);
                     return $clockInDate === $holiday->date;
@@ -225,23 +237,49 @@ class PayrollService
                         $clockOut = Carbon::parse($entry->clock_out);
                         $minutesWorked = $clockIn->diffInMinutes($clockOut);
                         $hoursWorked += $minutesWorked / self::SIXTY_MINUTES;
-                        $hoursWorkedPay += $this->attendanceService->formatHourly($minutesWorked, $hourlyRate) * $rate;
                     }
                 }
             }
             $holidaysPay[$type] = [
                 'hours' => $hours,
-                'hours_pay' => $hoursPay,
                 'hours_worked' => $hoursWorked,
-                'hours_worked_pay' => $hoursWorkedPay
             ];
         }
         $payroll->holidays = $holidaysPay;
         return $payroll;
     }
 
+    private function calculateHolidayPay(Payroll $payroll): Payroll
+    {
+        $holidays = $payroll->holidays;
+        foreach ($holidays as $type => $holiday) {
+
+            $rate = $this->salaryData->{"{$type}_holiday_rate"};
+
+            $holidays[$type] = [
+                ...$holidays[$type],
+                'hours_pay' => $holiday['hours'] * $this->salaryData->hourly_rate,
+                'hours_worked_pay' => $holiday['hours_worked'] * $this->salaryData->hourly_rate * $rate
+            ];
+        }
+        $payroll->holidays = $holidays;
+        return $payroll;
+    }
+
     private function calculateLeaves(Payroll $payroll): Payroll
     {
+        $leavesPay = 0;
+        $period = $payroll->period;
+        $leaves = $payroll->leaves;
+        foreach ($leaves as $key => $leave) {
+            if ($leave['date'] >= $period->start_date && $leave['date'] <= $period->end_date) {
+                $leavesPay += $leave['hours'] * $this->salaryData->hourly_rate;
+            } else {
+                unset($leaves[$key]);
+            }
+        }
+        $payroll->leaves = $leaves;
+        $payroll->leaves_pay = $leavesPay;
         return $payroll;
     }
 
@@ -253,4 +291,49 @@ class PayrollService
         ])->get();
     }
 
+    private function parseClockRecord(?string $clock): ?Carbon
+    {
+        return $clock ? Carbon::parse($clock) : null;
+    }
+
+    private function getMinutesWorked(?Carbon $clockIn, ?Carbon $clockOut): float
+    {
+        if ($clockIn && $clockOut) {
+            return $clockIn->diffInMinutes($clockOut);
+        }
+        return 0;
+    }
+
+    private function parseHoliday(Payroll $payroll, array $data): array
+    {
+        $holidays = $payroll->holidays;
+        if (isset($data['regular_holiday_hours_worked'])) {
+            $holidays[Holiday::REGULAR_HOLIDAY]['hours_worked'] = floatval($data['regular_holiday_hours_worked']);
+            unset($data['regular_holiday_hours_worked']);
+        }
+        if (isset($data['special_holiday_hours_worked'])) {
+            $holidays[Holiday::SPECIAL_HOLIDAY]['hours_worked'] = floatval($data['special_holiday_hours_worked']);
+            unset($data['special_holiday_hours_worked']);
+        }
+        $data['holidays'] = $holidays;
+        return $data;
+    }
+
+    private function parseAttendance(array $data): array
+    {
+        $types = [
+            'overtime_hours' => 'overtime_minutes',
+            'late_hours' => 'late_minutes',
+            'absent_hours' => 'absent_minutes',
+            'undertime_hours' => 'undertime_minutes'
+        ];
+
+        foreach ($types as $hours => $minutes) {
+            if (isset($data[$hours])) {
+                $data[$minutes] = $data[$hours] * self::SIXTY_MINUTES;
+                unset($data[$hours]);
+            }
+        }
+        return $data;
+    }
 }

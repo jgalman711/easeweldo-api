@@ -9,13 +9,11 @@ class PayrollRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'employee_id' => 'exists:employees,id',
-            'period_id' => 'required|exists:periods,id',
             'description' => self::NULLABLE_STRING,
-            'overtime_minutes' => self::NULLABLE_NUMERIC,
-            'late_minutes' => self::NULLABLE_NUMERIC,
-            'absent_minutes' => self::NULLABLE_NUMERIC,
-            'undertime_minutes' => self::NULLABLE_NUMERIC,
+            'overtime_hours' => self::NULLABLE_NUMERIC,
+            'late_hours' => self::NULLABLE_NUMERIC,
+            'absent_hours' => self::NULLABLE_NUMERIC,
+            'undertime_hours' => self::NULLABLE_NUMERIC,
             'regular_holiday_hours_worked' => self::NULLABLE_NUMERIC,
             'special_holiday_hours_worked' => self::NULLABLE_NUMERIC,
             'leaves' => self::NULLABLE_ARRAY,

@@ -17,10 +17,10 @@ class Payroll extends Model
     public const TYPE_FINAL_PAY = 'final_pay';
 
     protected $casts = [
+        'holidays' => 'json',
         'leaves' => 'json',
         'taxable_earnings' => 'json',
-        'non_taxable_earnings' => 'json',
-        'holidays' => 'json'
+        'non_taxable_earnings' => 'json'
     ];
 
     protected $hidden = [
@@ -40,6 +40,7 @@ class Payroll extends Model
         'leaves',
         'taxable_earnings',
         'non_taxable_earnings',
+        'holidays',
         'remarks'
     ];
 
@@ -56,7 +57,9 @@ class Payroll extends Model
         'total_taxable_earnings',
         'total_contributions',
         'total_deductions',
-        'gross_income'
+        'gross_income',
+        'taxable_income',
+        'net_income'
     ];
 
     public function employee(): BelongsTo
