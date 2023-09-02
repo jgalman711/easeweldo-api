@@ -9,6 +9,7 @@ use App\Models\Company;
 use App\Models\CompanySubscription;
 use App\Models\Employee;
 use App\Models\Subscription;
+use App\Models\SubscriptionPrices;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 
@@ -48,13 +49,20 @@ class CompanySubscriptionController extends Controller
         $now = Carbon::now();
 
         $subscription = Subscription::findOrFail($input['subscription_id']);
-        $companySubscription = CompanySubscription::firstOrCreate([
+
+        $subscriptionPrice = SubscriptionPrices::where([
+            'subscription_id' => $subscription->id,
+            'months' => $input['months']
+        ])->first();
+
+        $companySubscription = CompanySubscription::updateOrCreate([
             'company_id' => $company->id,
             'subscription_id' => $subscription->id
         ], [
             'status' => SubscriptionEnumerator::UNPAID_STATUS,
-            'amount_per_employee' => $subscription->amount,
-            'amount' => $subscription->amount * $employeeCount,
+            'amount_per_employee' => $subscriptionPrice->price_per_employee,
+            'amount' => $subscriptionPrice->price_per_employee * $employeeCount * $input['months'],
+            'balance' => $subscriptionPrice->price_per_employee * $employeeCount * $input['months'],
             'start_date' => $now,
             'end_date' => $now->clone()->addMonth($input['months'])
         ]);
