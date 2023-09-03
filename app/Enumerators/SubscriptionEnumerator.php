@@ -29,4 +29,16 @@ class SubscriptionEnumerator
 
     public const PAID_STATUS = 'paid';
     public const UNPAID_STATUS = 'unpaid';
+
+    public const MONTHS = [
+        self::MONTHS_1,
+        self::MONTHS_12,
+        self::MONTHS_24,
+        self::MONTHS_36
+    ];
+
+    public const MONTHS_36 = 36;
+    public const MONTHS_24 = 24;
+    public const MONTHS_12 = 12;
+    public const MONTHS_1 = 1;
 }

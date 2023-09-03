@@ -21,6 +21,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalaryComputationController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\SubscriptionPricesController;
 use App\Http\Controllers\SynchBiometricsController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\TimesheetUploadController;
@@ -52,6 +53,7 @@ Route::get('reset-password', [PasswordResetController::class, 'index']);
 Route::post('forgot-password', [ForgotPasswordController::class, 'forgot']);
 
 Route::resource('/subscriptions', SubscriptionController::class)->only('index', 'show');
+Route::resource('/subscription-prices', SubscriptionPricesController::class)->only('index');
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['middleware' => ['role:super-admin']], function () {
