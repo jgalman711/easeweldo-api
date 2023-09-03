@@ -61,6 +61,7 @@ class CompanySubscriptionController extends Controller
         ], [
             'status' => SubscriptionEnumerator::UNPAID_STATUS,
             'amount_per_employee' => $subscriptionPrice->price_per_employee,
+            'employee_count' => $input['employee_count'],
             'amount' => $subscriptionPrice->price_per_employee * $employeeCount * $input['months'],
             'balance' => $subscriptionPrice->price_per_employee * $employeeCount * $input['months'],
             'start_date' => $now,

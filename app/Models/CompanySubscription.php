@@ -16,6 +16,7 @@ class CompanySubscription extends Model
         'status',
         'amount',
         'amount_per_employee',
+        'employee_count',
         'amount_paid',
         'balance',
         'overpaid_balance',
