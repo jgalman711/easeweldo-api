@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\BiometricsController as AdminBiometricsController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -54,8 +55,9 @@ Route::resource('/subscriptions', SubscriptionController::class)->only('index', 
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['middleware' => ['role:super-admin']], function () {
-        Route::resource('holidays', HolidayController::class);
+        Route::resource('biometrics', AdminBiometricsController::class);
         Route::resource('companies', CompanyController::class);
+        Route::resource('holidays', HolidayController::class);
         Route::get('employees', [EmployeeController::class, 'all']);
     });
     Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {
