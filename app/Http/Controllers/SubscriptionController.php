@@ -11,10 +11,7 @@ class SubscriptionController extends Controller
 {
     public function index(): JsonResponse
     {
-        $subscriptions = Cache::remember('subscriptions', 3600, function () {
-            return Subscription::with('subscriptionPrices')->get();
-        });
-
+        $subscriptions = Subscription::with('subscriptionPrices')->get();
         return $this->sendResponse(
             BaseResource::collection($subscriptions),
             'Subscriptions retrieved successfully.'
@@ -23,10 +20,7 @@ class SubscriptionController extends Controller
 
     public function show(Subscription $subscription): JsonResponse
     {
-        $subscription = Cache::remember('subscription', 3600, function () use ($subscription) {
-            $subscription->load('subscriptionPrices');
-            return $subscription;
-        });
+        $subscription = $subscription->load('subscriptionPrices');
         return $this->sendResponse(new BaseResource($subscription), 'Subscription retrieved successfully.');
     }
 }
