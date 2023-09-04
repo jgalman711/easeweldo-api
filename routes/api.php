@@ -14,6 +14,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeScheduleController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\PeriodsController;
 use App\Http\Controllers\QrController;
@@ -54,6 +55,7 @@ Route::post('forgot-password', [ForgotPasswordController::class, 'forgot']);
 
 Route::resource('/subscriptions', SubscriptionController::class)->only('index', 'show');
 Route::resource('/subscription-prices', SubscriptionPricesController::class)->only('index');
+Route::resource('/payment-methods', PaymentMethodController::class)->only('index');
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['middleware' => ['role:super-admin']], function () {

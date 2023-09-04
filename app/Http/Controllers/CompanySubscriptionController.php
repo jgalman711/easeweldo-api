@@ -5,13 +5,17 @@ namespace App\Http\Controllers;
 use App\Enumerators\SubscriptionEnumerator;
 use App\Http\Requests\SubscriptionRequest;
 use App\Http\Resources\BaseResource;
+use App\Mail\UserSubscribed;
 use App\Models\Company;
 use App\Models\CompanySubscription;
 use App\Models\Employee;
+use App\Models\PaymentMethod;
 use App\Models\Subscription;
 use App\Models\SubscriptionPrices;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class CompanySubscriptionController extends Controller
 {
@@ -42,7 +46,7 @@ class CompanySubscriptionController extends Controller
         return $this->sendResponse(new BaseResource($subscriptions), 'Company subscriptions retrieved successfully.');
     }
 
-    public function store(SubscriptionRequest $request, Company $company): JsonResponse
+    public function store(SubscriptionRequest $request, Company $company)
     {
         $input = $request->validated();
         $employeeCount = $input['employee_count'] ?? $company->employees()->where('status', Employee::ACTIVE)->count();
@@ -61,12 +65,16 @@ class CompanySubscriptionController extends Controller
         ], [
             'status' => SubscriptionEnumerator::UNPAID_STATUS,
             'amount_per_employee' => $subscriptionPrice->price_per_employee,
-            'employee_count' => $input['employee_count'],
+            'employee_count' => $employeeCount,
             'amount' => $subscriptionPrice->price_per_employee * $employeeCount * $input['months'],
             'balance' => $subscriptionPrice->price_per_employee * $employeeCount * $input['months'],
             'start_date' => $now,
             'end_date' => $now->clone()->addMonth($input['months'])
         ]);
+
+        $user = Auth::user();
+        $companySubscription->load('company', 'subscription');
+        Mail::to($user->email_address)->send(new UserSubscribed($companySubscription));
 
         if ($companySubscription->wasRecentlyCreated) {
             $message = "Company subscribed successfully to {$subscription->title}";

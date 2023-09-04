@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Resources\BaseResource;
 use App\Models\Subscription;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Cache;
 
 class SubscriptionController extends Controller
 {
