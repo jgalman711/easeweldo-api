@@ -271,8 +271,8 @@ class PayrollService
     {
         $leavesPay = 0;
         $period = $payroll->period;
-        $leaves = $payroll->leaves;
-        if ($leaves && $period) {
+        $leaves = collect(json_decode($payroll->leaves, true))->unique('date')->values()->all();
+        if (!empty($leaves) && $period) {
             foreach ($leaves as $key => $leave) {
                 if ($leave['date'] >= $period->start_date && $leave['date'] <= $period->end_date) {
                     $leavesPay += $leave['hours'] * $this->salaryData->hourly_rate;
@@ -309,7 +309,7 @@ class PayrollService
                 return [
                     "type" => $type,
                     "date" => date("Y-m-d", strtotime($item["start_date"])),
-                    "hours" => $interval->h,
+                    "hours" => $interval->h - $this->salaryData->break_hours_per_day,
                 ];
             });
             $payroll->leaves = json_encode($leaves);
@@ -356,7 +356,7 @@ class PayrollService
 
         foreach ($types as $hours => $minutes) {
             if (isset($data[$hours])) {
-                $data[$minutes] = $data[$hours] * self::SIXTY_MINUTES;
+                $data[$minutes] = $data[$hours] / self::SIXTY_MINUTES;
                 unset($data[$hours]);
             }
         }
