@@ -21,6 +21,8 @@ class Biometrics extends Model
 
     public const STATUS_INACTIVE = 'inactive';
 
+    public const STATUS_ACTIVE = 'active';
+
     protected $fillable = [
         'name',
         'company_id',

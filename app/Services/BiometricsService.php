@@ -16,10 +16,14 @@ class BiometricsService
 
     public function initialize(Biometrics $biometrics)
     {
-        $biometrics = BiometricsStrategyFactory::createStrategy($biometrics);
-        $biometrics->connect();
-        $biometrics->disableDevice();
-        return $biometrics;
+        try {
+            $biometrics = BiometricsStrategyFactory::createStrategy($biometrics);
+            $biometrics->connect();
+            $biometrics->disableDevice();
+            return $biometrics;
+        } catch (Exception) {
+            throw new Exception("Please ensure your device is connected to the network and try again. Check the device's IP configuration if needed.");
+        }
     }
 
     public function synchEmployees(Biometrics $biometrics, Collection $employees): void

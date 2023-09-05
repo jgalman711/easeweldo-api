@@ -17,6 +17,7 @@ class ZKTecoBiometricsStrategy implements BiometricsStrategy
     public function __construct(Biometrics $biometrics)
     {
         $this->zkTeco = new ZKLibrary($biometrics->ip_address, $biometrics->port, 'TCP');
+        $this->zkTeco->setTimeout(10);
     }
 
     public function connect(): void

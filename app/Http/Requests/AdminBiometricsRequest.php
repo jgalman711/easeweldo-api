@@ -13,7 +13,8 @@ class AdminBiometricsRequest extends BaseRequest
             'port' => self::REQUIRED_NUMERIC,
             'provider' => self::REQUIRED_STRING,
             'model' => self::REQUIRED_STRING,
-            'product_number' => self::REQUIRED_STRING
+            'product_number' => self::REQUIRED_STRING,
+            'status' => self::REQUIRED_STRING
         ];
     }
 }

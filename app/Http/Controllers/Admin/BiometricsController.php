@@ -6,13 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminBiometricsRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Biometrics;
+use App\Services\BiometricsService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class BiometricsController extends Controller
 {
-    public function __construct()
+    protected $biometricsService;
+
+    public function __construct(BiometricsService $biometricsService)
     {
+        $this->biometricsService = $biometricsService;
         $this->setCacheIdentifier('biometrics');
     }
 
@@ -43,14 +48,30 @@ class BiometricsController extends Controller
             'status' => Biometrics::STATUS_INACTIVE,
             ...$request->validated(),
         ]);
-        return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data saved successfully.');
+
+        try {
+            $this->biometricsService->initialize($biometrics);
+            $biometrics->status = Biometrics::STATUS_ACTIVE;
+            return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data saved successfully.');
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
     }
 
     public function update(AdminBiometricsRequest $request, int $biometricsId): JsonResponse
     {
-        $biometrics = Biometrics::find($biometricsId);
-        $biometrics->update($request->validated());
-        return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data updated successfully.');
+        try {
+            $biometrics = Biometrics::find($biometricsId);
+            $biometrics->update($request->validated());
+            if ($biometrics->status == Biometrics::STATUS_ACTIVE) {
+                $this->biometricsService->initialize($biometrics);
+            }
+            return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data updated successfully.');
+        } catch (Exception $e) {
+            $biometrics->status = Biometrics::STATUS_INACTIVE;
+            $biometrics->save();
+            return $this->sendError($e->getMessage());
+        }
     }
 
     public function destroy(int $biometricsId): JsonResponse
