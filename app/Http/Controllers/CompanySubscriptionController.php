@@ -72,12 +72,11 @@ class CompanySubscriptionController extends Controller
             'end_date' => $now->clone()->addMonth($input['months'])
         ]);
 
-        $user = Auth::user();
-        $companySubscription->load('company', 'subscription');
-        Mail::to($user->email_address)->send(new UserSubscribed($companySubscription));
-
         if ($companySubscription->wasRecentlyCreated) {
             $message = "Company subscribed successfully to {$subscription->title}";
+            $user = Auth::user();
+            $companySubscription->load('company', 'subscription');
+            Mail::to($user->email_address)->send(new UserSubscribed($companySubscription));
         } else {
             $message = "Company already subscribed to {$subscription->title}";
         }

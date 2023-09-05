@@ -9,7 +9,7 @@ class LeaveRequest extends BaseRequest
         return [
             'type' => 'required',
             'start_date' => self::REQUIRED_DATE,
-            'end_date' => self::REQUIRED_DATE
+            'end_date' => self::REQUIRED_DATE . '|after:start_date'
         ];
     }
 }

@@ -34,8 +34,12 @@ class LeaveController extends Controller
         $data = $leaveRequest->validated();
         $data['company_id'] = $company->id;
         $data['employee_id'] = $employee->id;
-        $leave = $this->leaveService->applyLeave($employee, $data);
-        return $this->sendResponse(new BaseResource($leave), 'Leave created successfully.');
+        try {
+            $leave = $this->leaveService->applyLeave($employee, $data);
+            return $this->sendResponse(new BaseResource($leave), 'Leave created successfully.');
+        } catch (Exception $e) {
+            return $this->sendError("Unable to apply leave.", $e->getMessage());
+        }
     }
 
     public function show(Company $company, int $employeeId, int $leaveId): JsonResponse

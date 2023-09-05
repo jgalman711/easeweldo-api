@@ -104,6 +104,7 @@ class PayrollService
     public function generate(Period $period, Employee $employee): Payroll
     {
         $payroll = $this->initializePayroll($employee, $period);
+        $payroll = $this->getLeaves($payroll);
         $payroll->basic_salary = $this->salaryData->basic_salary / self::CYCLE_DIVISOR[$this->settings->period_cycle];
         if ($this->company->hasTimeAndAttendanceSubscription) {
             $this->timeRecordService->setExpectedScheduleByPeriod($employee, $period);
@@ -271,15 +272,17 @@ class PayrollService
         $leavesPay = 0;
         $period = $payroll->period;
         $leaves = $payroll->leaves;
-        foreach ($leaves as $key => $leave) {
-            if ($leave['date'] >= $period->start_date && $leave['date'] <= $period->end_date) {
-                $leavesPay += $leave['hours'] * $this->salaryData->hourly_rate;
-            } else {
-                unset($leaves[$key]);
+        if ($leaves && $period) {
+            foreach ($leaves as $key => $leave) {
+                if ($leave['date'] >= $period->start_date && $leave['date'] <= $period->end_date) {
+                    $leavesPay += $leave['hours'] * $this->salaryData->hourly_rate;
+                } else {
+                    unset($leaves[$key]);
+                }
             }
+            $payroll->leaves = $leaves;
+            $payroll->leaves_pay = $leavesPay;
         }
-        $payroll->leaves = $leaves;
-        $payroll->leaves_pay = $leavesPay;
         return $payroll;
     }
 
@@ -289,6 +292,29 @@ class PayrollService
             'dateFrom' => $period->start_date,
             'dateTo' => $period->end_date
         ])->get();
+    }
+
+    private function getLeaves(Payroll $payroll): Payroll
+    {
+        $leaves = $payroll->employee->leaves()->where([
+            ['start_date', '>=', $payroll->period->start_date],
+            ['end_date', '<=', $payroll->period->end_date]
+        ])->get();
+        if ($leaves->isNotEmpty()) {
+            $leaves = $leaves->map(function ($item) {
+                $type = str_replace("_leave", "", $item["type"]);
+                $startDateTime = new Carbon($item["start_date"]);
+                $endDateTime = new Carbon($item["end_date"]);
+                $interval = $startDateTime->diff($endDateTime);
+                return [
+                    "type" => $type,
+                    "date" => date("Y-m-d", strtotime($item["start_date"])),
+                    "hours" => $interval->h,
+                ];
+            });
+            $payroll->leaves = json_encode($leaves);
+        }
+        return $payroll;
     }
 
     private function parseClockRecord(?string $clock): ?Carbon
