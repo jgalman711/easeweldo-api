@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class LeaveService
 {
@@ -48,30 +49,47 @@ class LeaveService
             })->get();
     }
 
-    public function applyLeave(Employee $employee, array $data): Leave
+    public function applyLeave(Employee $employee, array $data): array
     {
         $data['type'] = Leave::TYPE_EMERGENCY_LEAVE ? Leave::TYPE_VACATION_LEAVE : $data['type'];
         $startDate = Carbon::parse($data['start_date']);
-        $endDate = Carbon::parse($data['end_date']);
-        $leaveHours = $startDate->diffInHours($endDate);
-        if ($leaveHours > self::WORK_HOURS_PER_DAY) {
-            $leaveHours -= self::HOUR_BREAK;
+        $originalEndDate = Carbon::parse($data['end_date']);
+
+        $dateRange = [];
+        while ($startDate <= $originalEndDate) {
+            $endDate = $startDate->copy()
+                ->addHours($employee->salaryComputation->working_hours_per_day)
+                ->addHours($employee->salaryComputation->break_hours_per_day);
+
+            $leaveHours = $startDate->diffInHours($endDate);
+
+            if ($leaveHours > $employee->salaryComputation->working_hours_per_day / 2) {
+                $leaveHours -= $employee->salaryComputation->break_hours_per_day;
+            }
+
+            $availableHoursLeaveType = "available_" . $data['type'] . "_hours";
+            if ($employee->salaryComputation->{$availableHoursLeaveType} < $leaveHours) {
+                break;
+            }
+
+            $dateRange[] = [
+                'type' => $data['type'],
+                'start_date' => $startDate->toDateTimeString(),
+                'end_date' => $endDate->toDateTimeString()
+            ];
+
+            $employee->salaryComputation->{$availableHoursLeaveType} -= $leaveHours;
+            $employee->salaryComputation->save();
+            $createdByUser = Auth::user();
+            $data['created_by'] = $createdByUser->id;
+            $data['status'] = Leave::PENDING;
+            $leave = Leave::create($data);
+            if ($createdByUser->hasRole('business-admin') || $createdByUser->hasRole('super-admin')) {
+                $this->approve($leave);
+            }
+            $startDate->addDay();
         }
-        $availableHoursLeaveType = "available_" . $data['type'] . "_hours";
-        throw_if(
-            $employee->salaryComputation->{$availableHoursLeaveType} <= $leaveHours,
-            new Exception('Insufficient leave')
-        );
-        $employee->salaryComputation->{$availableHoursLeaveType} -= $leaveHours;
-        $employee->salaryComputation->save();
-        $createdByUser = Auth::user();
-        $data['created_by'] = $createdByUser->id;
-        $data['status'] = Leave::PENDING;
-        $leave = Leave::create($data);
-        if ($createdByUser->hasRole('business-admin') || $createdByUser->hasRole('super-admin')) {
-            $this->approve($leave);
-        }
-        return $leave;
+        return $dateRange;
     }
 
     public function approve(Leave $leave): void
