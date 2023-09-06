@@ -221,8 +221,12 @@ class PayrollService
 
     private function calculateHolidayHours(Payroll $payroll, Collection $timesheet = null): Payroll
     {
+        $holidaysPay = [];
         foreach (Holiday::HOLIDAY_TYPES as $type) {
             $holidays = $this->holidays->where('simplified_type', $type);
+            if (!$holidays) {
+                continue;
+            }
             $hours = 0;
             $hoursWorked = 0;
             foreach ($holidays as $holiday) {
