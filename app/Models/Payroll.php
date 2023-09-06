@@ -138,41 +138,41 @@ class Payroll extends Model
 
     public function getRegularHolidayHoursAttribute(): float
     {
-        return $this->holidays[Holiday::REGULAR_HOLIDAY]['hours'];
+        return optional($this->holidays[Holiday::REGULAR_HOLIDAY])['hours'];
     }
 
     public function getRegularHolidayHoursPayAttribute(): float
     {
-        return $this->holidays[Holiday::REGULAR_HOLIDAY]['hours_pay'];
+        return optional($this->holidays[Holiday::REGULAR_HOLIDAY])['hours_pay'];
     }
 
     public function getRegularHolidayHoursWorkedAttribute(): float
     {
-        return $this->holidays[Holiday::REGULAR_HOLIDAY]['hours_worked'];
+        return optional($this->holidays[Holiday::REGULAR_HOLIDAY])['hours_worked'];
     }
 
     public function getRegularHolidayHoursWorkedPayAttribute(): float
     {
-        return $this->holidays[Holiday::REGULAR_HOLIDAY]['hours_worked_pay'];
+        return optional($this->holidays[Holiday::REGULAR_HOLIDAY])['hours_worked_pay'];
     }
 
     public function getSpecialHolidayHoursAttribute(): float
     {
-        return $this->holidays[Holiday::SPECIAL_HOLIDAY]['hours'];
+        return optional($this->holidays[Holiday::SPECIAL_HOLIDAY])['hours'];
     }
 
     public function getSpecialHolidayHoursPayAttribute(): float
     {
-        return $this->holidays[Holiday::SPECIAL_HOLIDAY]['hours_pay'];
+        return optional($this->holidays[Holiday::SPECIAL_HOLIDAY])['hours_pay'];
     }
 
     public function getSpecialHolidayHoursWorkedAttribute(): float
     {
-        return $this->holidays[Holiday::SPECIAL_HOLIDAY]['hours_worked'];
+        return optional($this->holidays[Holiday::SPECIAL_HOLIDAY])['hours_worked'];
     }
 
     public function getSpecialHolidayHoursWorkedPayAttribute(): float
     {
-        return $this->holidays[Holiday::SPECIAL_HOLIDAY]['hours_worked_pay'];
+        return optional($this->holidays[Holiday::SPECIAL_HOLIDAY])['hours_worked_pay'];
     }
 }
