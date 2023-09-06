@@ -20,6 +20,7 @@ class CompanySubscription extends Model
         'amount_paid',
         'balance',
         'overpaid_balance',
+        'months',
         'start_date',
         'end_date',
     ];

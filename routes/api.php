@@ -82,12 +82,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
                     Route::delete('/', [SalaryComputationController::class, 'delete']);
                 });
             });
-            Route::prefix('/subscriptions')->group(function () {
-                Route::get('/', [CompanySubscriptionController::class, 'index']);
-                Route::post('/', [CompanySubscriptionController::class, 'store']);
-                Route::put('/', [CompanySubscriptionController::class, 'update']);
-                Route::delete('/', [CompanySubscriptionController::class, 'delete']);
-            });
+            Route::resource('/subscriptions', CompanySubscriptionController::class);
             Route::resource('/work-schedules', WorkScheduleController::class);
             Route::resource('/periods', PeriodsController::class)->except('store');
             Route::resource('/reports', ReportController::class);

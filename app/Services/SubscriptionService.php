@@ -7,7 +7,6 @@ use App\Models\Company;
 use App\Models\CompanySubscription;
 use App\Models\Employee;
 use App\Models\Subscription;
-use App\Models\SubscriptionPrices;
 use Carbon\Carbon;
 use Exception;
 
@@ -43,30 +42,75 @@ class SubscriptionService
         }
     }
 
-
     public function upgrade(CompanySubscription $companySubscription, array $upgradeData): CompanySubscription
     {
         throw_if(
-            $upgradeData['subscription_id'] <= $companySubscription->subscription_id,
+            $upgradeData['subscription_id'] < $companySubscription->subscription_id,
             new Exception("Invalid upgrade plan.")
         );
+        throw_if(
+            $upgradeData['subscription_id'] == $companySubscription->subscription_id,
+            new Exception("Company is already subscribed to {$companySubscription->subscription->title} Plan.")
+        );
         $employeeCount = $this->getEmployeeCount($companySubscription->employee_count, $upgradeData);
-        $upgradedSubscriptionPlan = Subscription::with(['subscriptionprices' => function ($query) {
+        $upgradedSubscriptionPlan = Subscription::with(['subscriptionPrices' => function ($query) {
             $query->where('months', self::REGULAR_ONE_MONTH);
         }])->findOrFail($upgradeData['subscription_id']);
 
         $remainingMonths = Carbon::now()->diffInMonths($companySubscription->end_date);
-        $pricePerEmployee = floatval($upgradedSubscriptionPlan->subscriptionprices->first()->price_per_employee);
+        $subscriptionPrices = $upgradedSubscriptionPlan->subscriptionPrices->first();
+        $pricePerEmployee = floatval($subscriptionPrices->price_per_employee);
         $amountToPay = $pricePerEmployee * $employeeCount * $remainingMonths;
         $companySubscription->update([
             'subscription_id' => $upgradedSubscriptionPlan->id,
             'status' => SubscriptionEnumerator::UNPAID_STATUS,
             'amount_per_employee' => $pricePerEmployee,
             'employee_count' => $employeeCount,
-            'amount' => $companySubscription->amount + $amountToPay,
-            'balance' => $amountToPay - $companySubscription->balance
+            'amount' => $amountToPay,
+            'balance' => $amountToPay - $companySubscription->amount_paid
         ]);
+        $companySubscription->load('company', 'subscription');
         return $companySubscription;
+    }
+
+    public function renew(CompanySubscription $companySubscription, array $renewData): CompanySubscription
+    {
+        // Make a condition here to check if the subscription is already renewed.
+        $newCompanySubscription = $this->subscribe($companySubscription->company, $renewData, $companySubscription);
+        return $companySubscription;
+    }
+
+    public function subscribe(
+        Company $company,
+        array $subscriptionData,
+        CompanySubscription $companySubscription = null
+    ): CompanySubscription {
+        $activeEmployees = $company->employees()->where('status', Employee::ACTIVE)->count();
+        $employeeCount = $this->getEmployeeCount($activeEmployees, $subscriptionData);
+
+        $startDate = $companySubscription
+            ? Carbon::parse($companySubscription->end_date)->addDay()
+            : Carbon::now();
+
+        $subscriptionPlan = Subscription::with(['subscriptionPrices' => function ($query) use ($subscriptionData) {
+            $query->where('months', $subscriptionData['months']);
+        }])->findOrFail($subscriptionData['subscription_id']);
+
+        $subscriptionPrice = $subscriptionPlan->subscriptionPrices->first();
+        $pricePerEmployee = $subscriptionPrice->price_per_employee;
+
+        return CompanySubscription::create([
+            'company_id' => $company->id,
+            'subscription_id' => $subscriptionPlan->id,
+            'status' => SubscriptionEnumerator::UNPAID_STATUS,
+            'amount_per_employee' => $pricePerEmployee,
+            'employee_count' => $employeeCount,
+            'months' => $subscriptionData['months'],
+            'amount' => $pricePerEmployee * $employeeCount * $subscriptionData['months'],
+            'balance' => $pricePerEmployee * $employeeCount * $subscriptionData['months'],
+            'start_date' => $startDate,
+            'end_date' => $startDate->clone()->addMonth($subscriptionData['months'])
+        ])->load('company', 'subscription');
     }
 
     private function getEmployeeCount(int $employeeCount, array $upgradeData): int
