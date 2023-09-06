@@ -13,7 +13,6 @@ class DashboardResource extends BaseResource
      */
     public function toArray(Request $request): array
     {
-        dd($request->all());
         return parent::toArray($request);
     }
 }
