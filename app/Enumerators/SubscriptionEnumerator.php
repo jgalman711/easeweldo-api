@@ -41,4 +41,13 @@ class SubscriptionEnumerator
     public const MONTHS_24 = 24;
     public const MONTHS_12 = 12;
     public const MONTHS_1 = 1;
+
+    public const ACTIONS = [
+        self::NEW,
+        self::RENEW,
+        self::UPGRADE
+    ];
+    public const NEW = 'new';
+    public const RENEW = 'renew';
+    public const UPGRADE = 'upgrade';
 }

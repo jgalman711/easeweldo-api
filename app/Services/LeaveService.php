@@ -6,18 +6,12 @@ use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Leave;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class LeaveService
 {
     protected $timeRecordService;
-
-    private const HOUR_BREAK = 1;
-
-    private const WORK_HOURS_PER_DAY = 8;
 
     public function __construct(TimeRecordService $timeRecordService)
     {

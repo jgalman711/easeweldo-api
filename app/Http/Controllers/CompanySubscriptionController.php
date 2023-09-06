@@ -4,23 +4,27 @@ namespace App\Http\Controllers;
 
 use App\Enumerators\SubscriptionEnumerator;
 use App\Http\Requests\SubscriptionRequest;
-use App\Http\Resources\BaseResource;
+use App\Http\Resources\CompanySubscriptionResource;
 use App\Mail\UserSubscribed;
 use App\Models\Company;
 use App\Models\CompanySubscription;
 use App\Models\Employee;
-use App\Models\PaymentMethod;
 use App\Models\Subscription;
 use App\Models\SubscriptionPrices;
+use App\Services\SubscriptionService;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 class CompanySubscriptionController extends Controller
 {
-    public function __construct()
+    protected $subscriptionService;
+
+    public function __construct(SubscriptionService $subscriptionService)
     {
+        $this->subscriptionService = $subscriptionService;
         $this->setCacheIdentifier('subscriptions');
     }
 
@@ -28,7 +32,7 @@ class CompanySubscriptionController extends Controller
     {
         $subscriptions = $this->remember($company, function () use ($company) {
             if (!$company->isInSettlementPeriod()) {
-                $employeeCount = $company->employees()->where('status', Employee::ACTIVE)->count() - 1;
+                $employeeCount = $company->employees()->where('status', Employee::ACTIVE)->count();
                 foreach ($company->companySubscriptions as $companySubscription) {
                     $companySubscription->amount = $employeeCount * $companySubscription->amount_per_employee;
                     $balance = $companySubscription->amount - $companySubscription->amount_paid;
@@ -43,7 +47,8 @@ class CompanySubscriptionController extends Controller
             }
             return $company->companySubscriptions()->with('subscription')->get();
         });
-        return $this->sendResponse(new BaseResource($subscriptions), 'Company subscriptions retrieved successfully.');
+        return $this->sendResponse(CompanySubscriptionResource::collection($subscriptions),
+            'Company subscriptions retrieved successfully.');
     }
 
     public function store(SubscriptionRequest $request, Company $company)
@@ -59,13 +64,14 @@ class CompanySubscriptionController extends Controller
             'months' => $input['months']
         ])->first();
 
-        $companySubscription = CompanySubscription::updateOrCreate([
+        $companySubscription = CompanySubscription::firstOrCreate([
             'company_id' => $company->id,
             'subscription_id' => $subscription->id
         ], [
             'status' => SubscriptionEnumerator::UNPAID_STATUS,
             'amount_per_employee' => $subscriptionPrice->price_per_employee,
             'employee_count' => $employeeCount,
+            'months' => $input['months'],
             'amount' => $subscriptionPrice->price_per_employee * $employeeCount * $input['months'],
             'balance' => $subscriptionPrice->price_per_employee * $employeeCount * $input['months'],
             'start_date' => $now,
@@ -78,21 +84,32 @@ class CompanySubscriptionController extends Controller
             $companySubscription->load('company', 'subscription');
             Mail::to($user->email_address)->send(new UserSubscribed($companySubscription));
         } else {
-            $message = "Company already subscribed to {$subscription->title}";
+            $message = "Company is already subscribed to {$subscription->title}";
         }
-        return $this->sendResponse(new BaseResource($companySubscription), $message);
+        return $this->sendResponse(new CompanySubscriptionResource($companySubscription), $message);
     }
 
     public function update(SubscriptionRequest $request, Company $company): JsonResponse
     {
-        $input = $request->validated();
-        $companySubscription = $company->companySubscriptions()->first();
-        $input['end_date'] = Carbon::parse($companySubscription->end_date)->addMonths($input['months']);
-        $companySubscription->update($input);
-        return $this->sendResponse(
-            new BaseResource($companySubscription),
-            'Company subscription successfully updated.'
-        );
+        try {
+            $input = $request->validated();
+            $companySubscription = $company->companySubscriptions()->first();
+
+            if (isset($input['action']) && $input['action'] == SubscriptionEnumerator::UPGRADE) {
+                $this->subscriptionService->upgrade($companySubscription, $input);
+            } elseif (isset($input['action']) && $input['action'] == SubscriptionEnumerator::RENEW) {
+                $this->subscriptionService->renew($companySubscription, $input);
+            }
+
+            $input['end_date'] = Carbon::parse($companySubscription->end_date)->addMonths($input['months']);
+            $companySubscription->update($input);
+            return $this->sendResponse(
+                new CompanySubscriptionResource($companySubscription),
+                'Company subscription successfully updated.'
+            );
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
     }
 
     public function delete(Company $company): JsonResponse
@@ -100,7 +117,7 @@ class CompanySubscriptionController extends Controller
         $companySubscription = $company->companySubscriptions()->first();
         $companySubscription->delete();
         return $this->sendResponse(
-            new BaseResource($companySubscription),
+            new CompanySubscriptionResource($companySubscription),
             'Company subscription successfully deleted.'
         );
     }
