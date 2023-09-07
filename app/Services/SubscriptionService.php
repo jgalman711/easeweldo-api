@@ -49,10 +49,6 @@ class SubscriptionService
             $upgradeData['subscription_id'] < $companySubscription->subscription_id,
             new Exception("Invalid upgrade plan.")
         );
-        throw_if(
-            $upgradeData['subscription_id'] == $companySubscription->subscription_id,
-            new Exception("Company is already subscribed to {$companySubscription->subscription->title} Plan.")
-        );
         $employeeCount = $this->getEmployeeCount($companySubscription->employee_count, $upgradeData);
         $upgradedSubscriptionPlan = Subscription::with(['subscriptionPrices' => function ($query) {
             $query->where('months', self::REGULAR_ONE_MONTH);

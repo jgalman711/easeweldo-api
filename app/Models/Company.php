@@ -23,7 +23,11 @@ class Company extends Model
 
     protected $appends = [
         'has_time_and_attendance_subscription',
-        'has_core_subscription'
+        'has_core_subscription',
+        'subscription_amount',
+        'subscription_amount_paid',
+        'subscription_balance',
+        'subscription_status'
     ];
 
     public const STATUS_ACTIVE = 'active';
@@ -201,5 +205,30 @@ class Company extends Model
             }
         }
         return false;
+    }
+
+    public function getSubscriptionBalanceAttribute(): float
+    {
+        return $this->companySubscriptions()->sum('balance');
+    }
+
+    public function getSubscriptionAmountPaidAttribute(): float
+    {
+        return $this->companySubscriptions()->sum('amount_paid');
+    }
+
+    public function getSubscriptionAmountAttribute(): float
+    {
+        return $this->companySubscriptions()->sum('amount');
+    }
+
+    public function getSubscriptionStatusAttribute(): string
+    {
+        $unpaidSubscriptionsCount = $this->companySubscriptions()
+            ->where('status', SubscriptionEnumerator::UNPAID_STATUS)
+            ->count();
+        return $unpaidSubscriptionsCount > 0
+            ? SubscriptionEnumerator::UNPAID_STATUS
+            : SubscriptionEnumerator::PAID_STATUS;
     }
 }
