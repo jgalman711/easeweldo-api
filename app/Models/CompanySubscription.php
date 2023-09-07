@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CompanySubscription extends Model
@@ -13,6 +14,7 @@ class CompanySubscription extends Model
     protected $fillable = [
         'company_id',
         'subscription_id',
+        'renewed_from_id',
         'status',
         'amount',
         'amount_per_employee',
@@ -35,5 +37,10 @@ class CompanySubscription extends Model
     public function subscription(): BelongsTo
     {
         return $this->belongsTo(Subscription::class);
+    }
+
+    public function renewals(): HasMany
+    {
+        return $this->hasMany(CompanySubscription::class, 'renewed_from_id');
     }
 }

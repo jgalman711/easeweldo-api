@@ -65,6 +65,12 @@ class CompanySubscriptionController extends Controller
                 $companySubscription = $this->subscriptionService->upgrade($companySubscription, $input);
             } elseif ($input['action'] == SubscriptionEnumerator::RENEW) {
                 $companySubscription = $this->subscriptionService->renew($companySubscription, $input);
+                if (is_array($companySubscription)) {
+                    return $this->sendError(
+                        $companySubscription['message'],
+                        $companySubscription['companySubscription']
+                    );
+                }
             }
             $this->forget($company);
             return $this->sendResponse(

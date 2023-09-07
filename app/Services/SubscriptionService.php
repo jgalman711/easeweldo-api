@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enumerators\ErrorMessagesEnumerator;
 use App\Enumerators\SubscriptionEnumerator;
 use App\Models\Company;
 use App\Models\CompanySubscription;
@@ -73,11 +74,18 @@ class SubscriptionService
         return $companySubscription;
     }
 
-    public function renew(CompanySubscription $companySubscription, array $renewData): CompanySubscription
+    /*
+     * Return mixed. Collection or CompanySubscription Model.
+     */
+    public function renew(CompanySubscription $companySubscription, array $renewData)
     {
-        // Make a condition here to check if the subscription is already renewed.
-        $newCompanySubscription = $this->subscribe($companySubscription->company, $renewData, $companySubscription);
-        return $companySubscription;
+        if ($companySubscription->renewals->isNotEmpty()) {
+            return [
+                'companySubscription' => $companySubscription->renewals,
+                'message' => "Unable to renew your subscription."
+            ];
+        }
+        return $this->subscribe($companySubscription->company, $renewData, $companySubscription);
     }
 
     public function subscribe(
@@ -102,6 +110,7 @@ class SubscriptionService
         return CompanySubscription::create([
             'company_id' => $company->id,
             'subscription_id' => $subscriptionPlan->id,
+            'renewed_from_id' => optional($companySubscription)->id,
             'status' => SubscriptionEnumerator::UNPAID_STATUS,
             'amount_per_employee' => $pricePerEmployee,
             'employee_count' => $employeeCount,

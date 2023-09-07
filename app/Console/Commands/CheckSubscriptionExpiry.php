@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Enumerators\SubscriptionEnumerator;
 use App\Models\CompanySubscription;
-use App\Models\Subscription;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -18,7 +18,7 @@ class CheckSubscriptionExpiry extends Command
         $companySubscriptions = CompanySubscription::where('end_date', '<', Carbon::now())->get();
 
         foreach ($companySubscriptions as $companySubscription) {
-            $companySubscription->status = Subscription::UNPAID_STATUS;
+            $companySubscription->status = SubscriptionEnumerator::UNPAID_STATUS;
             $companySubscription->save();
         }
 

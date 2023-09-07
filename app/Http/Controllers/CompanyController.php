@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CompanyRequest;
-use App\Http\Resources\BaseResource;
+use App\Http\Resources\CompanyResource;
 use App\Models\Company;
 use App\Services\CompanyService;
 use App\Traits\Filter;
@@ -29,7 +29,7 @@ class CompanyController extends Controller
         $companies = $this->applyFilters($request, Company::query(), [
             'name'
         ]);
-        return $this->sendResponse($companies, 'Companies retrieved successfully.');
+        return $this->sendResponse(CompanyResource::collection($companies), 'Companies retrieved successfully.');
     }
 
     public function store(CompanyRequest $request): JsonResponse
@@ -43,12 +43,12 @@ class CompanyController extends Controller
             $input['logo'] = Company::STORAGE_PATH . $filename;
         }
         $company = Company::create($input);
-        return $this->sendResponse(new BaseResource($company), 'Company created successfully.');
+        return $this->sendResponse(new CompanyResource($company), 'Company created successfully.');
     }
 
     public function show(Company $company): JsonResponse
     {
-        return $this->sendResponse(new BaseResource($company), 'Company retrieved successfully.');
+        return $this->sendResponse(new CompanyResource($company), 'Company retrieved successfully.');
     }
 
     public function update(CompanyRequest $request, Company $company): JsonResponse
@@ -65,12 +65,12 @@ class CompanyController extends Controller
             unset($input['logo']);
         }
         $company->update($input);
-        return $this->sendResponse(new BaseResource($company), 'Company updated successfully.');
+        return $this->sendResponse(new CompanyResource($company), 'Company updated successfully.');
     }
 
     public function destroy(Company $company): JsonResponse
     {
         $company->delete();
-        return $this->sendResponse(new BaseResource($company), 'Company deleted successfully.');
+        return $this->sendResponse(new CompanyResource($company), 'Company deleted successfully.');
     }
 }
