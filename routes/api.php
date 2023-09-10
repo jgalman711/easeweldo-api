@@ -27,6 +27,7 @@ use App\Http\Controllers\SubscriptionPricesController;
 use App\Http\Controllers\SynchBiometricsController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\TimesheetUploadController;
+use App\Http\Controllers\UserChangePasswordController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VerifyTokenController;
 use App\Http\Controllers\WorkScheduleController;
@@ -66,6 +67,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::resource('companies', CompanyController::class);
         Route::resource('holidays', HolidayController::class);
         Route::resource('users', UserController::class);
+        Route::put('users/{user}/change-password', [UserChangePasswordController::class, 'update']);
         Route::get('employees', [EmployeeController::class, 'all']);
     });
     Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {

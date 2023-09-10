@@ -41,6 +41,8 @@ class PeriodService
                 $payroll->status = PayrollEnumerator::STATUS_PAID;
                 $payroll->save();
             }
+            $period->status = Period::STATUS_COMPLETED;
+            $period->save();
         });
         return $period->payrolls;
     }
