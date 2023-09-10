@@ -55,6 +55,19 @@ class UserController extends Controller
         );
     }
 
+    public function update(UserRequest $userRequest, User $user): JsonResponse
+    {
+        $input = $userRequest->validated();
+        $user->update($input);
+        return $this->sendResponse(new BaseResource($user), "User updated successfully.");
+    }
+
+    public function destroy(User $user): JsonResponse
+    {
+        $user->delete();
+        return $this->sendResponse(new BaseResource($user), "User deleted successfully.");
+    }
+
     public function qrcode(): Response
     {
         $user = Auth::user();
