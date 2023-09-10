@@ -14,6 +14,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeScheduleController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\PayEmployeeController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\PeriodsController;
@@ -88,6 +89,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::resource('subscriptions', CompanySubscriptionController::class);
             Route::resource('work-schedules', WorkScheduleController::class);
             Route::resource('periods', PeriodsController::class)->except('store');
+            Route::put('periods/{period}/pay', [PayEmployeeController::class, 'update']);
             Route::resource('reports', ReportController::class);
             Route::resource('earnings', EarningController::class)->only('index', 'store');
             Route::resource('settings', SettingController::class)->only('index', 'store');

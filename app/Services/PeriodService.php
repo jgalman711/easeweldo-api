@@ -2,12 +2,15 @@
 
 namespace App\Services;
 
+use App\Enumerators\PayrollEnumerator;
 use App\Models\Company;
 use App\Models\Period;
 use App\Models\Setting;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class PeriodService
 {
@@ -29,6 +32,17 @@ class PeriodService
         $this->currentMonth = $this->today->format('n');
         $this->currentYear = $this->today->format('Y');
         $this->salaryDate = null;
+    }
+
+    public function pay(Period $period): Collection
+    {
+        DB::transaction(function () use ($period) {
+            foreach ($period->payrolls as $payroll) {
+                $payroll->status = PayrollEnumerator::STATUS_PAID;
+                $payroll->save();
+            }
+        });
+        return $period->payrolls;
     }
 
     public function initializeFromSalaryDate(Company $company, DateTime $salaryDate, string $periodCycle): Period
