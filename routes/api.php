@@ -27,6 +27,7 @@ use App\Http\Controllers\SynchBiometricsController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\TimesheetUploadController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VerifyTokenController;
 use App\Http\Controllers\WorkScheduleController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -58,6 +59,7 @@ Route::resource('/subscription-prices', SubscriptionPricesController::class)->on
 Route::resource('/payment-methods', PaymentMethodController::class)->only('index');
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::post('verify', [VerifyTokenController::class, 'verify']);
     Route::group(['middleware' => ['role:super-admin']], function () {
         Route::resource('biometrics', AdminBiometricsController::class);
         Route::resource('companies', CompanyController::class);
