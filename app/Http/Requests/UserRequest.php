@@ -9,7 +9,7 @@ class UserRequest extends BaseRequest
         return [
             'first_name' => 'required',
             'last_name' => 'required',
-            'email' => 'required|email',
+            'email_address' => 'required|email',
             'password' => 'required|confirmed|min:6'
         ];
     }

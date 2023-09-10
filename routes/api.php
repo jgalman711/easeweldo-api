@@ -64,40 +64,40 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::resource('biometrics', AdminBiometricsController::class);
         Route::resource('companies', CompanyController::class);
         Route::resource('holidays', HolidayController::class);
+        Route::resource('users', UserController::class);
         Route::get('employees', [EmployeeController::class, 'all']);
     });
     Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {
         Route::resource('companies', CompanyController::class)->only('index', 'show', 'update');
         Route::prefix('companies/{company}')->group(function () {
-            Route::resource('/payrolls', PayrollController::class)->except('delete');
-            Route::resource('/employees', EmployeeController::class);
+            Route::resource('payrolls', PayrollController::class)->except('delete');
+            Route::resource('employees', EmployeeController::class);
             Route::prefix('employees/{employee}')->group(function () {
-                Route::get('/qrcode', [QrController::class, 'show']);
-                Route::post('/clock', [TimeRecordController::class, 'clock']);
-                Route::resource('/leaves', LeaveController::class);
-                Route::resource('/time-records', TimeRecordController::class);
-                Route::resource('/work-schedules', EmployeeScheduleController::class);
-                Route::prefix('/salary-computation')->group(function () {
+                Route::get('qrcode', [QrController::class, 'show']);
+                Route::post('clock', [TimeRecordController::class, 'clock']);
+                Route::resource('leaves', LeaveController::class);
+                Route::resource('time-records', TimeRecordController::class);
+                Route::resource('work-schedules', EmployeeScheduleController::class);
+                Route::prefix('salary-computation')->group(function () {
                     Route::get('/', [SalaryComputationController::class, 'show']);
                     Route::post('/', [SalaryComputationController::class, 'store']);
                     Route::put('/', [SalaryComputationController::class, 'update']);
                     Route::delete('/', [SalaryComputationController::class, 'delete']);
                 });
             });
-            Route::resource('/subscriptions', CompanySubscriptionController::class);
-            Route::resource('/work-schedules', WorkScheduleController::class);
-            Route::resource('/periods', PeriodsController::class)->except('store');
-            Route::resource('/reports', ReportController::class);
-            Route::resource('/earnings', EarningController::class)->only('index', 'store');
-            Route::resource('/settings', SettingController::class)->only('index', 'store');
-            Route::get('/dashboard', [DashboardController::class, 'index']);
-            Route::post('/timesheet/upload', [TimesheetUploadController::class, 'store']);
-
+            Route::resource('subscriptions', CompanySubscriptionController::class);
+            Route::resource('work-schedules', WorkScheduleController::class);
+            Route::resource('periods', PeriodsController::class)->except('store');
+            Route::resource('reports', ReportController::class);
+            Route::resource('earnings', EarningController::class)->only('index', 'store');
+            Route::resource('settings', SettingController::class)->only('index', 'store');
+            Route::get('dashboard', [DashboardController::class, 'index']);
+            Route::post('timesheet/upload', [TimesheetUploadController::class, 'store']);
             Route::middleware('check-company-subscriptions')->group(function () {
-                Route::post('/synch-biometrics/{module}/', [SynchBiometricsController::class, 'store']);
-                Route::resource('/biometrics', BiometricsController::class);
+                Route::post('synch-biometrics/{module}/', [SynchBiometricsController::class, 'store']);
+                Route::resource('biometrics', BiometricsController::class);
             });
         });
     });
-    Route::get('/user/qrcode', [UserController::class, 'qrcode']);
+    Route::get('user/qrcode', [UserController::class, 'qrcode']);
 });

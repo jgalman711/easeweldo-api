@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -12,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employee extends Model
 {
-    use HasFactory, SoftDeletes;
+    use SoftDeletes;
 
     public const ABSOLUTE_STORAGE_PATH = 'public/employees/images';
 
@@ -62,10 +61,9 @@ class Employee extends Model
     public const PENDING = 'pending';
 
     protected $fillable = [
+        'user_id',
         'company_id',
         'company_employee_id',
-        'first_name',
-        'last_name',
         'department',
         'job_title',
         'status',
@@ -89,14 +87,20 @@ class Employee extends Model
         'profile_picture'
     ];
 
+    protected $appends = [
+        'first_name',
+        'last_name',
+        'full_name'
+    ];
+
     public function company(): BelongsTo
     {
         return $this->BelongsTo(Company::class);
     }
 
-    public function user(): HasOne
+    public function user(): BelongsTo
     {
-        return $this->hasOne(User::class);
+        return $this->belongsTo(User::class);
     }
 
     public function payrolls(): HasMany
@@ -141,15 +145,21 @@ class Employee extends Model
 
     public function getFullNameAttribute(): string
     {
-        return ucfirst($this->first_name) . " " . ucfirst($this->last_name);
+        return ucfirst($this->user->first_name) . " " . ucfirst($this->user->last_name);
     }
 
     public function getLeaveById(int $leaveId): Leave
     {
-        $leave = $this->leaves->where('id', $leaveId)->first();
-        if (!$leave) {
-            throw new \Exception('Leave not found');
-        }
-        return $leave;
+        return $this->leaves->where('id', $leaveId)->firstOrFail();
+    }
+
+    public function getFirstNameAttribute(): string
+    {
+        return $this->user->first_name;
+    }
+
+    public function getLastNameAttribute(): string
+    {
+        return $this->user->last_name;
     }
 }

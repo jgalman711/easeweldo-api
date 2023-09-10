@@ -8,8 +8,10 @@ use App\Models\Company;
 use App\Models\Employee;
 use App\Services\EmployeeService;
 use App\Services\UserService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\PersonalAccessToken;
 
@@ -44,16 +46,23 @@ class EmployeeController extends Controller
 
     public function store(EmployeeRequest $request, Company $company): JsonResponse
     {
-        $input = $request->validated();
-        if (isset($input['profile_picture']) && $input['profile_picture']) {
-            $filename = time() . '.' . $request->profile_picture->extension();
-            $request->profile_picture->storeAs(Employee::ABSOLUTE_STORAGE_PATH, $filename);
-            $input['profile_picture'] = Employee::STORAGE_PATH . $filename;
+        try {
+            DB::beginTransaction();
+            $input = $request->validated();
+            $user = $this->userService->create($company, $input);
+            if (isset($input['profile_picture']) && $input['profile_picture']) {
+                $filename = time() . '.' . $request->profile_picture->extension();
+                $request->profile_picture->storeAs(Employee::ABSOLUTE_STORAGE_PATH, $filename);
+                $input['profile_picture'] = Employee::STORAGE_PATH . $filename;
+            }
+            $input['user_id'] = $user->id;
+            $employee = $this->employeeService->create($company, $input);
+            $this->forget($company);
+            DB::commit();
+            return $this->sendResponse(new BaseResource($employee), "Employee created successfully.");
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
         }
-        $employee = $this->employeeService->create($company, $input);
-        $this->forget($company);
-        $message = $this->employeeService->getEmployeeTemporaryCredentials();
-        return $this->sendResponse(new BaseResource($employee), $message);
     }
 
     public function show(Company $company, int $employeeId): JsonResponse
