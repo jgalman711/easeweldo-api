@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Company;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
@@ -21,7 +22,7 @@ class UserService
         return $temporaryPassword;
     }
 
-    public function create(Company $company, array $userData)
+    public function create(Company $company, array $userData): User
     {
         $username = $this->generateUniqueUsername($company, $userData['first_name'], $userData['last_name']);
         $temporaryPassword = Str::random(self::PASSWORD_LENGTH);
@@ -45,12 +46,7 @@ class UserService
             $firstNameInitial .= substr($firstNameParts[1], 0, 1);
         }
         $username = strtolower($firstNameInitial . str_replace(' ', '', strtolower($lastName)));
-
-        $existingUser = User::where('username', $username)
-            ->whereHas('employee', function ($query) use ($company) {
-                $query->where('company_id', $company->id);
-            })->first();
-
+        $existingUser = $company->users()->where('username', $username)->first();
         $usernameExists = $existingUser !== null;
         if ($usernameExists) {
             $i = 1;
@@ -66,6 +62,13 @@ class UserService
             } while ($usernameExists);
         }
         return $username;
+    }
+
+    public function getExistingUser(Company $company, array $userData): User
+    {
+        $user = User::find($userData['user_id']);
+        throw_if($user->employee, new Exception('User is already linked to employee'));
+        return $user;
     }
 
     private function isRoleBusinessAdmin($data): bool

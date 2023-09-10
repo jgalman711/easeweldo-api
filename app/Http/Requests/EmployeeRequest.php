@@ -10,6 +10,11 @@ class EmployeeRequest extends BaseRequest
     public function rules(): array
     {
         return [
+            'user_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('users', 'id')->whereNull('deleted_at'),
+            ],
             'first_name' => self::REQUIRED_STRING,
             'last_name' => self::REQUIRED_STRING,
             'department' => self::REQUIRED_STRING,

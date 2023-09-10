@@ -6,6 +6,7 @@ use App\Http\Requests\EmployeeRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Models\Employee;
+use App\Models\User;
 use App\Services\EmployeeService;
 use App\Services\UserService;
 use Exception;
@@ -49,7 +50,11 @@ class EmployeeController extends Controller
         try {
             DB::beginTransaction();
             $input = $request->validated();
-            $user = $this->userService->create($company, $input);
+            if ($request->has('user_id')) {
+                $user = $this->userService->getExistingUser($company, $input);
+            } else {
+                $user = $this->userService->create($company, $input);
+            }
             if (isset($input['profile_picture']) && $input['profile_picture']) {
                 $filename = time() . '.' . $request->profile_picture->extension();
                 $request->profile_picture->storeAs(Employee::ABSOLUTE_STORAGE_PATH, $filename);
