@@ -27,7 +27,7 @@ class UserController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $users = $this->applyFilters($request, User::query(), [
+        $users = $this->applyFilters($request, User::query()->with('companies'), [
             'email_address',
             'username',
             'first_name',
