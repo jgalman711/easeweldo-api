@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Validation\Rule;
 
 class UserRequest extends BaseRequest
@@ -19,6 +20,7 @@ class UserRequest extends BaseRequest
                     ->whereNull('deleted_at')
                     ->ignore($this->user),
             ],
+            'status' => 'nullable|string|in:' . implode(',', User::STATUSES),
             'company_id' => 'required|exists:companies,id'
         ];
     }

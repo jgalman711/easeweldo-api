@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
-use App\Http\Resources\BaseResource;
+use App\Http\Resources\UserResource;
 use App\Models\Company;
 use App\Models\User;
 use App\Services\QrService;
@@ -36,13 +36,13 @@ class UserController extends Controller
             'companies.legal_name',
             'companies.status'
         ]);
-        return $this->sendResponse(BaseResource::collection($users), 'Users retrieved successfully.');
+        return $this->sendResponse(UserResource::collection($users), 'Users retrieved successfully.');
     }
 
     public function show(User $user): JsonResponse
     {
         $user->load('companies');
-        return $this->sendResponse(new BaseResource($user), 'User retrieved successfully.');
+        return $this->sendResponse(new UserResource($user), 'User retrieved successfully.');
     }
 
     public function store(UserRequest $userRequest)
@@ -52,7 +52,7 @@ class UserController extends Controller
         $user = $this->userService->create($company, $input);
         $user->load('companies');
         return $this->sendResponse(
-            new BaseResource($user),
+            new UserResource($user),
             "User created successfully. This is the user's temporary password: {$user->temporary_password}"
         );
     }
@@ -62,14 +62,14 @@ class UserController extends Controller
         $input = $userRequest->validated();
         $user->update($input);
         $user->load('companies');
-        return $this->sendResponse(new BaseResource($user), "User updated successfully.");
+        return $this->sendResponse(new UserResource($user), "User updated successfully.");
     }
 
     public function destroy(User $user): JsonResponse
     {
         $user->delete();
         $user->load('companies');
-        return $this->sendResponse(new BaseResource($user), "User deleted successfully.");
+        return $this->sendResponse(new UserResource($user), "User deleted successfully.");
     }
 
     public function qrcode(): Response
