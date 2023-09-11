@@ -49,6 +49,7 @@ class UserController extends Controller
         $input = $userRequest->validated();
         $company = Company::findOrFail($input['company_id']);
         $user = $this->userService->create($company, $input);
+        $user->load('companies');
         return $this->sendResponse(
             new BaseResource($user),
             "User created successfully. This is the user's temporary password: {$user->temporary_password}"
