@@ -51,7 +51,7 @@ class EmployeeController extends Controller
             DB::beginTransaction();
             $input = $request->validated();
             if ($request->has('user_id')) {
-                $user = $this->userService->getExistingUser($company, $input);
+                $user = $this->userService->getExistingUser($input);
             } else {
                 $user = $this->userService->create($company, $input);
             }

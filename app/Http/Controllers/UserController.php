@@ -41,6 +41,7 @@ class UserController extends Controller
 
     public function show(User $user): JsonResponse
     {
+        $user->load('companies');
         return $this->sendResponse(new BaseResource($user), 'User retrieved successfully.');
     }
 
@@ -60,12 +61,14 @@ class UserController extends Controller
     {
         $input = $userRequest->validated();
         $user->update($input);
+        $user->load('companies');
         return $this->sendResponse(new BaseResource($user), "User updated successfully.");
     }
 
     public function destroy(User $user): JsonResponse
     {
         $user->delete();
+        $user->load('companies');
         return $this->sendResponse(new BaseResource($user), "User deleted successfully.");
     }
 
