@@ -30,8 +30,7 @@ class UserService
 
     public function create(Collection $companies, array $userData): User
     {
-        $mainCompany = $companies->first();
-        $username = $this->generateUniqueUsername($mainCompany, $userData['first_name'], $userData['last_name']);
+        $username = $this->generateUniqueUsername($companies, $userData['first_name'], $userData['last_name']);
         list($temporaryPassword, $temporaryPasswordExpiresAt) = $this->generateTemporaryPassword();
 
         $userData['username'] = $username;
@@ -53,7 +52,7 @@ class UserService
         return $user;
     }
 
-    public function generateUniqueUsername(Company $company, string $firstName, string $lastName): string
+    public function generateUniqueUsername(Collection $companies, string $firstName, string $lastName): string
     {
         $firstNameParts = explode(' ', $firstName);
         $firstNameInitial = substr($firstNameParts[0], 0, 1);
@@ -61,20 +60,18 @@ class UserService
             $firstNameInitial .= substr($firstNameParts[1], 0, 1);
         }
         $username = strtolower($firstNameInitial . str_replace(' ', '', strtolower($lastName)));
-        $existingUser = $company->users()->where('username', $username)->first();
-        $usernameExists = $existingUser !== null;
-        if ($usernameExists) {
-            $i = 1;
-            $originalUsername = $username;
-            do {
-                $username = $originalUsername . $i;
-                $existingUser = User::where('username', $username)
-                    ->whereHas('employee', function ($query) use ($company) {
-                        $query->where('company_id', $company->id);
-                    })->first();
-                $usernameExists = $existingUser !== null;
-                $i++;
-            } while ($usernameExists);
+        foreach ($companies as $company) {
+            $usernameExistsInCompany = $company->users()->where('username', $username)->exists();
+            if ($usernameExistsInCompany) {
+                $i = 1;
+                $originalUsername = $username;
+                do {
+                    $username = $originalUsername . $i;
+                    // Check if the updated username exists in the same company
+                    $usernameExistsInCompany = $company->users()->where('username', $username)->exists();
+                    $i++;
+                } while ($usernameExistsInCompany);
+            }
         }
         return $username;
     }
