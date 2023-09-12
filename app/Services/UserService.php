@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use App\Mail\ResetTemporaryPassword;
+use App\Mail\UserRegistered;
 use App\Models\Company;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
@@ -36,6 +39,8 @@ class UserService
 
         $user = User::create($userData);
         $user->temporary_password = $temporaryPassword;
+
+        Mail::to($user->email_address)->send(new UserRegistered($user));
         if ($this->isRoleBusinessAdmin($userData)) {
             $role = Role::where('name', self::BUSINESS_ADMIN_ROLE)->first();
             $user->assignRole($role);
@@ -81,6 +86,7 @@ class UserService
         $user->temporary_password = $temporaryPassword;
         $user->temporary_password_expires_at = $temporaryPasswordExpiresAt;
         $user->save();
+        Mail::to($user->email_address)->send(new ResetTemporaryPassword($user));
         return $user;
     }
 
