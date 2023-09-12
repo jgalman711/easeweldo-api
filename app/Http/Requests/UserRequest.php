@@ -21,7 +21,11 @@ class UserRequest extends BaseRequest
                     ->ignore($this->user),
             ],
             'status' => 'nullable|string|in:' . implode(',', User::STATUSES),
-            'company_id' => 'required|exists:companies,id'
+            'company_id' => [
+                'required',
+                'array',
+                Rule::exists('companies', 'id')->whereNull('deleted_at'),
+            ],
         ];
     }
 }

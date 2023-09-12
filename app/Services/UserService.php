@@ -7,6 +7,7 @@ use App\Mail\UserRegistered;
 use App\Models\Company;
 use App\Models\User;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
@@ -27,9 +28,10 @@ class UserService
         return $temporaryPassword;
     }
 
-    public function create(Company $company, array $userData): User
+    public function create(Collection $companies, array $userData): User
     {
-        $username = $this->generateUniqueUsername($company, $userData['first_name'], $userData['last_name']);
+        $mainCompany = $companies->first();
+        $username = $this->generateUniqueUsername($mainCompany, $userData['first_name'], $userData['last_name']);
         list($temporaryPassword, $temporaryPasswordExpiresAt) = $this->generateTemporaryPassword();
 
         $userData['username'] = $username;
@@ -45,7 +47,9 @@ class UserService
             $role = Role::where('name', self::BUSINESS_ADMIN_ROLE)->first();
             $user->assignRole($role);
         }
-        $company->users()->attach($user->id);
+        foreach ($companies as $company) {
+            $company->users()->attach($user->id);
+        }
         return $user;
     }
 

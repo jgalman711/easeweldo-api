@@ -49,8 +49,8 @@ class UserController extends Controller
     public function store(UserRequest $userRequest)
     {
         $input = $userRequest->validated();
-        $company = Company::findOrFail($input['company_id']);
-        $user = $this->userService->create($company, $input);
+        $companies = Company::whereIn('id', $input['company_id'])->get();
+        $user = $this->userService->create($companies, $input);
         $user->load('companies');
         return $this->sendResponse(
             new UserResource($user),
