@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\BaseController;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\CompanyRegistrationRequest;
 use App\Models\Company;
 use App\Models\CompanyUser;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
-class RegisterController extends BaseController
+class RegisterController extends Controller
 {
     protected const BUSINESS_ADMIN_ROLE = 'business-admin';
 
