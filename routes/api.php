@@ -27,8 +27,9 @@ use App\Http\Controllers\SubscriptionPricesController;
 use App\Http\Controllers\SynchBiometricsController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\TimesheetUploadController;
-use App\Http\Controllers\UserChangePasswordController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\User\UserChangePasswordController;
+use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\User\UserTemporaryPasswordResetController;
 use App\Http\Controllers\VerifyTokenController;
 use App\Http\Controllers\WorkScheduleController;
 use Illuminate\Support\Facades\Artisan;
@@ -68,6 +69,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::resource('holidays', HolidayController::class);
         Route::resource('users', UserController::class);
         Route::put('users/{user}/change-password', [UserChangePasswordController::class, 'update']);
+        Route::put('users/{user}/reset-temporary-password', [UserTemporaryPasswordResetController::class, 'update']);
         Route::get('employees', [EmployeeController::class, 'all']);
     });
     Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {

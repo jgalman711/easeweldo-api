@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Company;
@@ -53,7 +54,7 @@ class UserController extends Controller
         $user->load('companies');
         return $this->sendResponse(
             new UserResource($user),
-            "User created successfully. This is the user's temporary password: {$user->temporary_password}"
+            "User created successfully. This is the user's temporary password: {$user->temporary_password}. It expires after an hour. Please change it upon login."
         );
     }
 

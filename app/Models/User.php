@@ -29,18 +29,23 @@ class User extends Authenticatable
         'email_address',
         'username',
         'status',
-        'password'
+        'password',
+        'temporary_password',
+        'temporary_password_expires_at'
     ];
 
     protected $appends = ['email'];
 
     protected $hidden = [
         'password',
+        'temporary_password',
+        'temporary_password_expires_at',
         'remember_token',
     ];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'temporary_password_expires_at' => 'datetime'
     ];
 
     public function companies()

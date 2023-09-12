@@ -12,6 +12,8 @@ class UserService
 {
     private const PASSWORD_LENGTH = 6;
 
+    private const EXPIRATION_MINUTES = 60;
+
     private const BUSINESS_ADMIN_ROLE = 'business-admin';
 
     public function employeeResetPassword(User $user): string
@@ -25,9 +27,13 @@ class UserService
     public function create(Company $company, array $userData): User
     {
         $username = $this->generateUniqueUsername($company, $userData['first_name'], $userData['last_name']);
-        $temporaryPassword = Str::random(self::PASSWORD_LENGTH);
+        list($temporaryPassword, $temporaryPasswordExpiresAt) = $this->generateTemporaryPassword();
+
         $userData['username'] = $username;
         $userData['password'] = bcrypt($temporaryPassword);
+        $userData['temporary_password'] = $temporaryPassword;
+        $userData['temporary_password_expires_at'] = $temporaryPasswordExpiresAt;
+
         $user = User::create($userData);
         $user->temporary_password = $temporaryPassword;
         if ($this->isRoleBusinessAdmin($userData)) {
@@ -62,6 +68,20 @@ class UserService
             } while ($usernameExists);
         }
         return $username;
+    }
+
+    public function generateTemporaryPassword(): array
+    {
+        return [Str::random(self::PASSWORD_LENGTH), now()->addMinutes(self::EXPIRATION_MINUTES)];
+    }
+
+    public function temporaryPasswordReset(User $user): User
+    {
+        list($temporaryPassword, $temporaryPasswordExpiresAt) = $this->generateTemporaryPassword();
+        $user->temporary_password = $temporaryPassword;
+        $user->temporary_password_expires_at = $temporaryPasswordExpiresAt;
+        $user->save();
+        return $user;
     }
 
     public function getExistingUser(array $userData): User
