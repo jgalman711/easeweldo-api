@@ -5,13 +5,10 @@ namespace App\Http\Controllers;
 use App\Enumerators\SubscriptionEnumerator;
 use App\Http\Requests\SubscriptionRequest;
 use App\Http\Resources\CompanySubscriptionResource;
-use App\Mail\UserSubscribed;
 use App\Models\Company;
 use App\Services\SubscriptionService;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 
 class CompanySubscriptionController extends Controller
 {
@@ -47,8 +44,6 @@ class CompanySubscriptionController extends Controller
     {
         $input = $request->validated();
         $companySubscription = $this->subscriptionService->subscribe($company, $input);
-        $user = Auth::user();
-        Mail::to($user->email_address)->send(new UserSubscribed($companySubscription));
         $this->forget($company);
         return $this->sendResponse(
             new CompanySubscriptionResource($companySubscription),

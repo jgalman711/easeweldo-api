@@ -8,6 +8,7 @@ use App\Models\Company;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
@@ -41,7 +42,11 @@ class UserService
         $user = User::create($userData);
         $user->temporary_password = $temporaryPassword;
 
-        // Mail::to($user->email_address)->send(new UserRegistered($user));
+        try {
+            Mail::to($user->email_address)->send(new UserRegistered($user));
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+        }
         if ($this->isRoleBusinessAdmin($userData)) {
             $role = Role::where('name', self::BUSINESS_ADMIN_ROLE)->first();
             $user->assignRole($role);

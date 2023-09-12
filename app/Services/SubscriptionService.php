@@ -4,12 +4,16 @@ namespace App\Services;
 
 use App\Enumerators\ErrorMessagesEnumerator;
 use App\Enumerators\SubscriptionEnumerator;
+use App\Mail\UserSubscribed;
 use App\Models\Company;
 use App\Models\CompanySubscription;
 use App\Models\Employee;
 use App\Models\Subscription;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class SubscriptionService
 {
@@ -103,7 +107,7 @@ class SubscriptionService
         $subscriptionPrice = $subscriptionPlan->subscriptionPrices->first();
         $pricePerEmployee = $subscriptionPrice->price_per_employee;
 
-        return CompanySubscription::create([
+        $companySubscription = CompanySubscription::create([
             'company_id' => $company->id,
             'subscription_id' => $subscriptionPlan->id,
             'renewed_from_id' => optional($companySubscription)->id,
@@ -116,6 +120,15 @@ class SubscriptionService
             'start_date' => $startDate,
             'end_date' => $startDate->clone()->addMonth($subscriptionData['months'])
         ])->load('company', 'subscription');
+
+        $user = Auth::user();
+        try {
+            Mail::to($user->email_address)->send(new UserSubscribed($companySubscription));
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+        }
+
+        return $companySubscription;
     }
 
     private function getEmployeeCount(int $employeeCount, array $upgradeData): int
