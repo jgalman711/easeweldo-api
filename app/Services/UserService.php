@@ -41,7 +41,7 @@ class UserService
         $user = User::create($userData);
         $user->temporary_password = $temporaryPassword;
 
-        Mail::to($user->email_address)->send(new UserRegistered($user));
+        // Mail::to($user->email_address)->send(new UserRegistered($user));
         if ($this->isRoleBusinessAdmin($userData)) {
             $role = Role::where('name', self::BUSINESS_ADMIN_ROLE)->first();
             $user->assignRole($role);
@@ -67,7 +67,6 @@ class UserService
                 $originalUsername = $username;
                 do {
                     $username = $originalUsername . $i;
-                    // Check if the updated username exists in the same company
                     $usernameExistsInCompany = $company->users()->where('username', $username)->exists();
                     $i++;
                 } while ($usernameExistsInCompany);
