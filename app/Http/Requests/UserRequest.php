@@ -13,7 +13,6 @@ class UserRequest extends BaseRequest
             'first_name' => 'required',
             'last_name' => 'required',
             'email_address' => [
-                'nullable',
                 'email',
                 'sometimes',
                 Rule::unique('users', 'email_address')
