@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Mail\ResetTemporaryPassword;
 use App\Mail\UserRegistered;
-use App\Models\Company;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;

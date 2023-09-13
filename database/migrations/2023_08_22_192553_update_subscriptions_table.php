@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('subscriptions', function (Blueprint $table) {
-            $table->enum('type', ['core', 'bundle'])->after('name');
+            $table->enum('type', ['core', 'bundle', 'trial'])->after('name');
             $table->text('title')->after('type');
             $table->text('description')->after('title');
             $table->json('features')->after('description');

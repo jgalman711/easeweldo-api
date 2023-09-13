@@ -12,6 +12,8 @@ class Controller
 {
     use AuthorizesRequests, ValidatesRequests, Filter, Cache;
 
+    public const ADMIN_CACHE_KEY = 'admin';
+
     public function sendResponse($result, $message): JsonResponse
     {
         $response = [

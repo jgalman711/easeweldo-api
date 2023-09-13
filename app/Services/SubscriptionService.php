@@ -11,6 +11,7 @@ use App\Models\Employee;
 use App\Models\Subscription;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -18,6 +19,19 @@ use Illuminate\Support\Facades\Mail;
 class SubscriptionService
 {
     public const REGULAR_ONE_MONTH = 1;
+
+    public function getSubscriptions(Request $request)
+    {
+        return Subscription::query()
+            ->when($request->has('except'), function ($query) use ($request) {
+                $query->where('type', '<>', $request->except);
+            })
+            ->when($request->has('type'), function ($query) use ($request) {
+                $query->where('type', $request->type);
+            })
+            ->with('subscriptionPrices')
+            ->get();
+    }
 
     public function calculate(Company $company)
     {
@@ -120,8 +134,8 @@ class SubscriptionService
             'start_date' => $startDate,
             'end_date' => $startDate->clone()->addMonth($subscriptionData['months'])
         ])->load('company', 'subscription');
-
         $user = Auth::user();
+
         try {
             Mail::to($user->email_address)->send(new UserSubscribed($companySubscription));
         } catch (Exception $e) {

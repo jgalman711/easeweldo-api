@@ -27,20 +27,18 @@ class PayrollController extends Controller
 
     public function index(Request $request, Company $company): JsonResponse
     {
-        $payrolls = $this->remember($company, function () use ($request, $company) {
-            $payrollQuery = $company->payrolls();
-            if ($request->has('employee_id')) {
-                $payrollQuery->where('employee_id', $request->employee_id);
-            }
-            if ($request->has('period_id')) {
-                $payrollQuery->where('period_id', $request->period_id);
-            }
-            return $this->applyFilters($request, $payrollQuery->with('employee'), [
-                'status',
-                'employee.first_name',
-                'employee.last_name'
-            ]);
-        }, $request);
+        $payrollQuery = $company->payrolls();
+        if ($request->has('employee_id')) {
+            $payrollQuery->where('employee_id', $request->employee_id);
+        }
+        if ($request->has('period_id')) {
+            $payrollQuery->where('period_id', $request->period_id);
+        }
+        $payrolls = $this->applyFilters($request, $payrollQuery->with('employee'), [
+            'status',
+            'employee.first_name',
+            'employee.last_name'
+        ]);
         return $this->sendResponse(PayrollResource::collection($payrolls), 'Payrolls retrieved successfully.');
     }
 

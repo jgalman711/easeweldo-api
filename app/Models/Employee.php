@@ -128,14 +128,14 @@ class Employee extends Model
         return $this->hasMany(Leave::class);
     }
 
-    public function getSickLeaveAttribute(): float
+    public function getSickLeaveAttribute(): ?float
     {
-        return $this->salaryComputation->available_sick_leaves;
+        return optional($this->salaryComputation)->available_sick_leaves;
     }
 
-    public function getVacationLeaveAttribute(): float
+    public function getVacationLeaveAttribute(): ?float
     {
-        return $this->salaryComputation->available_vacation_leaves;
+        return optional($this->salaryComputation)->available_vacation_leaves;
     }
 
     public function getEmergencyLeaveAttribute(): float
@@ -143,9 +143,9 @@ class Employee extends Model
         return $this->vacation_leaves;
     }
 
-    public function getFullNameAttribute(): string
+    public function getFullNameAttribute(): ?string
     {
-        return ucfirst($this->user->first_name) . " " . ucfirst($this->user->last_name);
+        return ucfirst(optional($this->user)->first_name) . " " . ucfirst(optional($this->user)->last_name);
     }
 
     public function getLeaveById(int $leaveId): Leave
@@ -153,13 +153,13 @@ class Employee extends Model
         return $this->leaves->where('id', $leaveId)->firstOrFail();
     }
 
-    public function getFirstNameAttribute(): string
+    public function getFirstNameAttribute(): ?string
     {
-        return $this->user->first_name;
+        return optional($this->user)->first_name;
     }
 
-    public function getLastNameAttribute(): string
+    public function getLastNameAttribute(): ?string
     {
-        return $this->user->last_name;
+        return optional($this->user)->last_name;
     }
 }

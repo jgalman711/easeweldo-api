@@ -21,12 +21,10 @@ class EmployeeScheduleController extends Controller
     public function index(Request $request, Company $company, int $employeeId)
     {
         try {
-            $employeeSchedule = $this->remember($company, function () use ($request, $company, $employeeId) {
-                $employee = $company->getEmployeeById($employeeId);
-                return $this->applyFilters($request, $employee->schedules()->withPivot('start_date'), [
-                    'name'
-                ]);
-            }, $request);
+            $employee = $company->getEmployeeById($employeeId);
+            $employeeSchedule = $this->applyFilters($request, $employee->schedules()->withPivot('start_date'), [
+                'name'
+            ]);
             return $this->sendResponse(
                 EmployeeScheduleResource::collection($employeeSchedule),
                 'Employee schedules retrieved successfully.'

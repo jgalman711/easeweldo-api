@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\EmployeeService;
 use App\Services\UserService;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -33,15 +34,14 @@ class EmployeeController extends Controller
     
     public function index(Request $request, Company $company): JsonResponse
     {
-        $employees = $this->remember($company, function () use ($request, $company) {
-            return $this->applyFilters($request, $company->employees()->with('user'), [
-                'first_name',
-                'last_name',
-                'job_title',
-                'employment_status',
-                'department'
-            ]);
-        }, $request);
+        $this->forget($company);
+        $employees = $this->applyFilters($request, $company->employees()->with('user'), [
+            'user.first_name',
+            'user.last_name',
+            'job_title',
+            'employment_status',
+            'department'
+        ]);
         return $this->sendResponse(BaseResource::collection($employees), 'Employees retrieved successfully.');
     }
 
@@ -53,7 +53,8 @@ class EmployeeController extends Controller
             if ($request->has('user_id')) {
                 $user = $this->userService->getExistingUser($input);
             } else {
-                $user = $this->userService->create($company, $input);
+                $companies = new Collection([$company]);
+                $user = $this->userService->create($companies, $input);
             }
             if (isset($input['profile_picture']) && $input['profile_picture']) {
                 $filename = time() . '.' . $request->profile_picture->extension();
