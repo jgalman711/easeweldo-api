@@ -33,7 +33,7 @@ class SubscriptionService
             ->get();
     }
 
-    public function calculate(Company $company)
+    public function calculate(Company $company): void
     {
         foreach ($company->companySubscriptions as $companySubscription) {
             $amount = $companySubscription->subscription->amount;
@@ -119,7 +119,11 @@ class SubscriptionService
         }])->findOrFail($subscriptionData['subscription_id']);
 
         $subscriptionPrice = $subscriptionPlan->subscriptionPrices->first();
-        $pricePerEmployee = $subscriptionPrice->price_per_employee;
+        if ($subscriptionPrice) {
+            $pricePerEmployee = $subscriptionPrice->price_per_employee;
+        } else {
+            $pricePerEmployee = $subscriptionPlan->amount - $subscriptionPlan->discount;
+        }
 
         $companySubscription = CompanySubscription::create([
             'company_id' => $company->id,
