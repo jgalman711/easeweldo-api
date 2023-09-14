@@ -9,12 +9,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Payroll extends Model
 {
     use SoftDeletes;
-    
-    public const TYPE_REGULAR = 'regular';
-
-    public const TYPE_THIRTEENTH_MONTH_PAY = 'thirteenth_month_pay';
-
-    public const TYPE_FINAL_PAY = 'final_pay';
 
     protected $casts = [
         'holidays' => 'json',
@@ -30,18 +24,30 @@ class Payroll extends Model
     protected $fillable = [
         'employee_id',
         'period_id',
+        'type',
+        'status',
         'description',
+        'basic_salary',
+        'hours_worked',
+        'expected_hours_worked',
         'overtime_minutes',
+        'overtime_pay',
         'late_minutes',
+        'late_deductions',
         'absent_minutes',
+        'absent_deductions',
         'undertime_minutes',
-        'regular_holiday_hours_worked',
-        'special_holiday_hours_worked',
+        'undertime_deductions',
         'leaves',
+        'leaves_pay',
         'taxable_earnings',
         'non_taxable_earnings',
         'holidays',
-        'remarks'
+        'sss_contributions',
+        'philhealth_contributions',
+        'pagibig_contributions',
+        'withheld_tax',
+        'remarks',
     ];
 
     protected $appends = [

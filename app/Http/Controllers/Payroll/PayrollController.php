@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Payroll;
 
 use App\Enumerators\ErrorMessagesEnumerator;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\PayrollRequest;
 use App\Http\Resources\PayrollResource;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Payroll;
-use App\Services\PayrollService;
+use App\Services\Payroll\PayrollService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -49,7 +50,7 @@ class PayrollController extends Controller
                 return $this->sendError('Payroll not found.');
             }
             return $payroll->load('employee');
-        });
+        }, $payroll);
         return $this->sendResponse(new PayrollResource($payrollWithEmployee), 'Payroll retrieved successfully.');
     }
     

@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -55,6 +56,7 @@ class PasswordResetController extends Controller
         } elseif($status === Password::INVALID_TOKEN) {
             $response = $this->sendError(self::INVALID_TOKEN_MESSAGE);
         } else {
+            Log::info($status);
             $response = $this->sendError('Unable to reset password.');
         }
         return $response;

@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Payroll;
 
-use App\Models\Earning;
 use App\Models\Employee;
 use App\Models\Holiday;
-use App\Models\Leave;
 use App\Models\Payroll;
 use App\Models\Period;
+use App\Services\AttendanceService;
 use App\Services\Contributions\PagIbigService;
 use App\Services\Contributions\PhilHealthService;
 use App\Services\Contributions\SSSService;
+use App\Services\LeaveService;
+use App\Services\TaxService;
+use App\Services\TimeRecordService;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
 class PayrollService

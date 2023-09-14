@@ -12,6 +12,7 @@ class BaseRequest extends FormRequest
     protected const REQUIRED_DATE = 'required|date';
     protected const REQUIRED_NUMERIC = 'required|numeric|min:0';
     protected const NUMERIC = 'numeric|min:1';
+    protected const NULLABLE_JSON = 'nullable|json';
     protected const NULLABLE_NUMERIC = 'nullable|numeric';
     protected const NULLABLE_TIME_FORMAT = 'nullable|date_format:H:i:s';
     protected const NULLABLE_STRING = 'nullable|string|max:255';

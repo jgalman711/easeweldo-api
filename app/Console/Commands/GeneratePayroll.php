@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Employee;
 use App\Models\Period;
-use App\Services\PayrollService;
+use App\Services\Payroll\PayrollService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
