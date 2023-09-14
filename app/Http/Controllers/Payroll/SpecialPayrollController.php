@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers\Payroll;
 
+use App\Enumerators\PayrollEnumerator;
+use App\Factories\PayrollStrategyFactory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SpecialPayrollRequest;
 use App\Models\Company;
-use App\Services\Payroll\SpecialPayrollService;
 use Illuminate\Http\JsonResponse;
 
 class SpecialPayrollController extends Controller
 {
-    protected $specialPayrollService;
+    protected $specialPayrollStrategy;
 
-    public function __construct(SpecialPayrollService $specialPayrollService)
+    public function __construct()
     {
-        $this->specialPayrollService = $specialPayrollService;
+        $this->specialPayrollStrategy = PayrollStrategyFactory::createStrategy(PayrollEnumerator::TYPE_SPECIAL);
     }
 
     public function store(SpecialPayrollRequest $request, Company $company): JsonResponse
@@ -24,7 +25,7 @@ class SpecialPayrollController extends Controller
         if (!$employee) {
             return $this->sendError('Employee not found.');
         }
-        $specialPayroll = $this->specialPayrollService->generate($employee, $input);
-        return $this->sendResponse($specialPayroll, "Special payroll generated successfully.");
+        $payroll = $this->specialPayrollStrategy->generate($employee, $input);
+        return $this->sendResponse($payroll, "Special payroll generated successfully.");
     }
 }

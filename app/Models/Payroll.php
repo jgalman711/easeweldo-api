@@ -47,7 +47,7 @@ class Payroll extends Model
         'philhealth_contributions',
         'pagibig_contributions',
         'withheld_tax',
-        'remarks',
+        'remarks'
     ];
 
     protected $appends = [
@@ -65,6 +65,7 @@ class Payroll extends Model
         'total_deductions',
         'gross_income',
         'taxable_income',
+        'net_taxable_income',
         'net_income'
     ];
 
@@ -103,9 +104,14 @@ class Payroll extends Model
         return $this->gross_income - $this->total_contributions + $this->total_taxable_earnings;
     }
 
+    public function getNetTaxableIncomeAttribute(): float
+    {
+        return $this->taxable_income - $this->withheld_tax;
+    }
+
     public function getNetIncomeAttribute(): float
     {
-        return $this->taxable_income - $this->withheld_tax + $this->total_non_taxable_earnings;
+        return $this->net_taxable_income + $this->total_non_taxable_earnings;
     }
 
     public function getTotalTaxableEarningsAttribute(): float

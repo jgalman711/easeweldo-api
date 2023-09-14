@@ -104,6 +104,7 @@ class PayrollService
 
     public function generate(Period $period, Employee $employee): Payroll
     {
+        $timesheet = null;
         $payroll = $this->initializePayroll($employee, $period);
         $payroll = $this->getLeaves($payroll);
         $payroll->basic_salary = $this->salaryData->basic_salary / self::CYCLE_DIVISOR[$this->settings->period_cycle];
@@ -111,8 +112,8 @@ class PayrollService
             $this->timeRecordService->setExpectedScheduleByPeriod($employee, $period);
             $timesheet = $this->getTimesheet($employee, $period);
             $payroll = self::calculateAttendanceRecords($payroll, $timesheet);
+            $payroll = self::calculateAttendancePay($payroll, $this->salaryData->hourly_rate);
         }
-        $payroll = self::calculateAttendancePay($payroll, $this->salaryData->hourly_rate);
         $payroll = self::calculateHolidayHours($payroll, $timesheet);
         $payroll = self::calculateHolidayPay($payroll);
         $payroll = self::calculateLeaves($payroll);
@@ -123,7 +124,7 @@ class PayrollService
         return $payroll;
     }
 
-    public function update(Payroll $payroll, array $data)
+    public function update(Payroll $payroll, array $data): Payroll
     {
         $this->initializePayroll($payroll->employee, $payroll->period);
         $data = self::parseHoliday($payroll, $data);
@@ -232,18 +233,8 @@ class PayrollService
             $hoursWorked = 0;
             foreach ($holidays as $holiday) {
                 $hours += $this->salaryData->working_hours_per_day;
-                $filteredCollection = $timesheet->where(function ($item) use ($holiday) {
-                    $clockInDate = substr($item['clock_in'], 0, 10);
-                    return $clockInDate === $holiday->date;
-                });
-
-                if ($filteredCollection->isNotEmpty()) {
-                    foreach ($filteredCollection as $entry) {
-                        $clockIn = Carbon::parse($entry->clock_in);
-                        $clockOut = Carbon::parse($entry->clock_out);
-                        $minutesWorked = $clockIn->diffInMinutes($clockOut);
-                        $hoursWorked += $minutesWorked / self::SIXTY_MINUTES;
-                    }
+                if ($timesheet) {
+                    $hoursWorked += $this->calculateHolidayHoursWorked($timesheet, $holiday);
                 }
             }
             $holidaysPay[$type] = [
@@ -367,4 +358,24 @@ class PayrollService
         }
         return $data;
     }
+
+    private function calculateHolidayHoursWorked(Collection $timesheet, Holiday $holiday): float
+    {
+        $hoursWorked = 0;
+        $filteredCollection = $timesheet->where(function ($item) use ($holiday) {
+            $clockInDate = substr($item['clock_in'], 0, 10);
+            return $clockInDate === $holiday->date;
+        });
+
+        if ($filteredCollection->isNotEmpty()) {
+            foreach ($filteredCollection as $entry) {
+                $clockIn = Carbon::parse($entry->clock_in);
+                $clockOut = Carbon::parse($entry->clock_out);
+                $minutesWorked = $clockIn->diffInMinutes($clockOut);
+                $hoursWorked += $minutesWorked / self::SIXTY_MINUTES;
+            }
+        }
+        return $hoursWorked;
+    }
+
 }

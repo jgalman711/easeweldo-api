@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enumerators\SubscriptionEnumerator;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -91,7 +92,7 @@ class Company extends Model
 
     public function period(int $periodId): Period
     {
-        return $this->periods()->where('company_period_id', $periodId)->first();
+        return $this->periods()->where('company_period_id', $periodId)->firstOrFail();
     }
 
     public function periods(): HasMany
@@ -230,5 +231,13 @@ class Company extends Model
         return $unpaidSubscriptionsCount > 0
             ? SubscriptionEnumerator::UNPAID_STATUS
             : SubscriptionEnumerator::PAID_STATUS;
+    }
+
+    public function periodsForYear(int $year): Collection
+    {
+        return $this->periods()
+            ->whereYear('start_date', $year)
+            ->whereYear('end_date', $year)
+            ->get();
     }
 }

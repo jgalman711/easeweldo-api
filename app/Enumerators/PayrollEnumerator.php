@@ -13,8 +13,10 @@ class PayrollEnumerator
 
     public const TYPE = [
         self::TYPE_REGULAR,
-        self::TYPE_SPECIAL
+        self::TYPE_SPECIAL,
+        self::TYPE_NTH_MONTH_PAY
     ];
     public const TYPE_REGULAR = 'regular';
     public const TYPE_SPECIAL = 'special';
+    public const TYPE_NTH_MONTH_PAY = 'nth_month_pay';
 }
