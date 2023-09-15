@@ -3,6 +3,7 @@
 namespace App\Factories;
 
 use App\Enumerators\PayrollEnumerator;
+use App\Strategies\Payroll\FinalPayrollStrategy;
 use App\Strategies\Payroll\NthMonthPayrollStrategy;
 use App\Strategies\Payroll\RegularPayrollStrategy;
 use App\Strategies\Payroll\SpecialPayrollStrategy;
@@ -19,7 +20,9 @@ class PayrollStrategyFactory
             $strategy = new SpecialPayrollStrategy();
         } elseif ($type == PayrollEnumerator::TYPE_REGULAR) {
             $strategy = new RegularPayrollStrategy();
-        } else {
+        } elseif ($type == PayrollEnumerator::TYPE_FINAL) {
+            $strategy = new FinalPayrollStrategy();
+        }else {
             throw new Exception("Invalid payroll type");
         }
         return $strategy;

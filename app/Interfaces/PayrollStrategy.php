@@ -2,6 +2,9 @@
 
 namespace App\Interfaces;
 
+use App\Models\Company;
+use Illuminate\Support\Collection;
+
 interface PayrollStrategy
 {
     /**
@@ -13,4 +16,6 @@ interface PayrollStrategy
      * @return Payroll | Collection.
      */
     public function generate($employeeOrCompany, $periodOrData);
+
+    public function getEmployees(Company $company, array $data);
 }

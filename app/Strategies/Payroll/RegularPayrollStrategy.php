@@ -3,6 +3,8 @@
 namespace App\Strategies\Payroll;
 
 use App\Interfaces\PayrollStrategy;
+use App\Models\Company;
+use App\Models\Employee;
 use App\Models\Payroll;
 use App\Services\Payroll\PayrollService;
 use Exception;
@@ -47,5 +49,10 @@ class RegularPayrollStrategy implements PayrollStrategy
         $payroll->makeHidden('employee');
         $payroll->makeHidden('period');
         return $payroll;
+    }
+
+    public function getEmployees(Company $company, array $data = null)
+    {
+        return $company->employees()->where('status', Employee::ACTIVE)->get();
     }
 }

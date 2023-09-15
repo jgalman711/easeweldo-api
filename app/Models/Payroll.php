@@ -27,6 +27,7 @@ class Payroll extends Model
         'type',
         'status',
         'description',
+        'pay_date',
         'basic_salary',
         'hours_worked',
         'expected_hours_worked',

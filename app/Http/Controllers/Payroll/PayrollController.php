@@ -64,7 +64,7 @@ class PayrollController extends Controller
             return $this->sendError(ErrorMessagesEnumerator::COMPANY_NOT_SUBSCRIBED);
         }
         $period = $company->period($request->period_id);
-        $employees = $company->employees()->where('status', Employee::ACTIVE)->get();
+        $employees = $this->specialPayrollStrategy->getEmployees($company);
         list($payrolls, $errors) = $this->specialPayrollStrategy->generate($employees, $period);
         $this->forget($company);
         return $this->sendResponse(new PayrollResource([$payrolls, $errors]), 'Payroll created successfully.');

@@ -37,5 +37,4 @@ class NthMonthPayrollController extends Controller
         return $this->sendResponse(PayrollResource::collection($payrolls),
             "{$input['description']} generated successfully.");
     }
-
 }

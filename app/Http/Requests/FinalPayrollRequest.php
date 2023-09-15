@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
-class NthMonthPayRequest extends BaseRequest
+class FinalPayrollRequest extends BaseRequest
 {
-    public function rules()
+    public function rules(): array
     {
         return [
             'employee_id' => 'required',

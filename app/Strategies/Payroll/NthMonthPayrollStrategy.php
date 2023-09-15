@@ -4,6 +4,7 @@ namespace App\Strategies\Payroll;
 
 use App\Enumerators\PayrollEnumerator;
 use App\Interfaces\PayrollStrategy;
+use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Payroll;
 use Exception;
@@ -15,7 +16,7 @@ class NthMonthPayrollStrategy implements PayrollStrategy
     {
         $nthMonthPayrolls = [];
         $payrollData['type'] = PayrollEnumerator::TYPE_NTH_MONTH_PAY;
-        $employees = $company->employees()->where('status', Employee::ACTIVE)->get();
+        $employees = $this->getEmployees($company, $payrollData);
         $periods = $company->periodsForYear(date('Y'));
         foreach ($employees as $employee) {
             try {
@@ -34,5 +35,18 @@ class NthMonthPayrollStrategy implements PayrollStrategy
             }
         }
         return $nthMonthPayrolls;
+    }
+
+    public function getEmployees(Company $company, array $input)
+    {
+        $employees = $company->employees()->where('status', Employee::ACTIVE)
+            ->when($input['employee_id'] != 'all', function ($query) use ($input) {
+                $query->where('id', $input['employee_id']);
+            })->get();
+
+        if ($employees->isEmpty()) {
+            throw new Exception('Employee not found.');
+        }
+        return $employees;
     }
 }

@@ -16,6 +16,7 @@ use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\PayEmployeeController;
 use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\Payroll\FinalPayrollController;
 use App\Http\Controllers\Payroll\NthMonthPayrollController;
 use App\Http\Controllers\Payroll\PayrollController;
 use App\Http\Controllers\Payroll\SpecialPayrollController;
@@ -78,8 +79,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::resource('companies', CompanyController::class)->only('index', 'show', 'update');
         Route::prefix('companies/{company}')->group(function () {
             Route::resource('payrolls', PayrollController::class)->except('delete');
-            Route::resource('special-payrolls', SpecialPayrollController::class)->only('store');
-            Route::resource('nth-month-payrolls', NthMonthPayrollController::class);
+            Route::resource('special-payrolls', SpecialPayrollController::class)->only('index', 'store');
+            Route::resource('nth-month-payrolls', NthMonthPayrollController::class)->only('index', 'store');
+            Route::resource('final-payrolls', FinalPayrollController::class)->only('index', 'store');
             Route::resource('employees', EmployeeController::class);
             Route::prefix('employees/{employee}')->group(function () {
                 Route::get('qrcode', [QrController::class, 'show']);
