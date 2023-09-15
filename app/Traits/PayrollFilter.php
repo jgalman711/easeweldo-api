@@ -3,11 +3,11 @@
 namespace App\Traits;
 
 use Closure;
-use Exception;
 use Illuminate\Http\Request;
 
-trait Filter
+trait PayrollFilter
 {
+    use Filter;
     /*
      * @return LengthAwarePaginator or Collection
      */
@@ -42,33 +42,11 @@ trait Filter
         return function ($filterQuery) use ($request) {
             foreach ($request->filter as $key => $value) {
                 if ($key == 'from_date') {
-                    $filterQuery->whereDate($key, '>=', $value);
+                    $filterQuery->where('payrolls.created_at', '>=', $value);
                 } elseif ($key == 'to_date') {
-                    $filterQuery->whereDate($key, '<=', $value);
+                    $filterQuery->where('payrolls.created_at', '<=', $value);
                 } else {
                     $filterQuery->where($key, $value);
-                }
-            }
-        };
-    }
-
-    protected function search(array $searchableColumns, Request $request): Closure
-    {
-        $search = $request->input('search');
-        return function ($searchQuery) use ($searchableColumns, $search) {
-            foreach ($searchableColumns as $searchableColumn) {
-                $columnRelationship = explode('.', $searchableColumn);
-                if (count($columnRelationship) == 2) {
-                    $searchQuery->orWhereHas(
-                        $columnRelationship[0],
-                        function ($queryRelationship) use ($columnRelationship, $search) {
-                            $queryRelationship->where($columnRelationship[1], 'like', '%' . $search . '%');
-                        }
-                    );
-                } elseif (count($columnRelationship) == 1) {
-                    $searchQuery->orWhere($searchableColumn, 'like', '%' . $search . '%');
-                } else {
-                    throw new Exception('Unsupported search query');
                 }
             }
         };

@@ -11,6 +11,7 @@ use App\Http\Resources\PayrollResource;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Payroll;
+use App\Traits\PayrollFilter;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,8 @@ use Illuminate\Support\Facades\Validator;
 
 class PayrollController extends Controller
 {
+    use PayrollFilter;
+
     protected $specialPayrollStrategy;
 
     public function __construct()
@@ -28,15 +31,7 @@ class PayrollController extends Controller
 
     public function index(Request $request, Company $company): JsonResponse
     {
-        $payrollQuery = $company->payrolls();
-        if ($request->has('employee_id')) {
-            $payrollQuery->where('employee_id', $request->employee_id);
-        }
-        if ($request->has('period_id')) {
-            $payrollQuery->where('period_id', $request->period_id);
-        }
-        $payrolls = $this->applyFilters($request, $payrollQuery->with('employee'), [
-            'status',
+        $payrolls = $this->applyFilters($request, $company->payrolls()->with('employee'), [
             'employee.first_name',
             'employee.last_name'
         ]);

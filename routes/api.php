@@ -79,7 +79,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::prefix('companies/{company}')->group(function () {
             Route::resource('payrolls', PayrollController::class)->except('delete');
             Route::resource('special-payrolls', SpecialPayrollController::class)->only('store');
-            Route::resource('nth-month-payrolls', NthMonthPayrollController::class)->only('store');
+            Route::resource('nth-month-payrolls', NthMonthPayrollController::class);
             Route::resource('employees', EmployeeController::class);
             Route::prefix('employees/{employee}')->group(function () {
                 Route::get('qrcode', [QrController::class, 'show']);
