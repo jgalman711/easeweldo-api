@@ -12,7 +12,7 @@ class ChangePasswordRequest extends BaseRequest
             'old_password' => [
                 'required',
                 function ($attribute, $value, $fail) {
-                    if (!Hash::check($value, auth()->user()->password)) {
+                    if (!Hash::check($value, $this->user->password)) {
                         $fail('The old password does not match your current password.');
                     }
                 },

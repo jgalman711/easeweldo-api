@@ -12,7 +12,7 @@ class UserChangePasswordController extends Controller
     public function update(ChangePasswordRequest $request, User $user)
     {
         $request->validated();
-        $user->password = Hash::make($request->new_password);
+        $user->password = Hash::make($request->password);
         $user->save();
         return $this->sendResponse($user, 'Password changed successfully.');
     }
