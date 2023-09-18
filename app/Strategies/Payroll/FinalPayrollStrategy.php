@@ -7,38 +7,46 @@ use App\Interfaces\PayrollStrategy;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Payroll;
+use App\Models\Period;
+use App\Services\Payroll\PayrollService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
 class FinalPayrollStrategy implements PayrollStrategy
 {
+    protected $payrollService;
+
+    public function __construct()
+    {
+        $this->payrollService = app()->make(PayrollService::class);
+    }
+
     public function generate($employees, $payrollData): array
     {
         $finalPayrolls = [];
         $errors = [];
-        $payrollData['type'] = PayrollEnumerator::TYPE_NTH_MONTH_PAY;
+        $payrollData['type'] = PayrollEnumerator::TYPE_FINAL;
         foreach ($employees as $employee) {
             try {
                 DB::beginTransaction();
                 if ($employee->date_of_termination == null) {
                     $errors[] = [
+                        'company_employee_id' => $employee->company_employee_id,
                         'employee_id' => $employee->id,
                         'employee_full_name' => $employee->fullName,
                         'error' => "Unable to calculate the final pay for {$employee->fullName}. Please set the date of termination in the employee module"
                     ];
                     continue;
                 }
-                $latestPayroll = $this->getLatestPayroll($employee);
+                $payrollData['employee_id'] = $employee->id;
+                $payroll = $this->calculate($employee, $payrollData);
 
-                dd($latestPayroll);
-                // If not paid, calculate the worked here. If not subscribed to time and attendance must input
-                // the hours worked manually.
-                // Calculate the 13th month pay
-                // Calculate the remaining leaves if reimbursible
-
+                $finalPayrolls[] = $payroll;
                 DB::commit();
             } catch (Exception $e) {
                 $errors[] = [
+                    'company_employee_id' => $employee->company_employee_id,
                     'employee_id' => $employee->id,
                     'employee_full_name' => $employee->fullName,
                     'error' => $e->getMessage()
@@ -53,7 +61,7 @@ class FinalPayrollStrategy implements PayrollStrategy
     {
         $employees = $company->employees()->where('status', Employee::ACTIVE)
             ->when($input['employee_id'] != 'all', function ($query) use ($input) {
-                $query->where('id', $input['employee_id']);
+                $query->where('company_employee_id', $input['employee_id']);
             })->get();
 
         if ($employees->isEmpty()) {
@@ -62,11 +70,57 @@ class FinalPayrollStrategy implements PayrollStrategy
         return $employees;
     }
 
-    protected function getLatestPayroll(Employee $employee): Payroll
+    protected function calculate(Employee $employee, array $payrollData): Payroll
+    {
+        $latestPayroll = $this->getLatestPayroll($employee);
+        $endDate = $employee->date_of_termination;
+        if ($latestPayroll) {
+            $startDate = Carbon::parse($latestPayroll->period->end_date)->addDay()->format('Y-m-d');
+        } else {
+            $startDate = $employee->date_of_hire;
+        }
+        $period = Period::create([
+            'company_id' => $payrollData['company']->id,
+            'description' => 'Final Pay Period',
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'status' => Period::STATUS_PENDING,
+            'salary_date' => Carbon::parse($endDate)->addMonth()->format('Y-m-d')
+        ]);
+
+        $periodsForYear = $payrollData['company']->periodsForYear(date('Y'));
+        $payrolls = $employee->payrolls()
+            ->whereIn('period_id', $periodsForYear->pluck('id'))
+            ->get();
+        $thirteenthMonthPay = $payrolls->sum('net_taxable_income') / 12;
+
+        $payroll = $this->payrollService->generate($period, $employee, [
+            "pay_date" => $period->salary_date,
+            "taxable_earnings" => [
+                [
+                    "pay" => $thirteenthMonthPay,
+                    "name" => $payrollData['description'],
+                    "type" => PayrollEnumerator::TYPE_FINAL
+                ]
+            ]
+        ]);
+
+        $this->unlink($payroll, $period);
+        return $payroll;
+    }
+
+    protected function unlink(Payroll $payroll, Period $period): void
+    {
+        $payroll->period_id = null;
+        $period->delete();
+        $period->save();
+        $payroll->save();
+    }
+    protected function getLatestPayroll(Employee $employee, string $status = PayrollEnumerator::STATUS_PAID): ?Payroll
     {
         return $employee->payrolls()
-            ->where('status', PayrollEnumerator::STATUS_PAID)
             ->where('type', PayrollEnumerator::TYPE_REGULAR)
+            ->where('status', $status)
             ->whereNotNull('period_id')
             ->latest()
             ->first();

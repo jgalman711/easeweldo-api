@@ -34,11 +34,20 @@ class FinalPayrollController extends Controller
     {
         $input = $request->validated();
         $employees = $this->finalPayrollStrategy->getEmployees($company, $input);
+        $input['company'] = $company;
         list($payrolls, $errors) = $this->finalPayrollStrategy->generate($employees, $input);
+
+        if (empty($payrolls) && !empty($errors)) {
+            return $this->sendError($errors, "Final payroll failed.");
+        } elseif (empty(!$errors) && !empty($payrolls)) {
+            $message = "Final payroll generated partially successfully.";
+        } else {
+            $message = "Final payroll generated successfully.";
+        }
         return $this->sendResponse(BaseResource::collection([
             'success' => $payrolls,
             'failed' => $errors
-        ]), "Final payroll generated successfully.");
+        ]), $message);
     }
 
 }

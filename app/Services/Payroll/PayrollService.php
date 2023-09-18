@@ -49,7 +49,7 @@ class PayrollService
 
     protected $salaryData;
 
-    protected $data;
+    protected $additional;
 
     protected $company;
 
@@ -77,8 +77,9 @@ class PayrollService
         $this->leaveService = $leaveService;
     }
 
-    public function initializePayroll(Employee $employee, Period $period, array $override = []): Payroll
+    public function initializePayroll(Employee $employee, Period $period, array $additional = []): Payroll
     {
+        $this->additional = $additional;
         $this->company = $employee->company;
         $this->settings = $employee->company->setting;
         $this->salaryData = $employee->salaryComputation;
@@ -100,17 +101,17 @@ class PayrollService
         );
 
         $data = [
-            ...$override,
             'period_id' => $period->id,
-            'employee_id' => $employee->id
+            'employee_id' => $employee->id,
+            ...$additional,
         ];
         return Payroll::firstOrCreate($data);
     }
 
-    public function generate(Period $period, Employee $employee, array $override = []): Payroll
+    public function generate(Period $period, Employee $employee, array $additional = []): Payroll
     {
         $timesheet = null;
-        $payroll = $this->initializePayroll($employee, $period, $override);
+        $payroll = $this->initializePayroll($employee, $period, $additional);
         $payroll = $this->getLeaves($payroll);
         $payroll->basic_salary = $this->salaryData->basic_salary / self::CYCLE_DIVISOR[$this->settings->period_cycle];
         if ($this->company->hasTimeAndAttendanceSubscription) {
@@ -204,9 +205,9 @@ class PayrollService
 
     private function calculateContributions(Payroll $payroll): Payroll
     {
-        $payroll->sss_contributions = $this->sssService->compute($payroll->basic_salary);
-        $payroll->pagibig_contributions = $this->pagIbigService->compute($payroll->basic_salary);
-        $payroll->philhealth_contributions = $this->philHealthService->compute($payroll->basic_salary);
+        $payroll->sss_contributions = $this->sssService->compute($payroll->gross_income);
+        $payroll->pagibig_contributions = $this->pagIbigService->compute($payroll->gross_income);
+        $payroll->philhealth_contributions = $this->philHealthService->compute($payroll->gross_income);
         return $payroll;
     }
 
@@ -221,8 +222,23 @@ class PayrollService
 
     private function calculateOtherEarnings(Payroll $payroll): Payroll
     {
-        $payroll->non_taxable_earnings = $this->salaryData->non_taxable_earnings;
-        $payroll->taxable_earnings = $this->salaryData->taxable_earnings;
+        if ($payroll->non_taxable_earnings) {
+            $payroll->non_taxable_earnings = array_merge(
+                $payroll->non_taxable_earnings,
+                $this->salaryData->non_taxable_earnings
+            );
+        } else {
+            $payroll->non_taxable_earnings = $this->salaryData->non_taxable_earnings;
+        }
+
+        if ($payroll->taxable_earnings) {
+            $payroll->taxable_earnings = array_merge(
+                $payroll->taxable_earnings,
+                $this->salaryData->taxable_earnings
+            );
+        } else {
+            $payroll->taxable_earnings = $this->salaryData->taxable_earnings;
+        }
         return $payroll;
     }
 

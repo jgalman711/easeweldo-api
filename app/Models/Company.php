@@ -236,6 +236,7 @@ class Company extends Model
     public function periodsForYear(int $year): Collection
     {
         return $this->periods()
+            ->whereNotNull('company_period_id')
             ->whereYear('start_date', $year)
             ->whereYear('end_date', $year)
             ->get();
