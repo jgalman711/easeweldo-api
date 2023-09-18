@@ -64,6 +64,7 @@ class Employee extends Model
         'user_id',
         'company_id',
         'company_employee_id',
+        'employee_number',
         'department',
         'job_title',
         'status',

@@ -77,7 +77,7 @@ class PayrollService
         $this->leaveService = $leaveService;
     }
 
-    public function initializePayroll(Employee $employee, Period $period): Payroll
+    public function initializePayroll(Employee $employee, Period $period, array $override = []): Payroll
     {
         $this->company = $employee->company;
         $this->settings = $employee->company->setting;
@@ -99,13 +99,18 @@ class PayrollService
             new Exception("Company is not subscribed.")
         );
 
-        return Payroll::firstOrCreate(['period_id' => $period->id, 'employee_id' => $employee->id]);
+        $data = [
+            ...$override,
+            'period_id' => $period->id,
+            'employee_id' => $employee->id
+        ];
+        return Payroll::firstOrCreate($data);
     }
 
-    public function generate(Period $period, Employee $employee): Payroll
+    public function generate(Period $period, Employee $employee, array $override = []): Payroll
     {
         $timesheet = null;
-        $payroll = $this->initializePayroll($employee, $period);
+        $payroll = $this->initializePayroll($employee, $period, $override);
         $payroll = $this->getLeaves($payroll);
         $payroll->basic_salary = $this->salaryData->basic_salary / self::CYCLE_DIVISOR[$this->settings->period_cycle];
         if ($this->company->hasTimeAndAttendanceSubscription) {
@@ -267,7 +272,7 @@ class PayrollService
     {
         $leavesPay = 0;
         $period = $payroll->period;
-        $leaves = collect(json_decode($payroll->leaves, true))->unique('date')->values()->all();
+        $leaves = collect($payroll->leaves)->unique('date')->values()->all();
         if (!empty($leaves) && $period) {
             foreach ($leaves as $key => $leave) {
                 if ($leave['date'] >= $period->start_date && $leave['date'] <= $period->end_date) {
