@@ -48,9 +48,10 @@ class EmployeeController extends Controller
 
     public function store(EmployeeRequest $request, Company $company): JsonResponse
     {
+        $input = $request->validated();
         try {
             DB::beginTransaction();
-            list($employee) = $this->userEmployeeService->create($request, $company);
+            list($employee) = $this->userEmployeeService->create($company, $input);
             $this->forget($company);
             DB::commit();
             return $this->sendResponse(new BaseResource($employee), "Employee created successfully.");

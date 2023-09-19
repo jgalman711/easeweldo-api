@@ -3,36 +3,49 @@
 namespace App\Http\Controllers\Upload;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\BaseResource;
+use App\Models\Company;
 use App\Models\Employee;
+use App\Services\UserEmployeeService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class UploadEmployeeController extends Controller
 {
-    public function store(Request $request)
+    protected $userEmployeeService;
+
+    public function __construct(UserEmployeeService $userEmployeeService)
+    {
+        $this->userEmployeeService = $userEmployeeService;
+    }
+
+    public function store(Company $company, Request $request): JsonResponse
     {
         $request->validate([
             'csv_file' => 'required|file|mimes:csv,txt',
         ]);
 
+        $message = "Unable to upload all employees.";
         if ($request->hasFile('csv_file')) {
             $file = $request->file('csv_file');
             $path = $file->getRealPath();
-
-            // Process the CSV data and save employees here
             $employeesData = array_map('str_getcsv', file($path));
-
-            foreach ($employeesData as $employeeData) {
-                // Assuming CSV structure: name, email, etc.
-                $employee = new Employee();
-                $employee->name = $employeeData[0];
-                $employee->email = $employeeData[1];
-                // Add more fields as needed
-                $employee->save();
+            list($employees, $errors) = $this->userEmployeeService->bulk($company, $employeesData);
+            if (!empty($employees) && !empty($errors)) {
+                $message = "Unable to upload some of the employees.";
+            } elseif (!empty($employees) && empty($errors)) {
+                return $this->sendResponse(
+                    BaseResource::collection([
+                        "success" => $employees,
+                        "errors" => $errors
+                    ]),
+                    "Employees uploaded successfully."
+                );
             }
-
-            return redirect('/employees')->with('success', 'Employees imported successfully.');
         }
-
-        return redirect('/upload-employees')->with('error', 'No file selected.');
+        return $this->sendError(BaseResource::collection([
+            "success" => $employees,
+            "errors" => $errors
+        ]), $message);
     }
 }

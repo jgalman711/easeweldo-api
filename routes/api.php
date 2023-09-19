@@ -30,6 +30,7 @@ use App\Http\Controllers\SubscriptionPricesController;
 use App\Http\Controllers\SynchBiometricsController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\TimesheetUploadController;
+use App\Http\Controllers\Upload\UploadEmployeeController;
 use App\Http\Controllers\User\UserChangePasswordController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserTemporaryPasswordResetController;
@@ -78,10 +79,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {
         Route::resource('companies', CompanyController::class)->only('index', 'show', 'update');
         Route::prefix('companies/{company}')->group(function () {
-            Route::resource('payrolls', PayrollController::class)->except('delete');
-            Route::resource('special-payrolls', SpecialPayrollController::class)->only('index', 'store');
-            Route::resource('nth-month-payrolls', NthMonthPayrollController::class)->only('index', 'store');
-            Route::resource('final-payrolls', FinalPayrollController::class)->only('index', 'store');
+            Route::get('dashboard', [DashboardController::class, 'index']);
             Route::resource('employees', EmployeeController::class);
             Route::prefix('employees/{employee}')->group(function () {
                 Route::get('qrcode', [QrController::class, 'show']);
@@ -96,6 +94,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
                     Route::delete('/', [SalaryComputationController::class, 'delete']);
                 });
             });
+            Route::resource('payrolls', PayrollController::class)->except('delete');
+            Route::resource('special-payrolls', SpecialPayrollController::class)->only('index', 'store');
+            Route::resource('nth-month-payrolls', NthMonthPayrollController::class)->only('index', 'store');
+            Route::resource('final-payrolls', FinalPayrollController::class)->only('index', 'store');
             Route::resource('subscriptions', CompanySubscriptionController::class);
             Route::resource('work-schedules', WorkScheduleController::class);
             Route::resource('periods', PeriodsController::class)->except('store');
@@ -103,12 +105,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::resource('reports', ReportController::class);
             Route::resource('earnings', EarningController::class)->only('index', 'store');
             Route::resource('settings', SettingController::class)->only('index', 'store');
-            Route::get('dashboard', [DashboardController::class, 'index']);
             Route::post('timesheet/upload', [TimesheetUploadController::class, 'store']);
             Route::middleware('check-company-subscriptions')->group(function () {
                 Route::post('synch-biometrics/{module}/', [SynchBiometricsController::class, 'store']);
                 Route::resource('biometrics', BiometricsController::class);
             });
+            Route::post('upload/employees', [UploadEmployeeController::class, 'store']);
         });
     });
     Route::get('user/qrcode', [UserController::class, 'qrcode']);

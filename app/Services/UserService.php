@@ -94,9 +94,9 @@ class UserService
         return $user;
     }
 
-    public function getExistingUser(array $userData): User
+    public function getExistingUser(int $userId): User
     {
-        $user = User::find($userData['user_id']);
+        $user = User::find($userId);
         throw_if($user->employee, new Exception('User is already linked to employee'));
         return $user;
     }
