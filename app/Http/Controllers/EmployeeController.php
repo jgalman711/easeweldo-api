@@ -6,29 +6,30 @@ use App\Http\Requests\EmployeeRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Models\Employee;
-use App\Models\User;
 use App\Services\EmployeeService;
+use App\Services\UserEmployeeService;
 use App\Services\UserService;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Laravel\Sanctum\PersonalAccessToken;
 
 class EmployeeController extends Controller
 {
-    protected const PUBLIC_PATH = 'public/';
-
     protected $employeeService;
 
     protected $userService;
 
-    public function __construct(EmployeeService $employeeService, UserService $userService)
-    {
+    protected $userEmployeeService;
+
+    public function __construct(
+        EmployeeService $employeeService,
+        UserService $userService,
+        UserEmployeeService $userEmployeeService
+    ) {
         $this->employeeService = $employeeService;
         $this->userService = $userService;
+        $this->userEmployeeService = $userEmployeeService;
         $this->setCacheIdentifier('employees');
     }
     
@@ -49,24 +50,12 @@ class EmployeeController extends Controller
     {
         try {
             DB::beginTransaction();
-            $input = $request->validated();
-            if ($request->has('user_id')) {
-                $user = $this->userService->getExistingUser($input);
-            } else {
-                $companies = new Collection([$company]);
-                $user = $this->userService->create($companies, $input);
-            }
-            if (isset($input['profile_picture']) && $input['profile_picture']) {
-                $filename = time() . '.' . $request->profile_picture->extension();
-                $request->profile_picture->storeAs(Employee::ABSOLUTE_STORAGE_PATH, $filename);
-                $input['profile_picture'] = Employee::STORAGE_PATH . $filename;
-            }
-            $input['user_id'] = $user->id;
-            $employee = $this->employeeService->create($company, $input);
+            list($employee) = $this->userEmployeeService->create($request, $company);
             $this->forget($company);
             DB::commit();
             return $this->sendResponse(new BaseResource($employee), "Employee created successfully.");
         } catch (Exception $e) {
+            DB::rollBack();
             return $this->sendError($e->getMessage());
         }
     }
@@ -79,44 +68,18 @@ class EmployeeController extends Controller
         return $this->sendResponse(new BaseResource($employee), 'Employee retrieved successfully.');
     }
 
-    public function update(EmployeeRequest $request, Company $company, Employee $employee): JsonResponse
+    public function update(EmployeeRequest $request, Company $company, int $employeeId): JsonResponse
     {
-        $company->getEmployeeById($employee->id);
-        $input = $request->validated();
-        if ($request->has('reset_password') && $request->reset_password) {
-            $temporaryPassword = $this->userService->employeeResetPassword($employee->user);
-            PersonalAccessToken::where('tokenable_id', $employee->user->id)
-                ->where('tokenable_type', get_class($employee->user))
-                ->delete();
-            return $this->sendResponse(
-                new BaseResource($employee),
-                'Employee password reset successfully. Temporary password: ' . $temporaryPassword
-            );
+        try {
+            DB::beginTransaction();
+            $employee = $company->getEmployeeById($employeeId);
+            $employee = $this->employeeService->update($request, $company, $employee);
+            $this->forget($company, $employee->id);
+            return $this->sendResponse(new BaseResource($employee), 'Employee updated successfully.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->sendError($e->getMessage());
         }
-
-        if (isset($input['profile_picture']) && $input['profile_picture']) {
-            if ($employee->profile_picture) {
-                Storage::delete(self::PUBLIC_PATH . $employee->profile_picture);
-            }
-            $filename = time() . '.' . $request->profile_picture->extension();
-            $request->profile_picture->storeAs(Employee::ABSOLUTE_STORAGE_PATH, $filename);
-            $input['profile_picture'] = Employee::STORAGE_PATH . $filename;
-        } else {
-            unset($input['profile_picture']);
-        }
-
-        if ($company->isInSettlementPeriod()) {
-            $input['status'] = $employee->status;
-        }
-
-        $employee->update($input);
-        if ($request->has('email_address')) {
-            $employee->user->update([
-                'email_address' => $request->email_address
-            ]);
-        }
-        $this->forget($company, $employee->id);
-        return $this->sendResponse(new BaseResource($employee), 'Employee updated successfully.');
     }
 
     public function destroy(Company $company, int $employeeId): JsonResponse
