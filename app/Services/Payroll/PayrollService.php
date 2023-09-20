@@ -287,19 +287,10 @@ class PayrollService
     private function calculateLeaves(Payroll $payroll): Payroll
     {
         $leavesPay = 0;
-        $period = $payroll->period;
-        $leaves = collect($payroll->leaves)->unique('date')->values()->all();
-        if (!empty($leaves) && $period) {
-            foreach ($leaves as $key => $leave) {
-                if ($leave['date'] >= $period->start_date && $leave['date'] <= $period->end_date) {
-                    $leavesPay += $leave['hours'] * $this->salaryData->hourly_rate;
-                } else {
-                    unset($leaves[$key]);
-                }
-            }
-            $payroll->leaves = $leaves;
-            $payroll->leaves_pay = $leavesPay;
+        foreach ($payroll->leaves as $leave) {
+            $leavesPay += $leave['hours'] * $this->salaryData->hourly_rate;
         }
+        $payroll->leaves_pay = $leavesPay;
         return $payroll;
     }
 
