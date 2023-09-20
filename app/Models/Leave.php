@@ -14,20 +14,22 @@ class Leave extends Model
     public const APPROVED = 'approved';
     public const REJECTED = 'rejected';
 
-    public const TYPE_SICK_LEAVE = 'sick_leave';
-    public const TYPE_VACATION_LEAVE = 'vacation_leave';
-    public const TYPE_EMERGENCY_LEAVE = 'emergency_leave';
+    public const TYPE_SICK_LEAVE = 'sick';
+    public const TYPE_VACATION_LEAVE = 'vacation';
+    public const TYPE_EMERGENCY_LEAVE = 'emergency';
 
     public const TYPE = 'type';
     public const HOURS = 'hours';
-    public const DATE = 'date';
-    public const PAY = 'pay';
 
     public const ATTRIBUTES = [
         self::TYPE,
         self::HOURS,
-        self::DATE,
-        self::PAY
+    ];
+
+    public const TYPES = [
+        self::TYPE_SICK_LEAVE,
+        self::TYPE_VACATION_LEAVE,
+        self::TYPE_EMERGENCY_LEAVE
     ];
 
     protected $fillable = [
