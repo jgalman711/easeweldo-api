@@ -7,4 +7,6 @@ class ReportType
     const PAYROLL_SUMMARY = 'payroll-summary';
 
     const EMPLOYEE_PAYROLL_DETAILS = 'employee-payroll-details';
+
+    const ANNUAL_EXPENSES = 'annual-expenses';
 }
