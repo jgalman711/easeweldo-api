@@ -6,12 +6,12 @@ use App\Http\Resources\PayrollExpenseReportResource;
 use App\Interfaces\ReportStrategy;
 use App\Models\Company;
 
-class AnnualExpenseReportStrategy implements ReportStrategy
+class MonthlyExpenseReportStrategy implements ReportStrategy
 {
     public function generate(Company $company, array $data = []): PayrollExpenseReportResource
     {
-        $year = $data['year'] ?? date('Y');
-        $payrolls = $company->payrolls()->whereYear('payrolls.created_at', $year)->get();
+        $month = $data['month'] ?? now()->month;
+        $payrolls = $company->payrolls()->whereMonth('payrolls.created_at', $month)->get();
         
         $monthlyTotals = [
             'hours_worked' => [],

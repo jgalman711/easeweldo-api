@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Factories\ReportStrategyFactory;
 use App\Http\Requests\ReportRequest;
-use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -19,7 +18,7 @@ class ReportController extends Controller
             $input = $request->validated();
             $reportStrategy = ReportStrategyFactory::createStrategy($type);
             $report = $reportStrategy->generate($company, $input);
-            return $this->sendResponse(new BaseResource($report), 'Report data retrieved successfully.');
+            return $this->sendResponse($report, 'Report data retrieved successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
