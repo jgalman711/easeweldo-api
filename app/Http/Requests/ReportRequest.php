@@ -8,8 +8,8 @@ class ReportRequest extends BaseRequest
     {
         return [
             'employee_id' => 'nullable|exists:employees,company_employee_id',
-            'date_from' => 'nullable|date',
-            'date_to' => 'nullable|date|after:date_from',
+            'from_date' => 'nullable|date',
+            'to_date' => 'nullable|date|after:date_from',
         ];
     }
 }
