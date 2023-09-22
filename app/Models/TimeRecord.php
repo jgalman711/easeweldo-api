@@ -71,12 +71,14 @@ class TimeRecord extends Model
 
     public function getAttendanceStatusAttribute()
     {
-        $expectedClockIn = Carbon::parse($this->expected_clock_in);
-        $clockIn = Carbon::parse($this->clock_in);
-        $expectedClockOut = Carbon::parse($this->expected_clock_out);
-        $clockOut = Carbon::parse($this->clock_out);
+        $expectedClockIn = $this->parse($this->expected_clock_in);
+        $clockIn = $this->parse($this->clock_in);
+        $expectedClockOut = $this->parse($this->expected_clock_out);
+        $clockOut = $this->parse($this->clock_out);
 
-        if ($clockIn->isSameDay($expectedClockIn) && $clockOut->isSameDay($expectedClockOut)) {
+        if ($this->areDatesSameDay($clockIn, $expectedClockIn) &&
+            $this->areDatesSameDay($clockOut, $expectedClockOut)
+        ) {
             if ($clockIn->lt($expectedClockIn)) {
                 $attendanceStatus = self::ON_TIME;
             } elseif ($clockIn->gt($expectedClockIn)) {
@@ -88,13 +90,26 @@ class TimeRecord extends Model
             } else {
                 $attendanceStatus = self::ON_TIME;
             }
-        } elseif (!$clockIn->isValid() && $clockOut->isValid()) {
+        } elseif (!$clockIn && $clockOut) {
             $attendanceStatus = self::MISSED_CLOCK_IN;
-        } elseif ($clockIn->isValid() && !$clockOut->isValid()) {
+        } elseif ($clockIn && !$clockOut) {
             $attendanceStatus = self::MISSED_CLOCK_OUT;
         } else {
             $attendanceStatus = self::ABSENT;
         }
         return $attendanceStatus;
+    }
+
+    private function areDatesSameDay($clock, $expectedClock): bool
+    {
+        if ($clock && $expectedClock) {
+            return $clock->isSameDay($expectedClock);
+        }
+        return false;
+    }
+
+    private function parse($clock): ?Carbon
+    {
+        return $clock ? Carbon::parse($clock) : null;
     }
 }
