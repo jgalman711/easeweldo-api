@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use App\Models\Company;
-use App\Models\Subscription;
 use Closure;
 use Illuminate\Http\Request;
 
