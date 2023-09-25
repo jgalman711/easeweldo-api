@@ -222,23 +222,8 @@ class PayrollService
 
     private function calculateOtherEarnings(Payroll $payroll): Payroll
     {
-        if ($payroll->non_taxable_earnings) {
-            $payroll->non_taxable_earnings = array_merge(
-                $payroll->non_taxable_earnings,
-                $this->salaryData->non_taxable_earnings
-            );
-        } else {
-            $payroll->non_taxable_earnings = $this->salaryData->non_taxable_earnings;
-        }
-
-        if ($payroll->taxable_earnings) {
-            $payroll->taxable_earnings = array_merge(
-                $payroll->taxable_earnings,
-                $this->salaryData->taxable_earnings
-            );
-        } else {
-            $payroll->taxable_earnings = $this->salaryData->taxable_earnings;
-        }
+        $payroll->non_taxable_earnings ?? $this->salaryData->non_taxable_earnings;
+        $payroll->taxable_earnings ?? $this->salaryData->taxable_earnings;
         return $payroll;
     }
 

@@ -15,7 +15,7 @@ class PayrollResource extends BaseResource
         foreach ($indeces as $index) {
             $hoursKey = $index . '_hours';
             $minutesKey = $index . '_minutes';
-            $data[$hoursKey] = isset($data[$minutesKey]) && $data[$minutesKey] ? $data[$minutesKey] * self::SIXTY_MINUTES : null;
+            $data[$hoursKey] = isset($data[$minutesKey]) && $data[$minutesKey] ? $data[$minutesKey] / self::SIXTY_MINUTES : null;
         }
         return $data;
     }
