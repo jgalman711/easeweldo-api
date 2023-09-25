@@ -37,8 +37,12 @@ class Leave extends Model
         'employee_id',
         'created_by',
         'type',
-        'start_date',
-        'end_date',
+        'from_date',
+        'to_date',
+        'reason',
+        'remarks',
+        'approved_date',
+        'submitted_date',
         'status'
     ];
 

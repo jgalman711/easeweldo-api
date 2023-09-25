@@ -120,6 +120,16 @@ class Company extends Model
         return $this->hasMany(CompanySubscription::class);
     }
 
+    public function overtimeRequests(): HasMany
+    {
+        return $this->hasMany(OvertimeRequest::class);
+    }
+
+    public function leaves(): HasMany
+    {
+        return $this->hasMany(Leave::class);
+    }
+
     public function subscriptions(): HasManyThrough
     {
         return $this->hasManyThrough(

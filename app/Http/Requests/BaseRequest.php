@@ -17,6 +17,7 @@ class BaseRequest extends FormRequest
     protected const NULLABLE_TIME_FORMAT = 'nullable|date_format:H:i:s';
     protected const NULLABLE_STRING = 'nullable|string|max:255';
     protected const NULLABLE_ARRAY = 'nullable|array|min:1';
+    protected const NULLABLE_DATE = 'nullable|date';
     protected const PH_MOBILE_NUMBER = 'regex:/^(09|\+639)\d{9}$/';
     protected const PRESENT_NULLABLE_ARRAY = 'present|nullable|array';
 

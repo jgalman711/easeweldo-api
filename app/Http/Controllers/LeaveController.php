@@ -9,6 +9,7 @@ use App\Models\Employee;
 use App\Services\LeaveService;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class LeaveController extends Controller
 {
@@ -19,22 +20,22 @@ class LeaveController extends Controller
         $this->leaveService = $leaveService;
     }
 
-    public function index(Company $company, $employee): JsonResponse
+    public function index(Request $request, Company $company): JsonResponse
     {
         try {
-            $leaves = $this->leaveService->getLeaves($company, $employee);
+            $leaves = $this->applyFilters($request, $company->leaves());
             return $this->sendResponse(BaseResource::collection($leaves), 'Leaves retrieved successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
     }
     
-    public function store(LeaveRequest $leaveRequest, Company $company, Employee $employee): JsonResponse
+    public function store(LeaveRequest $leaveRequest, Company $company): JsonResponse
     {
         $data = $leaveRequest->validated();
         $data['company_id'] = $company->id;
-        $data['employee_id'] = $employee->id;
         try {
+            $employee = $company->employees()->where('company_employee_id', $leaveRequest->employee_id)->first();
             $leave = $this->leaveService->applyLeave($employee, $data);
             return $this->sendResponse(new BaseResource($leave), 'Leave created successfully.');
         } catch (Exception $e) {

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\EmployeeRequest;
-use App\Http\Resources\BaseResource;
+use App\Http\Resources\EmployeeResource;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Services\EmployeeService;
@@ -43,7 +43,7 @@ class EmployeeController extends Controller
             'employment_status',
             'department'
         ]);
-        return $this->sendResponse(BaseResource::collection($employees), 'Employees retrieved successfully.');
+        return $this->sendResponse(EmployeeResource::collection($employees), 'Employees retrieved successfully.');
     }
 
     public function store(EmployeeRequest $request, Company $company): JsonResponse
@@ -54,7 +54,7 @@ class EmployeeController extends Controller
             list($employee) = $this->userEmployeeService->create($company, $input);
             $this->forget($company);
             DB::commit();
-            return $this->sendResponse(new BaseResource($employee), "Employee created successfully.");
+            return $this->sendResponse(new EmployeeResource($employee), "Employee created successfully.");
         } catch (Exception $e) {
             DB::rollBack();
             return $this->sendError($e->getMessage());
@@ -66,7 +66,7 @@ class EmployeeController extends Controller
         $employee = $this->remember($company, function () use ($company, $employeeId) {
             return $company->getEmployeeById($employeeId);
         }, $employeeId);
-        return $this->sendResponse(new BaseResource($employee), 'Employee retrieved successfully.');
+        return $this->sendResponse(new EmployeeResource($employee), 'Employee retrieved successfully.');
     }
 
     public function update(EmployeeRequest $request, Company $company, int $employeeId): JsonResponse
@@ -76,7 +76,7 @@ class EmployeeController extends Controller
             $employee = $company->getEmployeeById($employeeId);
             $employee = $this->employeeService->update($request, $company, $employee);
             $this->forget($company, $employee->id);
-            return $this->sendResponse(new BaseResource($employee), 'Employee updated successfully.');
+            return $this->sendResponse(new EmployeeResource($employee), 'Employee updated successfully.');
         } catch (Exception $e) {
             DB::rollBack();
             return $this->sendError($e->getMessage());
@@ -88,7 +88,7 @@ class EmployeeController extends Controller
         $employee = $company->getEmployeeById($employeeId);
         $employee->delete();
         $this->forget($company, $employee->id);
-        return $this->sendResponse(new BaseResource($employee), 'Employee deleted successfully.');
+        return $this->sendResponse(new EmployeeResource($employee), 'Employee deleted successfully.');
     }
 
     public function all(Request $request): JsonResponse
@@ -99,6 +99,6 @@ class EmployeeController extends Controller
             'employment_status',
             'company.name'
         ]);
-        return $this->sendResponse($employees, 'Employees retrieved successfully.');
+        return $this->sendResponse(EmployeeResource::collection($employees), 'Employees retrieved successfully.');
     }
 }
