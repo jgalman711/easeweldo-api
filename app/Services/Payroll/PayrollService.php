@@ -287,10 +287,12 @@ class PayrollService
     private function calculateLeaves(Payroll $payroll): Payroll
     {
         $leavesPay = 0;
-        foreach ($payroll->leaves as $leave) {
-            $leavesPay += $leave['hours'] * $this->salaryData->hourly_rate;
+        if ($payroll->leaves) {
+            foreach ($payroll->leaves as $leave) {
+                $leavesPay += $leave['hours'] * $this->salaryData->hourly_rate;
+            }
+            $payroll->leaves_pay = $leavesPay;
         }
-        $payroll->leaves_pay = $leavesPay;
         return $payroll;
     }
 
@@ -305,8 +307,8 @@ class PayrollService
     private function getLeaves(Payroll $payroll): Payroll
     {
         $leaves = $payroll->employee->leaves()->where([
-            ['start_date', '>=', $payroll->period->start_date],
-            ['end_date', '<=', $payroll->period->end_date]
+            ['from_date', '>=', $payroll->period->start_date],
+            ['to_date', '<=', $payroll->period->end_date]
         ])->get();
         if ($leaves->isNotEmpty()) {
             $leaves = $leaves->map(function ($item) {
@@ -364,7 +366,7 @@ class PayrollService
 
         foreach ($types as $hours => $minutes) {
             if (isset($data[$hours])) {
-                $data[$minutes] = $data[$hours] / self::SIXTY_MINUTES;
+                $data[$minutes] = $data[$hours] * self::SIXTY_MINUTES;
                 unset($data[$hours]);
             }
         }

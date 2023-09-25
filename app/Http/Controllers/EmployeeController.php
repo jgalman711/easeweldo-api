@@ -63,9 +63,7 @@ class EmployeeController extends Controller
 
     public function show(Company $company, int $employeeId): JsonResponse
     {
-        $employee = $this->remember($company, function () use ($company, $employeeId) {
-            return $company->getEmployeeById($employeeId);
-        }, $employeeId);
+        $employee = $company->getEmployeeById($employeeId);
         return $this->sendResponse(new EmployeeResource($employee), 'Employee retrieved successfully.');
     }
 
