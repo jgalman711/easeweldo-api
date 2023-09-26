@@ -12,9 +12,6 @@ class EarningTypeJsonRule implements ValidationRule
     {
         if (isset($value) && !empty($value)) {
             foreach ($value as $item) {
-                if (!isset($item['type']) || !$item['type'] || !in_array($item['type'], Earning::TYPES)) {
-                    $fail('The :attribute type must be in ' . implode(', ', Earning::TYPES) . '.');
-                }
                 if (!isset($item['name']) || !$item['name']) {
                     $fail('The :attribute name is required.');
                 }
