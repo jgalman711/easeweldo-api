@@ -17,11 +17,16 @@ class EmployeeOfCompany
     public function handle(Request $request, Closure $next): Response
     {
         $user = Auth::user();
+
+        if ($user->hasRole('super-admin')) {
+            return $next($request);
+        }
+
         $companySlug = $request->route('company');
         $employeeId = $request->route('employee');
 
         if (
-            $user && $user->employee->id == $employeeId &&
+            $user && optional($user->employee)->id == $employeeId &&
             $user->companies()->where('slug', $companySlug->slug)->exists()
         ) {
             return $next($request);

@@ -34,6 +34,7 @@ use App\Http\Controllers\TimesheetUploadController;
 use App\Http\Controllers\Upload\UploadEmployeeController;
 use App\Http\Controllers\User\UserChangePasswordController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\UserTemporaryPasswordResetController;
 use App\Http\Controllers\VerifyTokenController;
 use App\Http\Controllers\WorkScheduleController;
@@ -108,6 +109,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         });
         Route::group(['prefix' => 'employees/{employee}', 'middleware' => ['employee-of-company']], function () {
             Route::get('/', [EmployeeController::class, 'show']);
+            Route::get('dashboard', [UserDashboardController::class, 'index']);
             Route::get('qrcode', [QrController::class, 'show']);
             Route::post('clock', [TimeRecordController::class, 'clock']);
             Route::resource('time-records', TimeRecordController::class);

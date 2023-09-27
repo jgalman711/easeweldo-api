@@ -7,7 +7,6 @@ use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Models\WorkSchedule;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class WorkScheduleController extends Controller
 {

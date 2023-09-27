@@ -24,7 +24,11 @@ class TimeRecordController extends Controller
     public function index(Request $request, Company $company, int $employeeId): JsonResponse
     {
         $employee = $company->getEmployeeById($employeeId);
-        $timeRecords = $this->timeRecordService->getTimeRecordsByDateRange($request, $employee->timeRecords());
+        $timeRecords = $this->timeRecordService->getTimeRecordsByDateRange(
+            $employee->timeRecords(),
+            $request->date_from,
+            $request->date_to,
+        );
         $timeRecords = $this->applyFilters($request, $timeRecords);
         return $this->sendResponse(BaseResource::collection($timeRecords), 'Time records retrieved successfully.');
     }

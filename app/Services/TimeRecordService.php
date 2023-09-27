@@ -12,7 +12,7 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class TimeRecordService
 {
@@ -73,23 +73,36 @@ class TimeRecordService
         ];
     }
 
-    public function getTimeRecordsByDateRange(Request $request, Relation $timeRecordsQuery): Relation
-    {
-        if ($request->has('filter')) {
-            if (isset($request->filter['date_from']) && $request->filter['date_from']) {
-                $timeRecordsQuery->where(function ($query) use ($request) {
-                    $query->whereDate('expected_clock_in', '>=', $request->filter['date_from'])
-                        ->orWhereDate('clock_in', '>=', $request->filter['date_from']);
-                });
-            }
-            if (isset($request->filter['date_to']) && $request->filter['date_to']) {
-                $timeRecordsQuery->where(function ($query) use ($request) {
-                    $query->whereDate('expected_clock_out', '<=', $request->filter['date_to'])
-                        ->orWhereDate('clock_out', '<=', $request->filter['date_to']);
-                });
-            }
+    public function getTimeRecordsByDateRange(
+        Relation $timeRecordsQuery,
+        string $dateFrom = null,
+        string $dateTo = null
+    ): Relation {
+        if ($dateFrom) {
+            $timeRecordsQuery->where(function ($query) use ($dateFrom) {
+                $query->whereDate('expected_clock_in', '>=', $dateFrom)
+                    ->orWhereDate('clock_in', '>=', $dateFrom);
+            });
+        }
+        if ($dateTo) {
+            $timeRecordsQuery->where(function ($query) use ($dateTo) {
+                $query->whereDate('expected_clock_out', '<=', $dateTo)
+                    ->orWhereDate('clock_out', '<=', $dateTo);
+            });
         }
         return $timeRecordsQuery;
+    }
+
+    public function getTimeRecordToday(Employee $employee): ?TimeRecord
+    {
+        $now = time();
+        $startOfDay = strtotime('midnight', $now);
+        $endOfDay = strtotime('23:59:59', $now);
+        return $this->getTimeRecordsByDateRange(
+            $employee->timeRecords(),
+            date('Y-m-d H:i:s', $startOfDay),
+            date('Y-m-d H:i:s', $endOfDay)
+        )->first();
     }
 
     public function getAttendanceSummary(Company $company, string $date): array
