@@ -68,6 +68,9 @@ Route::resource('/payment-methods', PaymentMethodController::class)->only('index
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('verify', [VerifyTokenController::class, 'verify']);
+    /**
+     * Super Admin Only Route
+     */
     Route::group(['middleware' => ['role:super-admin']], function () {
         Route::resource('biometrics', AdminBiometricsController::class);
         Route::resource('companies', CompanyController::class);
@@ -77,23 +80,13 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::put('users/{user}/reset-temporary-password', [UserTemporaryPasswordResetController::class, 'update']);
         Route::get('employees', [EmployeeController::class, 'all']);
     });
-    Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {
-        Route::resource('companies', CompanyController::class)->only('index', 'show', 'update');
-        Route::prefix('companies/{company}')->group(function () {
+
+    Route::prefix('companies/{company}')->group(function () {
+        Route::group(['middleware' => ['role:super-admin|business-admin']], function () {
+            Route::get('/', [CompanyController::class, 'show']);
+            Route::patch('/', [CompanyController::class, 'update']);
             Route::get('dashboard', [DashboardController::class, 'index']);
             Route::resource('employees', EmployeeController::class);
-            Route::prefix('employees/{employee}')->group(function () {
-                Route::get('qrcode', [QrController::class, 'show']);
-                Route::post('clock', [TimeRecordController::class, 'clock']);
-                Route::resource('time-records', TimeRecordController::class);
-                Route::resource('work-schedules', EmployeeScheduleController::class);
-                Route::prefix('salary-computation')->group(function () {
-                    Route::get('/', [SalaryComputationController::class, 'show']);
-                    Route::post('/', [SalaryComputationController::class, 'store']);
-                    Route::put('/', [SalaryComputationController::class, 'update']);
-                    Route::delete('/', [SalaryComputationController::class, 'delete']);
-                });
-            });
             Route::resource('payrolls', PayrollController::class)->except('delete');
             Route::resource('special-payrolls', SpecialPayrollController::class)->only('index', 'store');
             Route::resource('nth-month-payrolls', NthMonthPayrollController::class)->only('index', 'store');
@@ -103,7 +96,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::resource('periods', PeriodsController::class)->except('store');
             Route::put('periods/{period}/pay', [PayEmployeeController::class, 'update']);
             Route::resource('reports', ReportController::class);
-            Route::resource('earnings', EarningController::class)->only('index', 'store');
             Route::resource('settings', SettingController::class)->only('index', 'store');
             Route::post('timesheet/upload', [TimesheetUploadController::class, 'store']);
             Route::middleware('check-company-subscriptions')->group(function () {
@@ -114,6 +106,18 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::resource('overtime-requests', OvertimeRequestController::class);
             Route::resource('leave-requests', LeaveController::class);
         });
+        Route::group(['prefix' => 'employees/{employee}', 'middleware' => ['employee-of-company']], function () {
+            Route::get('/', [EmployeeController::class, 'show']);
+            Route::get('qrcode', [QrController::class, 'show']);
+            Route::post('clock', [TimeRecordController::class, 'clock']);
+            Route::resource('time-records', TimeRecordController::class);
+            Route::resource('work-schedules', EmployeeScheduleController::class);
+            Route::get('salary-computation', [SalaryComputationController::class, 'show']);
+            Route::post('salary-computation', [SalaryComputationController::class, 'store']);
+            Route::put('salary-computation', [SalaryComputationController::class, 'update']);
+            Route::delete('salary-computation', [SalaryComputationController::class, 'delete']);
+        });
     });
+
     Route::get('user/qrcode', [UserController::class, 'qrcode']);
 });

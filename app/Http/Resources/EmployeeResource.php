@@ -25,7 +25,7 @@ class EmployeeResource extends JsonResource
             "first_name" => $this->first_name,
             "last_name" => $this->last_name,
             "full_name" => $this->full_name,
-            "user" => [
+            "user" => $this->user ? [
                 "email" => $this->user->email,
                 "email_address" => $this->user->email_address,
                 "username" => $this->user->username,
@@ -33,7 +33,7 @@ class EmployeeResource extends JsonResource
                 "last_name" => $this->user->last_name,
                 "status" => $this->user->status,
                 "temporary_password" => $this->user->temporary_password
-            ]
+            ] : null
         ];
     }
 }
