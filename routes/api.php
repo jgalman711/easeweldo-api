@@ -35,6 +35,7 @@ use App\Http\Controllers\Upload\UploadEmployeeController;
 use App\Http\Controllers\User\UserChangePasswordController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserDashboardController;
+use App\Http\Controllers\User\UserPayrollController;
 use App\Http\Controllers\User\UserTemporaryPasswordResetController;
 use App\Http\Controllers\VerifyTokenController;
 use App\Http\Controllers\WorkScheduleController;
@@ -114,6 +115,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('clock', [TimeRecordController::class, 'clock']);
             Route::resource('time-records', TimeRecordController::class);
             Route::resource('work-schedules', EmployeeScheduleController::class);
+            Route::resource('payrolls', UserPayrollController::class)->only('index', 'show');
             Route::get('salary-computation', [SalaryComputationController::class, 'show']);
             Route::post('salary-computation', [SalaryComputationController::class, 'store']);
             Route::put('salary-computation', [SalaryComputationController::class, 'update']);

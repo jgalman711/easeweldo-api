@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use DateTime;
 use Illuminate\Http\Request;
 
 class PayrollResource extends BaseResource
@@ -10,6 +11,13 @@ class PayrollResource extends BaseResource
 
     public function toArray(Request $request): array
     {
+        $start_date = is_string($this->period->start_date)
+            ? new DateTime($this->period->start_date)
+            : $this->period->start_date;
+        $end_date = is_string($this->period->end_date)
+            ? new DateTime($this->period->end_date)
+            : $this->period->end_date;
+
         $data = parent::toArray($request);
         $indeces = ['overtime', 'late', 'absent', 'undertime'];
         foreach ($indeces as $index) {
@@ -17,6 +25,7 @@ class PayrollResource extends BaseResource
             $minutesKey = $index . '_minutes';
             $data[$hoursKey] = isset($data[$minutesKey]) && $data[$minutesKey] ? $data[$minutesKey] / self::SIXTY_MINUTES : null;
         }
+        $data['period_duration'] = $start_date->format('F d') . ' - ' . $end_date->format('F d, Y');
         return $data;
     }
 }
