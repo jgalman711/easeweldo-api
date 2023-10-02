@@ -83,7 +83,7 @@ class TimeRecordController extends Controller
                     ->orWhereDate('expected_clock_in', $currentDate);
             })
             ->first();
-a
+
             if (!$timeRecord) {
                 $timeRecord = new TimeRecord();
                 $timeRecord->company_id = $company->id;
