@@ -78,7 +78,12 @@ class TimeRecordController extends Controller
             $currentTime = Carbon::now();
             $currentDate = $currentTime->copy()->format('Y-m-d');
 
-            $timeRecord = $employee->timeRecords()->whereDate('expected_clock_in', $currentDate)->first();
+            $timeRecord = $employee->timeRecords()->where(function ($query) use ($currentDate) {
+                $query->whereDate('clock_in', $currentDate)
+                    ->orWhereDate('expected_clock_in', $currentDate);
+            })
+            ->first();
+a
             if (!$timeRecord) {
                 $timeRecord = new TimeRecord();
                 $timeRecord->company_id = $company->id;
@@ -91,12 +96,12 @@ class TimeRecordController extends Controller
             } elseif ($timeRecord->clock_out == null) {
                 throw_if(
                     $currentTime->diffInMinutes($timeRecord->clock_in) <= 1,
-                    new Exception("You cannot clock out yet. Please wait for at least 1 minute.")
+                    new Exception("Clock out failed. Please wait for at least 1 minute.")
                 );
                 $timeRecord->clock_out = $currentTime;
                 $message = 'Clock out successful.';
             } else {
-                throw new Exception("Time record creation failed. User already clocked out.");
+                throw new Exception("Clock out failed. User already clocked out.");
             }
             $timeRecord->save();
             return $this->sendResponse(new BaseResource($timeRecord), $message);

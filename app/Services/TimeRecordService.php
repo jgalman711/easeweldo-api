@@ -87,7 +87,8 @@ class TimeRecordService
         if ($dateTo) {
             $timeRecordsQuery->where(function ($query) use ($dateTo) {
                 $query->whereDate('expected_clock_out', '<=', $dateTo)
-                    ->orWhereDate('clock_out', '<=', $dateTo);
+                    ->orWhereDate('clock_out', '<=', $dateTo)
+                    ->orWhereNull('clock_out');
             });
         }
         return $timeRecordsQuery;
@@ -95,13 +96,10 @@ class TimeRecordService
 
     public function getTimeRecordToday(Employee $employee): ?TimeRecord
     {
-        $now = time();
-        $startOfDay = strtotime('midnight', $now);
-        $endOfDay = strtotime('23:59:59', $now);
         return $this->getTimeRecordsByDateRange(
             $employee->timeRecords(),
-            date('Y-m-d H:i:s', $startOfDay),
-            date('Y-m-d H:i:s', $endOfDay)
+            Carbon::now()->startOfDay(),
+            Carbon::now()->endOfDay(),
         )->first();
     }
 

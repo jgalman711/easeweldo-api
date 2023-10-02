@@ -41,7 +41,8 @@ class TimeRecord extends Model
     ];
 
     protected $appends = [
-        'attendance_status'
+        'attendance_status',
+        'next_action'
     ];
 
     public function employee()
@@ -98,6 +99,20 @@ class TimeRecord extends Model
             $attendanceStatus = self::ABSENT;
         }
         return $attendanceStatus;
+    }
+
+    public function getNextActionAttribute()
+    {
+        if ($this->clock_in === null && $this->clock_out === null) {
+            $action = "Clock In";
+        } elseif ($this->clock_in !== null && $this->clock_out === null) {
+            $action = "Clock Out";
+        } elseif ($this->clock_in !== null && $this->clock_out !== null) {
+            $action = "Already Clocked Out";
+        } else {
+            $action = "Missed Clock In";
+        }
+        return $action;
     }
 
     private function areDatesSameDay($clock, $expectedClock): bool

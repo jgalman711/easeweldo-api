@@ -17,7 +17,7 @@ class UserDashboardController extends Controller
         $this->timeRecordService = $timeRecordService;
     }
 
-    public function index(Request $request, Company $company, int $employeeId)
+    public function index(Company $company, int $employeeId)
     {
         $employee = $company->employees()->find($employeeId);
         $timeRecord = $this->timeRecordService->getTimeRecordToday($employee);
