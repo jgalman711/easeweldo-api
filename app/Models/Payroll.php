@@ -52,6 +52,10 @@ class Payroll extends Model
     ];
 
     protected $appends = [
+        'absent_hours',
+        'late_hours',
+        'overtime_hours',
+        'undertime_hours',
         'regular_holiday_hours_worked',
         'regular_holiday_hours_worked_pay',
         'regular_holiday_hours',
@@ -189,5 +193,25 @@ class Payroll extends Model
     public function getSpecialHolidayHoursWorkedPayAttribute(): float
     {
         return optional(optional($this->holidays)[Holiday::SPECIAL_HOLIDAY])['hours_worked_pay'] ?? 0;
+    }
+
+    public function getOvertimeHoursAttribute(): float
+    {
+        return $this->overtime_minutes / 60;
+    }
+
+    public function getLateHoursAttribute(): float
+    {
+        return $this->late_minutes / 60;
+    }
+
+    public function getAbsentHoursAttribute(): float
+    {
+        return $this->absent_minutes / 60;
+    }
+
+    public function getUndertimeHoursAttribute(): float
+    {
+        return $this->undertime_minutes / 60;
     }
 }

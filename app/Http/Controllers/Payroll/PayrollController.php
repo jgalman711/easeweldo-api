@@ -21,11 +21,11 @@ class PayrollController extends Controller
 {
     use PayrollFilter;
 
-    protected $specialPayrollStrategy;
+    protected $payrollStrategy;
 
     public function __construct()
     {
-        $this->specialPayrollStrategy = PayrollStrategyFactory::createStrategy(PayrollEnumerator::TYPE_REGULAR);
+        $this->payrollStrategy = PayrollStrategyFactory::createStrategy(PayrollEnumerator::TYPE_REGULAR);
         $this->setCacheIdentifier('payrolls');
     }
 
@@ -64,8 +64,8 @@ class PayrollController extends Controller
             return $this->sendError(ErrorMessagesEnumerator::COMPANY_NOT_SUBSCRIBED);
         }
         $period = $company->period($request->period_id);
-        $employees = $this->specialPayrollStrategy->getEmployees($company);
-        list($payrolls, $errors) = $this->specialPayrollStrategy->generate($employees, $period);
+        $employees = $this->payrollStrategy->getEmployees($company);
+        list($payrolls, $errors) = $this->payrollStrategy->generate($employees, $period);
         $this->forget($company);
         return $this->sendResponse(new PayrollResource([$payrolls, $errors]), 'Payroll created successfully.');
     }
@@ -79,7 +79,7 @@ class PayrollController extends Controller
         }
 
         try {
-            $payroll = $this->specialPayrollStrategy->regenerate($payroll, $input);
+            $payroll = $this->payrollStrategy->regenerate($payroll, $input);
             $payroll->makeHidden('employee');
             $payroll->makeHidden('period');
             $this->forget($company);
