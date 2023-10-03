@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PeriodRequest;
+use App\Http\Resources\BaseResource;
 use App\Http\Resources\PeriodResource;
 use App\Models\Company;
 use App\Models\Period;
@@ -22,7 +23,10 @@ class PeriodsController extends Controller
     public function index(Request $request, Company $company): JsonResponse
     {
         $periods = $this->applyFilters($request, $company->periods());
-        return $this->sendResponse($periods, 'Payroll periods retrieved successfully.');
+        return $this->sendResponse(
+            new BaseResource($periods),
+            'Payroll periods retrieved successfully.'
+        );
     }
 
     public function show(Company $company, int $companyPeriodId): JsonResponse
