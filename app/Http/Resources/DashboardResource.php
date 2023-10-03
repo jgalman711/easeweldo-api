@@ -19,7 +19,7 @@ class DashboardResource extends BaseResource
         $workSchedule = $this['workSchedule'];
         return [
             'schedule' => $this->parseWorkSchedule($workSchedule),
-            'work_today' =>$this->parseWorkToday($timeRecord),
+            'work_today' => $this->parseWorkToday($timeRecord),
         ];
     }
 

@@ -8,6 +8,7 @@ use App\Models\Company;
 use App\Models\Period;
 use App\Services\PeriodService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class PeriodsController extends Controller
 {
@@ -18,9 +19,9 @@ class PeriodsController extends Controller
         $this->periodService = $periodService;
     }
 
-    public function index(Company $company): JsonResponse
+    public function index(Request $request, Company $company): JsonResponse
     {
-        $periods = $company->periods;
+        $periods = $this->applyFilters($request, $company->periods());
         return $this->sendResponse(PeriodResource::collection($periods), 'Payroll periods retrieved successfully.');
     }
 
