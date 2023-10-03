@@ -22,7 +22,7 @@ class PeriodsController extends Controller
     public function index(Request $request, Company $company): JsonResponse
     {
         $periods = $this->applyFilters($request, $company->periods());
-        return $this->sendResponse(PeriodResource::collection($periods), 'Payroll periods retrieved successfully.');
+        return $this->sendResponse($periods, 'Payroll periods retrieved successfully.');
     }
 
     public function show(Company $company, int $companyPeriodId): JsonResponse
