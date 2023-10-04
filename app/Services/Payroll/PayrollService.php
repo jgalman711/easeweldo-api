@@ -292,22 +292,19 @@ class PayrollService
     private function getLeaves(Payroll $payroll): Payroll
     {
         $leaves = $payroll->employee->leaves()->where([
-            ['from_date', '>=', $payroll->period->start_date],
-            ['to_date', '<=', $payroll->period->end_date]
+            ['date', '>=', $payroll->period->start_date],
+            ['date', '<=', $payroll->period->end_date]
         ])->get();
+
         if ($leaves->isNotEmpty()) {
-            $leaves = $leaves->map(function ($item) {
-                $type = str_replace("_leave", "", $item["type"]);
-                $startDateTime = new Carbon($item["start_date"]);
-                $endDateTime = new Carbon($item["end_date"]);
-                $interval = $startDateTime->diff($endDateTime);
-                return [
-                    "type" => $type,
-                    "date" => date("Y-m-d", strtotime($item["start_date"])),
-                    "hours" => $interval->h - $this->salaryData->break_hours_per_day,
+            foreach ($leaves as $leave) {
+                $transformedLeaves[] = [
+                    'type' => $leave->type,
+                    'date' => $leave->date,
+                    'hours' => $leave->hours
                 ];
-            });
-            $payroll->leaves = json_encode($leaves);
+            }
+            $payroll->leaves = $transformedLeaves;
         }
         return $payroll;
     }

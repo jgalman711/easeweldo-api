@@ -113,6 +113,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('dashboard', [UserDashboardController::class, 'index']);
             Route::get('qrcode', [QrController::class, 'show']);
             Route::post('clock', [TimeRecordController::class, 'clock']);
+            Route::resource('leaves', LeaveController::class);
             Route::resource('time-records', TimeRecordController::class);
             Route::resource('work-schedules', EmployeeScheduleController::class);
             Route::resource('payrolls', UserPayrollController::class)->only('index', 'show');

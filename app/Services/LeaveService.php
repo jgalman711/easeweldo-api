@@ -8,6 +8,8 @@ use App\Models\Leave;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -20,90 +22,126 @@ class LeaveService
         $this->timeRecordService = $timeRecordService;
     }
 
-    public function getLeaveByDateRange(Employee $employee, Carbon $dateFrom, Carbon $dateTo): Collection
+    public function getLeaveByDateRange(Employee $employee, Carbon $dateFrom = null, Carbon $dateTo = null): Collection
     {
         return $employee->leaves()
             ->where(function ($query) use ($dateFrom, $dateTo) {
                 $dateTo = Carbon::parse($dateTo)->addDay();
-                $query->whereBetween('start_date', [$dateFrom, $dateTo])
-                    ->orWhereBetween('end_date', [$dateFrom, $dateTo]);
+                if ($dateFrom) {
+                    $query->whereDate('date', '>=', $dateFrom);
+                }
+                if ($dateTo) {
+                    $query->whereDate('date', '<=', $dateTo);
+                }
             })->get();
     }
 
-    public function applyLeave(Employee $employee, array $data): array
+    public function filter(Request $request, $query): Collection
     {
-        $dateRange = [];
-        $data['type'] = Leave::TYPE_EMERGENCY_LEAVE ? Leave::TYPE_VACATION_LEAVE : $data['type'];
-        $startDate = Carbon::parse($data['from_date']);
-        $originalEndDate = Carbon::parse($data['to_date']);
-
-        while ($startDate <= $originalEndDate) {
-            try {
-                DB::beginTransaction();
-                $endDate = $startDate->copy()
-                ->addHours($employee->salaryComputation->working_hours_per_day)
-                ->addHours($employee->salaryComputation->break_hours_per_day);
-
-                $leaveHours = $startDate->diffInHours($endDate);
-
-                if ($leaveHours > $employee->salaryComputation->working_hours_per_day / 2) {
-                    $leaveHours -= $employee->salaryComputation->break_hours_per_day;
-                }
-
-                $availableHoursLeaveType = "available_" . $data['type'] . "_leave_hours";
-
-                if ($employee->salaryComputation->{$availableHoursLeaveType} < $leaveHours) {
-                    $dateRange[] = [
-                        'type' => $data['type'],
-                        'from_date' => $startDate->toDateTimeString(),
-                        'to_date' => $endDate->toDateTimeString(),
-                        'status' => 'insufficient balance'
-                    ];
-                    break;
+        if ($request->has('filter')) {
+            foreach ($request->filter as $key => $value) {
+                if ($key == 'from_date') {
+                    $query->whereDate('date', '>=', $value);
+                } elseif ($key == 'to_date') {
+                    $query->whereDate('date', '<=', $value);
                 } else {
-                    $dateRange[] = [
-                        'type' => $data['type'],
-                        'from_date' => $startDate->toDateTimeString(),
-                        'to_date' => $endDate->toDateTimeString()
-                    ];
+                    $query->where($key, $value);
                 }
-
-                $employee->salaryComputation->{$availableHoursLeaveType} -= $leaveHours;
-                $employee->salaryComputation->save();
-                $createdByUser = Auth::user();
-                $data['created_by'] = $createdByUser->id;
-                $data['status'] = Leave::PENDING;
-                $data['type'] .= "_leave";
-                $leave = Leave::create($data);
-                if ($createdByUser->hasRole('business-admin') || $createdByUser->hasRole('super-admin')) {
-                    $this->approve($leave);
-                }
-                $startDate->addDay();
-                DB::commit();
-            } catch (Exception $e) {
-                DB::rollBack();
-                throw $e;
             }
         }
-        return $dateRange;
+        if ($request->has('sort')) {
+            $sortColumn = $request->input('sort');
+            $sortDirection = 'asc';
+            if (strpos($sortColumn, '-') === 0) {
+                $sortDirection = 'desc';
+                $sortColumn = ltrim($sortColumn, '-');
+            }
+            $query->orderBy($sortColumn, $sortDirection);
+        } else {
+            $query->orderBy('created_at', 'asc');
+        }
+        if ($request->has('per_page')) {
+            $perPage = $request->input('per_page', 10);
+            return $query->paginate($perPage);
+        }
+        return $query->get();
     }
 
-    public function approve(Leave $leave): void
+    public function apply(Employee $employee, array $data): array
+    {
+        $employeeSalaryDetails = $employee->salaryComputation;
+        $workHoursPerDay = $employeeSalaryDetails->working_hours_per_day;
+
+        $availableHoursLeaveType = "available_" . $data['type'] . "_leave_hours";
+        $remainingLeaveHours = $employee->salaryComputation->{$availableHoursLeaveType};
+        $fromDate = Carbon::parse($data['from_date']);
+        $toDate = Carbon::parse($data['to_date']);
+        $days = $fromDate->diffInDays($toDate);
+        $leaves = [];
+        if ($days > 0) {
+            $currentDate = $fromDate;
+            while ($currentDate <= $toDate && $remainingLeaveHours > 0) {
+                $leaves[] = $this->createLeave($employee, $data);
+                $currentDate->addDay();
+            }
+        } else {
+            $data['date'] = $fromDate;
+            $hours = $fromDate->diffInMinutes($toDate) / 60;
+            $breakHours = $employeeSalaryDetails->break_hours_per_day;
+
+            $hours = $hours < ($workHoursPerDay / 2) + $breakHours ? $hours : $hours - $breakHours;
+            if ($remainingLeaveHours >= $hours) {
+                $data['hours'] = $hours;
+                $remainingLeaveHours -= $hours;
+            } else {
+                $data['hours'] = $remainingLeaveHours;
+                $remainingLeaveHours = 0;
+            }
+            $leaves[] = $this->createLeave($employee, $data);
+        }
+        $employee->salaryComputation->{$availableHoursLeaveType} = $remainingLeaveHours;
+        $employee->salaryComputation->save();
+        return $leaves;
+    }
+
+    public function createLeave(Employee $employee, array $data): Leave
+    {
+        throw_if($data['hours'] <= 0, new Exception("Insufficient leave balance."));
+        return Leave::create([
+            'company_id' => $data['company_id'],
+            'employee_id' => $employee->id,
+            'created_by' => Auth::id(),
+            'type' => $data['type'] . '_leave',
+            'description' => $data['description'],
+            'hours' => $data['hours'],
+            'date' => Carbon::parse($data['date'])->toDateString(),
+            'submitted_date' => Carbon::now()->toDateString(),
+            'remarks' => $data['remarks'] ?? null,
+            'status' => Leave::PENDING
+        ]);
+
+    }
+
+    public function approve(Leave $leave, string $remarks = null): Leave
     {
         $leave->status = Leave::APPROVED;
+        $leave->approved_by = Auth::id();
+        $leave->approved_date = Carbon::now()->toDateString();
+        $leave->remarks = $remarks;
         $leave->save();
+        return $leave;
     }
 
     public function getSoonestLeaves(int $companyId): Collection
     {
         $leaves = Leave::where('company_id', $companyId)
             ->where('status', Leave::APPROVED)
-            ->whereDate('start_date', '>=', now())
-            ->whereDate('start_date', '<=', now()->addDays(7))
-            ->orderBy('start_date')
+            ->whereDate('date', '>=', now())
+            ->whereDate('date', '<=', now()->addDays(7))
+            ->orderBy('date')
             ->get();
         $groupedLeaves = $leaves->groupBy(function ($item) {
-            return Carbon::parse($item->start_date)->format('Y-m-d');
+            return Carbon::parse($item->date)->format('Y-m-d');
         });
         return $groupedLeaves->sortBy(function ($item) {
             return $item;
