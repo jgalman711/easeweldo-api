@@ -39,6 +39,11 @@ class SalaryComputation extends Model
         'available_vacation_leave_hours'
     ];
 
+    protected $appends = [
+        'total_available_leaves',
+        'total_leaves'
+    ];
+
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
@@ -47,5 +52,15 @@ class SalaryComputation extends Model
     public function timeRecords(): HasMany
     {
         return $this->hasMany(TimeRecord::class);
+    }
+
+    public function getTotalLeavesAttribute()
+    {
+        return $this->total_sick_leave_hours + $this->total_vacation_leave_hours;
+    }
+
+    public function getTotalAvailableLeavesAttribute()
+    {
+        return ($this->available_sick_leave_hours + $this->available_vacation_leave_hours);
     }
 }

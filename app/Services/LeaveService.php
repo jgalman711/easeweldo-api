@@ -36,7 +36,7 @@ class LeaveService
             })->get();
     }
 
-    public function filter(Request $request, $query): Collection
+    public function filter(Request $request, $query)
     {
         if ($request->has('filter')) {
             foreach ($request->filter as $key => $value) {

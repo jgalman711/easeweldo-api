@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LeaveRequest;
 use App\Http\Resources\BaseResource;
+use App\Http\Resources\LeaveResource;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Services\LeaveService;
@@ -25,7 +26,7 @@ class LeaveController extends Controller
         try {
             $query = $company->leaves()->where('employee_id', $employeeId);
             $leaves = $this->leaveService->filter($request, $query);
-            return $this->sendResponse($leaves, 'Leaves retrieved successfully.');
+            return $this->sendResponse(LeaveResource::collection($leaves), 'Leaves retrieved successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }

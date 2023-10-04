@@ -49,6 +49,4 @@ class Leave extends Model
     {
         return $this->belongsTo(Employee::class);
     }
-
-    
 }
