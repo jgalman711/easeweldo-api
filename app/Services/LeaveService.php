@@ -2,16 +2,13 @@
 
 namespace App\Services;
 
-use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Leave;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class LeaveService
 {
@@ -78,6 +75,7 @@ class LeaveService
         $toDate = Carbon::parse($data['to_date']);
         $days = $fromDate->diffInDays($toDate);
         $leaves = [];
+        throw_if($remainingLeaveHours <= 0, new Exception('No available leaves left for this type.'));
         if ($days > 0) {
             $currentDate = $fromDate;
             while ($currentDate <= $toDate && $remainingLeaveHours > 0) {
