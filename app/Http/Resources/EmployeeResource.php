@@ -10,13 +10,14 @@ class EmployeeResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            "department" => $this->department,
-            "job_title" => $this->job_title,
+            "company" => $this->company->name,
+             "department" => ucwords($this->department),
+            "job_title" => ucwords($this->job_title),
             "date_of_hire" => $this->date_of_hire,
             "date_of_birth" => $this->date_of_birth,
-            "employment_status" => $this->employment_status,
-            "address_line" => $this->address_line,
-            "barangay_town_city_province" => $this->barangay_town_city_province,
+            "employment_status" => ucwords($this->employment_status),
+            "address_line" => ucwords($this->address_line),
+            "barangay_town_city_province" => ucwords($this->barangay_town_city_province),
             "bank_account_number" => $this->bank_account_number,
             "user_id" => $this->user_id,
             "company_id" => $this->company_id,
@@ -25,6 +26,12 @@ class EmployeeResource extends JsonResource
             "first_name" => $this->first_name,
             "last_name" => $this->last_name,
             "full_name" => $this->full_name,
+            "username" => $this->user->username,
+            "profile_picture" => $this->profile_picture,
+            "email" => $this->user->email,
+            "employment_type" => ucwords($this->employment_type),
+            "employment_status" => ucwords($this->employment_status),
+            "mobile_number" => $this->mobile_number,
             "user" => $this->user ? [
                 "email" => $this->user->email,
                 "email_address" => $this->user->email_address,

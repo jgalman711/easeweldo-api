@@ -9,7 +9,6 @@ use App\Http\Controllers\BiometricsController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanySubscriptionController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\EarningController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeScheduleController;
 use App\Http\Controllers\HolidayController;
@@ -32,6 +31,7 @@ use App\Http\Controllers\SynchBiometricsController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\TimesheetUploadController;
 use App\Http\Controllers\Upload\UploadEmployeeController;
+use App\Http\Controllers\User\EmployeeChangePasswordController;
 use App\Http\Controllers\User\UserChangePasswordController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserDashboardController;
@@ -121,6 +121,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('salary-computation', [SalaryComputationController::class, 'store']);
             Route::put('salary-computation', [SalaryComputationController::class, 'update']);
             Route::delete('salary-computation', [SalaryComputationController::class, 'delete']);
+            Route::patch('change-password', [EmployeeChangePasswordController::class, 'update']);
         });
     });
 
