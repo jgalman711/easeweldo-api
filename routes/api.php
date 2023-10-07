@@ -99,6 +99,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::resource('special-payrolls', SpecialPayrollController::class)->only('index', 'store');
             Route::resource('nth-month-payrolls', NthMonthPayrollController::class)->only('index', 'store');
             Route::resource('final-payrolls', FinalPayrollController::class)->only('index', 'store');
+            Route::post('payrolls/{payroll}/regenerate', [PayrollController::class, 'regenerate']);
             Route::resource('subscriptions', CompanySubscriptionController::class);
             Route::resource('work-schedules', WorkScheduleController::class);
             Route::resource('periods', PeriodsController::class)->except('store');

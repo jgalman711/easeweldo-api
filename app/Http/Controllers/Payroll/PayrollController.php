@@ -11,6 +11,7 @@ use App\Http\Resources\PayrollResource;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Payroll;
+use App\Services\Payroll\PayrollService;
 use App\Traits\PayrollFilter;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -70,9 +71,6 @@ class PayrollController extends Controller
         return $this->sendResponse(new PayrollResource([$payrolls, $errors]), 'Payroll created successfully.');
     }
 
-    /**
-     * Update Payroll
-     */
     public function update(PayrollRequest $request, Company $company, int $payrollId): JsonResponse
     {
         $input = $request->validated();
@@ -91,4 +89,23 @@ class PayrollController extends Controller
             return $this->sendError("Failed to update payroll.", $e->getMessage());
         }
     }
+
+    /**
+     * Regenerate Payroll
+     */
+    public function regenerate(Company $company, int $payrollId): JsonResponse
+    {
+        $payroll = $company->payrolls()->find($payrollId);
+        if (!$payroll) {
+            return $this->sendError("Unable to regenerate payroll. Payroll id not found.");
+        }
+
+        try {
+            $payroll = $this->payrollStrategy->regenerate($payroll);
+            return $this->sendResponse(new PayrollResource($payroll), 'Payroll regenerated successfully.');
+        } catch (Exception $e) {
+            return $this->sendError("Unable to regenerate payroll.", $e->getMessage());
+        }
+    }
+
 }

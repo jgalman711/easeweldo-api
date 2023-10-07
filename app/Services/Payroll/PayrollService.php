@@ -140,7 +140,6 @@ class PayrollService
         $payroll = self::calculateHolidayPay($payroll);
         $payroll = self::calculateLeaves($payroll);
         $payroll = self::calculateContributions($payroll);
-        $payroll = self::calculateOtherEarnings($payroll);
         $payroll = self::calculateWithheldTax($payroll);
         $payroll->save();
         return $payroll;
@@ -222,8 +221,8 @@ class PayrollService
 
     private function calculateOtherEarnings(Payroll $payroll): Payroll
     {
-        $payroll->non_taxable_earnings ?? $this->salaryData->non_taxable_earnings;
-        $payroll->taxable_earnings ?? $this->salaryData->taxable_earnings;
+        $payroll->non_taxable_earnings = $this->salaryData->non_taxable_earnings;
+        $payroll->taxable_earnings = $this->salaryData->taxable_earnings;
         return $payroll;
     }
 
@@ -271,7 +270,7 @@ class PayrollService
 
     private function calculateLeaves(Payroll $payroll): Payroll
     {
-        $leavesPay = 0;
+        $payroll->leaves_pay = $leavesPay = 0;
         if ($payroll->leaves) {
             foreach ($payroll->leaves as $leave) {
                 $leavesPay += $leave['hours'] * $this->salaryData->hourly_rate;
