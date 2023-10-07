@@ -70,6 +70,9 @@ class PayrollController extends Controller
         return $this->sendResponse(new PayrollResource([$payrolls, $errors]), 'Payroll created successfully.');
     }
 
+    /**
+     * Update Payroll
+     */
     public function update(PayrollRequest $request, Company $company, int $payrollId): JsonResponse
     {
         $input = $request->validated();
@@ -79,7 +82,7 @@ class PayrollController extends Controller
         }
 
         try {
-            $payroll = $this->payrollStrategy->regenerate($payroll, $input);
+            $payroll = $this->payrollStrategy->update($payroll, $input);
             $payroll->makeHidden('employee');
             $payroll->makeHidden('period');
             $this->forget($company);

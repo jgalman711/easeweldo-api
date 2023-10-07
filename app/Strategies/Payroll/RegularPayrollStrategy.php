@@ -43,7 +43,7 @@ class RegularPayrollStrategy implements PayrollStrategy
         return [$payrolls, $errors];
     }
 
-    public function regenerate(Payroll $payroll, array $data): Payroll
+    public function update(Payroll $payroll, array $data): Payroll
     {
         $payroll = $this->payrollService->update($payroll, $data);
         $payroll->makeHidden('employee');
