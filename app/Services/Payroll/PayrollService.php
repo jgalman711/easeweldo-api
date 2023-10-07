@@ -2,6 +2,7 @@
 
 namespace App\Services\Payroll;
 
+use App\Enumerators\PayrollEnumerator;
 use App\Models\Employee;
 use App\Models\Holiday;
 use App\Models\Payroll;
@@ -112,6 +113,7 @@ class PayrollService
     {
         $timesheet = null;
         $payroll = $this->initializePayroll($employee, $period, $additional);
+        throw_if($payroll->status == PayrollEnumerator::STATUS_PAID, new Exception('Payroll already paid.'));
         $payroll = $this->getLeaves($payroll);
         $payroll->basic_salary = $this->salaryData->basic_salary / self::CYCLE_DIVISOR[$this->settings->period_cycle];
         if ($this->company->hasTimeAndAttendanceSubscription) {

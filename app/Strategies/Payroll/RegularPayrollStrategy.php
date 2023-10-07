@@ -2,6 +2,7 @@
 
 namespace App\Strategies\Payroll;
 
+use App\Enumerators\PayrollEnumerator;
 use App\Interfaces\PayrollStrategy;
 use App\Models\Company;
 use App\Models\Employee;
@@ -45,6 +46,7 @@ class RegularPayrollStrategy implements PayrollStrategy
 
     public function update(Payroll $payroll, array $data): Payroll
     {
+        throw_if($payroll->status == PayrollEnumerator::STATUS_PAID, new Exception('Payroll already paid.'));
         $payroll = $this->payrollService->update($payroll, $data);
         $payroll->makeHidden('employee');
         $payroll->makeHidden('period');
