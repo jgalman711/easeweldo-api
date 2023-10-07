@@ -6,6 +6,7 @@ use App\Http\Requests\TimeRecordRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Models\TimeRecord;
+use App\Services\ClockService;
 use App\Services\TimeRecordService;
 use Carbon\Carbon;
 use Exception;
@@ -14,10 +15,13 @@ use Illuminate\Http\Request;
 
 class TimeRecordController extends Controller
 {
+    protected $clockService;
+
     protected $timeRecordService;
 
-    public function __construct(TimeRecordService $timeRecordService)
+    public function __construct(ClockService $clockService, TimeRecordService $timeRecordService)
     {
+        $this->clockService = $clockService;
         $this->timeRecordService = $timeRecordService;
     }
 
@@ -75,35 +79,7 @@ class TimeRecordController extends Controller
     {
         try {
             $employee = $company->getEmployeeById($employeeId);
-            $currentTime = Carbon::now();
-            $currentDate = $currentTime->copy()->format('Y-m-d');
-
-            $timeRecord = $employee->timeRecords()->where(function ($query) use ($currentDate) {
-                $query->whereDate('clock_in', $currentDate)
-                    ->orWhereDate('expected_clock_in', $currentDate);
-            })
-            ->first();
-
-            if (!$timeRecord) {
-                $timeRecord = new TimeRecord();
-                $timeRecord->company_id = $company->id;
-                $timeRecord->employee_id = $employeeId;
-            }
-
-            if ($timeRecord->clock_in == null) {
-                $timeRecord->clock_in = $currentTime;
-                $message = 'Clock in successful.';
-            } elseif ($timeRecord->clock_out == null) {
-                throw_if(
-                    $currentTime->diffInMinutes($timeRecord->clock_in) <= 1,
-                    new Exception("Clock out failed. Please wait for at least 1 minute.")
-                );
-                $timeRecord->clock_out = $currentTime;
-                $message = 'Clock out successful.';
-            } else {
-                throw new Exception("Clock out failed. User already clocked out.");
-            }
-            $timeRecord->save();
+            list($timeRecord, $message) = $this->clockService->clockAction($employee);
             return $this->sendResponse(new BaseResource($timeRecord), $message);
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());

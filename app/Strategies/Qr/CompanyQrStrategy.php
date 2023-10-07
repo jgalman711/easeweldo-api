@@ -1,20 +1,22 @@
 <?php
 
-namespace App\Services;
+namespace App\Strategies\Qr;
 
+use App\Interfaces\QrStrategy;
 use Illuminate\Support\HtmlString;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
-class QrService
+class CompanyQrStrategy implements QrStrategy
 {
     private const M_SIZE = 256;
 
-    public function generate(int $companyId, int $employeeId): HtmlString
+    public function generate(array $data): HtmlString
     {
+        $url = "companies/{$data['company_slug']}/qr-clock";
         return QrCode::size(self::M_SIZE)
             ->format('png')
             ->merge('/storage/app/qr-logo.png')
             ->errorCorrection('M')
-            ->generate(url('api/companies/' . $companyId . '/employees/' . $employeeId . '/clock'));
+            ->generate($url);
     }
 }

@@ -7,23 +7,17 @@ use App\Http\Requests\UserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Company;
 use App\Models\User;
-use App\Services\QrService;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
     protected $userService;
 
-    protected $qrService;
-
-    public function __construct(UserService $userService, QrService $qrService)
+    public function __construct(UserService $userService)
     {
         $this->userService = $userService;
-        $this->qrService = $qrService;
     }
 
     public function index(Request $request): JsonResponse
@@ -71,14 +65,5 @@ class UserController extends Controller
         $user->delete();
         $user->load('companies');
         return $this->sendResponse(new UserResource($user), "User deleted successfully.");
-    }
-
-    public function qrcode(): Response
-    {
-        $user = Auth::user();
-        $employee = $user->employee;
-        $company = $employee->company;
-        $data = $this->qrService->generate($company->id, $employee->id);
-        return response($data)->header('Content-type', 'image/png');
     }
 }

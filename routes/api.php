@@ -21,7 +21,8 @@ use App\Http\Controllers\Payroll\NthMonthPayrollController;
 use App\Http\Controllers\Payroll\PayrollController;
 use App\Http\Controllers\Payroll\SpecialPayrollController;
 use App\Http\Controllers\PeriodsController;
-use App\Http\Controllers\QrController;
+use App\Http\Controllers\Qr\CompanyQrController;
+use App\Http\Controllers\Qr\EmployeeQrController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalaryComputationController;
 use App\Http\Controllers\SettingController;
@@ -107,11 +108,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('upload/employees', [UploadEmployeeController::class, 'store']);
             Route::resource('overtime-requests', OvertimeRequestController::class);
             Route::resource('leave-requests', LeaveController::class);
+            Route::get('qrcode', [CompanyQrController::class, 'index']);
         });
         Route::group(['prefix' => 'employees/{employee}', 'middleware' => ['employee-of-company']], function () {
             Route::get('/', [EmployeeController::class, 'show']);
             Route::get('dashboard', [UserDashboardController::class, 'index']);
-            Route::get('qrcode', [QrController::class, 'show']);
+            Route::get('qrcode', [EmployeeQrController::class, 'index']);
             Route::post('clock', [TimeRecordController::class, 'clock']);
             Route::resource('leaves', LeaveController::class);
             Route::resource('time-records', TimeRecordController::class);
