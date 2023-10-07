@@ -87,7 +87,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::prefix('companies/{company}')->group(function () {
 
         // START 'middleware' => ['employee-of-company']
-        Route::post('qrcode', [CompanyQrController::class, 'store']);
+        Route::post('qr-clock', [CompanyQrController::class, 'store']);
         // END
 
         Route::group(['middleware' => ['role:super-admin|business-admin']], function () {
