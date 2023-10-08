@@ -34,14 +34,28 @@ class PeriodService
         $this->salaryDate = null;
     }
 
-    public function pay(Period $period): Collection
+    public function updateStatus(Period $period, string $action): Collection
     {
-        DB::transaction(function () use ($period) {
+        DB::transaction(function () use ($period, $action) {
+            switch ($action) {
+                case "pay":
+                    $payrollStatus = PayrollEnumerator::STATUS_PAID;
+                    $periodStatus = Period::STATUS_COMPLETED;
+                    break;
+                case "cancel":
+                    $payrollStatus = PayrollEnumerator::STATUS_CANCELED;
+                    $periodStatus = Period::STATUS_CANCELLED;
+                    break;
+                default:
+                    $payrollStatus = PayrollEnumerator::STATUS_TO_PAY;
+                    $periodStatus = Period::STATUS_PENDING;
+                    break;
+            }
             foreach ($period->payrolls as $payroll) {
-                $payroll->status = PayrollEnumerator::STATUS_PAID;
+                $payroll->status = $payrollStatus;
                 $payroll->save();
             }
-            $period->status = Period::STATUS_COMPLETED;
+            $period->status = $periodStatus;
             $period->save();
         });
         return $period->payrolls;

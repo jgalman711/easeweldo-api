@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Period;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\PeriodRequest;
 use App\Http\Resources\BaseResource;
 use App\Http\Resources\PeriodResource;
