@@ -10,11 +10,9 @@ class CompanyQrStrategy implements QrStrategy
 {
     private const M_SIZE = 256;
 
-    public function generate(): HtmlString
+    public function generate(array $data): HtmlString
     {
-        $queryString = http_build_query([
-            'action' => 'clock'
-        ]);
+        $queryString = http_build_query($data);
 
         return QrCode::size(self::M_SIZE)
             ->format('png')

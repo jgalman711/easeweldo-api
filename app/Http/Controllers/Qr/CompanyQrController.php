@@ -27,9 +27,9 @@ class CompanyQrController extends Controller
      * Generate a QR code for the company.
      * Display the company's QR Code to the company terminal.
      */
-    public function index(Company $company): Response
+    public function index(): Response
     {
-        $qr = $this->qrService->generate();
+        $qr = $this->qrService->generate(['action' => 'clock']);
         return response($qr)->header('Content-type', 'image/png');
     }
 

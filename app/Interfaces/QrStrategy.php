@@ -6,5 +6,5 @@ use Illuminate\Support\HtmlString;
 
 interface QrStrategy
 {
-    public function generate(): HtmlString;
+    public function generate(array $data): HtmlString;
 }

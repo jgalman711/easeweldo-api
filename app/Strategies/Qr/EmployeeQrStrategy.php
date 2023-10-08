@@ -12,11 +12,12 @@ class EmployeeQrStrategy implements QrStrategy
 
     public function generate(array $data): HtmlString
     {
-        $url = "companies/{$data['company_slug']}/employees/{$data['employee_id']}/qr-clock";
+        $queryString = http_build_query($data);
+
         return QrCode::size(self::M_SIZE)
             ->format('png')
             ->merge('/storage/app/qr-logo.png')
             ->errorCorrection('M')
-            ->generate($url);
+            ->generate($queryString);
     }
 }

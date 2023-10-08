@@ -113,7 +113,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::group(['prefix' => 'employees/{employee}', 'middleware' => ['employee-of-company']], function () {
             Route::get('/', [EmployeeController::class, 'show']);
             Route::get('dashboard', [UserDashboardController::class, 'index']);
-            Route::get('qrcode', [EmployeeQrController::class, 'index']);
             Route::post('clock', [TimeRecordController::class, 'clock']);
             Route::resource('leaves', LeaveController::class);
             Route::resource('time-records', TimeRecordController::class);
@@ -125,7 +124,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::delete('salary-computation', [SalaryComputationController::class, 'delete']);
             Route::patch('change-password', [EmployeeChangePasswordController::class, 'update']);
 
-             // START 'middleware' => ['employee-of-company']
+             // QR - START
+            Route::get('qrcode', [EmployeeQrController::class, 'index']);
             Route::post('qrcode', [CompanyQrController::class, 'store']);
             // END
         });

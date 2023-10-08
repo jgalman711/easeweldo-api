@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Qr;
 
 use App\Factories\QrStrategyFactory;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\EmployeeQrRequest;
 use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Services\ClockService;
@@ -30,7 +31,7 @@ class EmployeeQrController extends Controller
     {
         $employee = $company->employees()->find($employeeId);
         $qr = $this->qrService->generate([
-            'company_slug' => $company->slug,
+            'action' => 'clock',
             'employee_id' => $employee->id
         ]);
         return response($qr)->header('Content-type', 'image/png');
@@ -39,10 +40,10 @@ class EmployeeQrController extends Controller
     /**
      * User will scan the company's qr code
      */
-    public function store(Company $company, int $employeeId)
+    public function store(EmployeeQrRequest $employeeQrRequest, Company $company)
     {
         try {
-            $employee = $company->getEmployeeById($employeeId);
+            $employee = $company->getEmployeeById($employeeQrRequest->employee_id);
             list($timeRecord, $message) = $this->clockService->clockAction($employee);
             return $this->sendResponse(new BaseResource($timeRecord), $message);
         } catch (Exception $e) {
