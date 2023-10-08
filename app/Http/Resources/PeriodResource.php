@@ -24,7 +24,8 @@ class PeriodResource extends BaseResource
             'employees_net_pay' => $this->employees_net_pay,
             'withheld_taxes' => $this->withheld_taxes,
             'total_contributions' => $this->total_contributions,
-            'payroll_cost' => $this->payroll_cost
+            'payroll_cost' => $this->payroll_cost,
+            'payrolls' => $this->payrolls
         ];
     }
 }

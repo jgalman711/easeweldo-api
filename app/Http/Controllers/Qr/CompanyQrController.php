@@ -29,20 +29,18 @@ class CompanyQrController extends Controller
      */
     public function index(Company $company): Response
     {
-        $qr = $this->qrService->generate([
-            'company_slug' => $company->slug
-        ]);
+        $qr = $this->qrService->generate();
         return response($qr)->header('Content-type', 'image/png');
     }
 
     /**
      * Company will scan the employee's qr code
      */
-    public function store(CompanyQrRequest $request, Company $company)
+    public function store(CompanyQrRequest $request, Company $company, int $employeeId)
     {
         try {
             $input = $request->validated();
-            $employee = $company->getEmployeeById($request->employee_id);
+            $employee = $company->getEmployeeById($employeeId);
             list($timeRecord, $message) = $this->clockService->clockAction($employee, $input);
             return $this->sendResponse(new BaseResource($timeRecord), $message);
         } catch (Exception $e) {

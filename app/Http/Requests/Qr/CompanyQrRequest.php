@@ -9,7 +9,7 @@ class CompanyQrRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'employee_id' => 'required|exists:employees,id',
+            'action' => 'required|in:clock',
             'geolocation' => 'string'
         ];
     }

@@ -83,13 +83,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::put('users/{user}/reset-temporary-password', [UserTemporaryPasswordResetController::class, 'update']);
         Route::get('employees', [EmployeeController::class, 'all']);
     });
-
     Route::prefix('companies/{company}')->group(function () {
-
-        // START 'middleware' => ['employee-of-company']
-        Route::post('qr-clock', [CompanyQrController::class, 'store']);
-        // END
-
         Route::group(['middleware' => ['role:super-admin|business-admin']], function () {
             Route::get('/', [CompanyController::class, 'show']);
             Route::patch('/', [CompanyController::class, 'update']);
@@ -130,8 +124,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::put('salary-computation', [SalaryComputationController::class, 'update']);
             Route::delete('salary-computation', [SalaryComputationController::class, 'delete']);
             Route::patch('change-password', [EmployeeChangePasswordController::class, 'update']);
+
+             // START 'middleware' => ['employee-of-company']
+            Route::post('qrcode', [CompanyQrController::class, 'store']);
+            // END
         });
     });
-
-    Route::get('user/qrcode', [UserController::class, 'qrcode']);
 });

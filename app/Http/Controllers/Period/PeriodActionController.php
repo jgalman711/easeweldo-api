@@ -18,10 +18,10 @@ class PeriodActionController extends Controller
         $this->periodService = $periodService;
     }
 
-    public function update(Company $company, int $companyPeriodId, string $action): JsonResponse
+    public function update(Company $company, int $periodId, string $action): JsonResponse
     {
         try {
-            $period = $company->periods()->where('company_period_id', $companyPeriodId)->first();
+            $period = $company->periods()->find($periodId)->first();
             if ($period) {
                 $payrolls = $this->periodService->updateStatus($period, $action);
                 return $this->sendResponse(PayrollResource::collection($payrolls),
