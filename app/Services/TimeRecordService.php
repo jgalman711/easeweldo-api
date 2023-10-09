@@ -86,9 +86,8 @@ class TimeRecordService
         }
         if ($dateTo) {
             $timeRecordsQuery->where(function ($query) use ($dateTo) {
-                $query->whereDate('expected_clock_out', '<=', $dateTo)
-                    ->orWhereDate('clock_out', '<=', $dateTo)
-                    ->orWhereNull('clock_out');
+                $query->whereDate('expected_clock_in', '<=', $dateTo)
+                    ->orWhereDate('clock_in', '<=', $dateTo);
             });
         }
         return $timeRecordsQuery;

@@ -59,6 +59,7 @@ Route::get('artisan-migrate', function () {
         '--force' => true
     ]);
 });
+
 Route::post('register', [RegisterController::class, 'register']);
 Route::post('login', [LoginController::class, 'login']);
 Route::post('reset-password', [PasswordResetController::class, 'reset'])->name('password.reset');
@@ -70,6 +71,7 @@ Route::resource('/subscription-prices', SubscriptionPricesController::class)->on
 Route::resource('/payment-methods', PaymentMethodController::class)->only('index');
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::post('logout', [LoginController::class, 'logout']);
     Route::post('verify', [VerifyTokenController::class, 'verify']);
     /**
      * Super Admin Only Route

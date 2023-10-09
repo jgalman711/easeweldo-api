@@ -33,6 +33,13 @@ class LoginController extends Controller
         }
     }
 
+    public function logout(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->currentAccessToken()->delete();
+        return $this->sendResponse($user, 'User successfully logged out.');
+    }
+
     private function hasTemporaryPassword(User $user): bool
     {
         return $user->temporary_password && $user->temporary_password_expires_at;
