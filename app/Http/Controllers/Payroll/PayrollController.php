@@ -74,7 +74,7 @@ class PayrollController extends Controller
     public function update(PayrollRequest $request, Company $company, int $payrollId): JsonResponse
     {
         $input = $request->validated();
-        $payroll = $company->payrolls->find('id', $payrollId);
+        $payroll = $company->payrolls()->find($payrollId);
         if (!$payroll) {
             return $this->sendError("Payroll not found");
         }
