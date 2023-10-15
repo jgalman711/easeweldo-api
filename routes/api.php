@@ -21,6 +21,7 @@ use App\Http\Controllers\Payroll\PayrollController;
 use App\Http\Controllers\Payroll\SpecialPayrollController;
 use App\Http\Controllers\Period\PeriodActionController;
 use App\Http\Controllers\Period\PeriodsController;
+use App\Http\Controllers\PersonalLoginController;
 use App\Http\Controllers\Qr\CompanyQrController;
 use App\Http\Controllers\Qr\EmployeeQrController;
 use App\Http\Controllers\ReportController;
@@ -62,6 +63,7 @@ Route::get('artisan-migrate', function () {
 
 Route::post('register', [RegisterController::class, 'register']);
 Route::post('login', [LoginController::class, 'login']);
+Route::post('personal/login', [PersonalLoginController::class, 'login']);
 Route::post('reset-password', [PasswordResetController::class, 'reset'])->name('password.reset');
 Route::get('reset-password', [PasswordResetController::class, 'index']);
 Route::post('forgot-password', [ForgotPasswordController::class, 'forgot']);

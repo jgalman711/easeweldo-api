@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class LoginController extends Controller
+class PersonalLoginController extends LoginController
 {
     public function login(Request $request): JsonResponse
     {
@@ -21,9 +20,7 @@ class LoginController extends Controller
                 return $this->sendError('Your temporary password has expired.');
             }
             
-            if (!$user->hasRole('business-admin')) {
-                abort(403, 'Unauthorized action.');
-            }
+    
 
             $success['token'] =  $user->createToken(env('APP_NAME'))->plainTextToken;
             $success['user'] = $user;
@@ -36,22 +33,5 @@ class LoginController extends Controller
         } else {
             return $this->sendError('Incorrect email or password.');
         }
-    }
-
-    public function logout(Request $request): JsonResponse
-    {
-        $user = $request->user();
-        $user->currentAccessToken()->delete();
-        return $this->sendResponse($user, 'User successfully logged out.');
-    }
-
-    protected function hasTemporaryPassword(User $user): bool
-    {
-        return $user->temporary_password && $user->temporary_password_expires_at;
-    }
-
-    protected function isTemporaryPasswordExpired(User $user): bool
-    {
-        return $this->hasTemporaryPassword($user) && now()->gt($user->temporary_password_expires_at);
     }
 }
