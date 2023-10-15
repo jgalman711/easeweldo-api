@@ -4,11 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CompanyRegistrationRequest;
-use App\Models\Company;
-use App\Models\CompanyUser;
-use App\Models\User;
 use App\Services\RegistrationService;
-use Spatie\Permission\Models\Role;
 
 class RegisterController extends Controller
 {
