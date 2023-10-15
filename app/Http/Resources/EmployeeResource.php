@@ -11,7 +11,7 @@ class EmployeeResource extends JsonResource
     {
         return [
             "company" => $this->company->name,
-             "department" => ucwords($this->department),
+            "department" => ucwords($this->department),
             "job_title" => ucwords($this->job_title),
             "date_of_hire" => $this->date_of_hire,
             "date_of_birth" => $this->date_of_birth,
@@ -26,7 +26,8 @@ class EmployeeResource extends JsonResource
             "first_name" => $this->first_name,
             "last_name" => $this->last_name,
             "full_name" => $this->full_name,
-            "username" => $this->user->username,
+            "username" => optional($this->user)->username,
+            "email_address" =>  optional($this->user)->email_address,
             "profile_picture" => $this->profile_picture,
             "email" => $this->user->email,
             "employment_type" => ucwords($this->employment_type),
