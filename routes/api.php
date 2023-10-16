@@ -90,7 +90,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::prefix('companies/{company}')->group(function () {
         Route::group(['middleware' => ['role:super-admin|business-admin']], function () {
             Route::get('/', [CompanyController::class, 'show']);
-            Route::patch('/', [CompanyController::class, 'update']);
+            Route::put('/', [CompanyController::class, 'update']);
             Route::get('dashboard', [DashboardController::class, 'index']);
             Route::resource('employees', EmployeeController::class);
             Route::resource('payrolls', PayrollController::class)->except('delete');
