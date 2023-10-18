@@ -23,7 +23,7 @@ class LoginService
             throw_if($this->isTemporaryPasswordExpired($user), new Exception('Your temporary password has expired.'));
             
             throw_if(
-                $type == self::TYPE_BUSINESS && !$user->hasRole('business-admin'), 
+                $type == self::TYPE_BUSINESS && !$user->hasRole('business-admin') && !$user->hasRole('super-admin'),
                 new Exception('Unauthorized request.')
             );
          
