@@ -103,6 +103,7 @@ class Payroll extends Model
     {
         $grossIncome = $this->basic_salary +
             $this->overtime_pay +
+            $this->leaves_pay +
             $this->regular_holiday_hours_worked_pay +
             $this->regular_holiday_hours_pay +
             $this->special_holiday_hours_worked_pay +
