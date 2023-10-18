@@ -102,13 +102,13 @@ class Payroll extends Model
     public function getGrossIncomeAttribute(): float
     {
         $grossIncome = $this->basic_salary - $this->total_deductions + $this->overtime_pay;
-        return $grossIncome >= 0 ?: 0;
+        return $grossIncome >= 0 ? $grossIncome : 0;
     }
 
     public function getTaxableIncomeAttribute(): float
     {
         $taxableIncome = $this->gross_income - $this->total_contributions + $this->total_taxable_earnings;
-        return $taxableIncome >= 0 ?: 0;
+        return $taxableIncome >= 0 ? $taxableIncome : 0;
     }
 
     public function getNetTaxableIncomeAttribute(): float
