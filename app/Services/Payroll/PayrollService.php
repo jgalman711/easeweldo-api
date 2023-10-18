@@ -200,7 +200,8 @@ class PayrollService
         $payroll->absent_deductions = $this->attendanceService->formatHourly($payroll->absent_minutes, $hourlyRate);
         $payroll->late_deductions = $this->attendanceService->formatHourly($payroll->late_minutes, $hourlyRate);
         $payroll->undertime_deductions = $this->attendanceService->formatHourly($payroll->undertime_minutes, $hourlyRate);
-        $payroll->overtime_pay = $this->attendanceService->formatHourly($payroll->overtime_minutes, $hourlyRate);
+        $overtimePay = $this->attendanceService->formatHourly($payroll->overtime_minutes, $hourlyRate);
+        $payroll->overtime_pay = $overtimePay + ($overtimePay * $this->salaryData->overtime_rate);
         return $payroll;
     }
 
