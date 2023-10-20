@@ -116,7 +116,12 @@ class PayrollService
         throw_if($payroll->status == PayrollEnumerator::STATUS_PAID, new Exception('Payroll already paid.'));
         $payroll = $this->getLeaves($payroll);
         $payroll->basic_salary = $this->salaryData->basic_salary / self::CYCLE_DIVISOR[$this->settings->period_cycle];
-        if ($this->company->hasTimeAndAttendanceSubscription) {
+
+        $employeeSchedule = $employee->employeeSchedules()
+            ->whereDate('start_date', '<', now())
+            ->orderBy('start_date', 'desc')
+            ->first();
+        if ($this->company->hasTimeAndAttendanceSubscription && $employeeSchedule->is_clock_required) {
             $this->timeRecordService->setExpectedScheduleByPeriod($employee, $period);
             $timesheet = $this->getTimesheet($employee, $period);
             $payroll = self::calculateAttendanceRecords($payroll, $timesheet);

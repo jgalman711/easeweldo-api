@@ -114,6 +114,11 @@ class Employee extends Model
         return $this->hasOne(SalaryComputation::class);
     }
 
+    public function employeeSchedules(): HasMany
+    {
+        return $this->hasMany(EmployeeSchedule::class);
+    }
+
     public function schedules(): BelongsToMany
     {
         return $this->belongsToMany(WorkSchedule::class, 'employee_schedules')->withTimestamps();

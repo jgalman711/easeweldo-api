@@ -36,7 +36,8 @@ class RegistrationService
             $company = Company::create([
                 'name' =>  $input['company_name'],
                 'slug' => strtolower(str_replace(' ', '-', $input['company_name'])),
-                'status' => Company::STATUS_TRIAL
+                'status' => Company::STATUS_TRIAL,
+                'email_address' => $user->email_address
             ]);
 
             $company->users()->attach($user->id);
