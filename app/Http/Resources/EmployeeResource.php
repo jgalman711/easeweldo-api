@@ -29,7 +29,7 @@ class EmployeeResource extends JsonResource
             "username" => optional($this->user)->username,
             "email_address" =>  optional($this->user)->email_address,
             "profile_picture" => $this->profile_picture,
-            "email" => $this->user->email,
+            "email" => optional($this->user)->email,
             "employment_type" => ucwords($this->employment_type),
             "employment_status" => ucwords($this->employment_status),
             "mobile_number" => $this->mobile_number,
