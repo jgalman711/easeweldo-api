@@ -25,7 +25,8 @@ class NthMonthPayrollController extends Controller
 
     public function index(Request $request, Company $company): JsonResponse
     {
-        $nthMonthPayroll = $this->applyFilters($request, $company->payrolls());
+        $payrolls = $company->payrolls()->where('type', PayrollEnumerator::TYPE_NTH_MONTH_PAY);
+        $nthMonthPayroll = $this->applyFilters($request, $payrolls);
         return $this->sendResponse(PayrollResource::collection($nthMonthPayroll),
             "Payrolls retrieved successfully.");
     }
