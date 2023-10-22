@@ -25,8 +25,9 @@ class FinalPayrollController extends Controller
 
     public function index(Request $request, Company $company): JsonResponse
     {
-        $nthMonthPayroll = $this->applyFilters($request, $company->payrolls());
-        return $this->sendResponse(BaseResource::collection($nthMonthPayroll),
+        $payrolls = $company->payrolls()->where('type', PayrollEnumerator::TYPE_FINAL)->with('employee');
+        $finalPayroll = $this->applyFilters($request, $payrolls);
+        return $this->sendResponse(BaseResource::collection($finalPayroll),
             "Payrolls retrieved successfully.");
     }
 

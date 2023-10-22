@@ -32,7 +32,8 @@ class PayrollController extends Controller
 
     public function index(Request $request, Company $company): JsonResponse
     {
-        $payrolls = $this->applyFilters($request, $company->payrolls()->with('employee'), [
+        $payrolls = $company->payrolls()->where('type', PayrollEnumerator::TYPE_REGULAR)->with('employee');
+        $payrolls = $this->applyFilters($request, $payrolls, [
             'employee.first_name',
             'employee.last_name'
         ]);

@@ -22,7 +22,8 @@ class SpecialPayrollController extends Controller
 
     public function index(Request $request, Company $company): JsonResponse
     {
-        $specialPayroll = $this->applyFilters($request, $company->payrolls());
+        $payrolls = $company->payrolls()->where('type', PayrollEnumerator::TYPE_SPECIAL)->with('employee');
+        $specialPayroll = $this->applyFilters($request, $payrolls);
         return $this->sendResponse(PayrollResource::collection($specialPayroll),
             "Payrolls retrieved successfully.");
     }
