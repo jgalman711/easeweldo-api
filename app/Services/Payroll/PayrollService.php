@@ -149,7 +149,24 @@ class PayrollService
         $payroll = self::calculateContributions($payroll);
         $payroll = self::calculateWithheldTax($payroll);
         $payroll->save();
+        $this->updatePeriodStatus($payroll->period);
         return $payroll;
+    }
+
+    public function updatePeriodStatus(Period $period): void
+    {
+        $payrolls = $period->payrolls;
+        $totalPayrolls = $payrolls->count();
+        $paidPayrollsCount = $payrolls->where('status', PayrollEnumerator::STATUS_PAID)->count();
+        $canceledPayrollsCount = $payrolls->where('status', PayrollEnumerator::STATUS_CANCELED)->count();
+        if ($paidPayrollsCount == $totalPayrolls) {
+            $period->status = Period::STATUS_COMPLETED;
+        } elseif ($canceledPayrollsCount == $totalPayrolls) {
+            $period->status = Period::STATUS_CANCELLED;
+        } else {
+            $period->status = Period::STATUS_PROCESSING;
+        }
+        $period->save();
     }
 
     public function calculateAttendanceRecords(Payroll $payroll, Collection $timesheet): Payroll
