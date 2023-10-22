@@ -32,8 +32,8 @@ class SpecialPayrollStrategy implements PayrollStrategy
     public function getEmployees(Company $company, array $input)
     {
         $employees = $company->employees()->where('status', Employee::ACTIVE)
-            ->when($input['employee_id'] != 'all', function ($query) use ($input) {
-                $query->where('company_employee_id', $input['employee_id']);
+            ->when($input['employee_id'][0] != 'all', function ($query) use ($input) {
+                $query->whereIn('id', $input['employee_id']);
             })->get();
 
         if ($employees->isEmpty()) {
