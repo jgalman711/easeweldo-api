@@ -10,6 +10,7 @@ class EmployeeResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            "id" => $this->id,
             "company" => $this->company->name,
             "department" => ucwords($this->department),
             "job_title" => ucwords($this->job_title),
