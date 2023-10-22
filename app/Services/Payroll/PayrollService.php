@@ -159,10 +159,14 @@ class PayrollService
         $totalPayrolls = $payrolls->count();
         $paidPayrollsCount = $payrolls->where('status', PayrollEnumerator::STATUS_PAID)->count();
         $canceledPayrollsCount = $payrolls->where('status', PayrollEnumerator::STATUS_CANCELED)->count();
+        $toPayPayroll = $payrolls->where('status', PayrollEnumerator::STATUS_TO_PAY)->count();
+
         if ($paidPayrollsCount == $totalPayrolls) {
             $period->status = Period::STATUS_COMPLETED;
         } elseif ($canceledPayrollsCount == $totalPayrolls) {
             $period->status = Period::STATUS_CANCELLED;
+        } elseif ($toPayPayroll == 0) {
+            $period->status = Period::STATUS_ATTENTION_REQUIRED;
         } else {
             $period->status = Period::STATUS_PROCESSING;
         }
