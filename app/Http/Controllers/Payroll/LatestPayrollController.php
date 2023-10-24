@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Payroll;
 
 use App\Enumerators\PayrollEnumerator;
+use App\Http\Controllers\Controller;
 use App\Http\Resources\PayrollResource;
 use App\Models\Company;
 use Illuminate\Http\JsonResponse;

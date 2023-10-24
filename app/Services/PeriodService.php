@@ -17,6 +17,7 @@ class PeriodService
     private const PAYROLL_ALLOWANCE_DAY = 5;
     private const SEMI_MONTHLY_DAYS = 15;
     private const MINIMUM_LAST_DAY = 28;
+    private const LATEST = 'latest';
 
     protected $today;
 
@@ -157,6 +158,18 @@ class PeriodService
             return $this->salaryDate;
         }
         return null;
+    }
+
+    public function getCompanyPeriod(Company $company, int|string $periodId): Period
+    {
+        if ($periodId == self::LATEST) {
+            return $company->periods()
+                ->whereNotNull('company_period_id')
+                ->latest()
+                ->firstOrFail();
+        } else {
+            return $company->periods()->findOrFail($periodId);
+        }
     }
 
     private function salaryDayMonthly(int $salaryDay): DateTime
