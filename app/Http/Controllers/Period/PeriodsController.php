@@ -30,9 +30,9 @@ class PeriodsController extends Controller
         );
     }
 
-    public function show(Company $company, int $periodId): JsonResponse
+    public function show(Company $company, int|string $periodId): JsonResponse
     {
-        $period = $company->periods()->findOrFail($periodId);
+        $period = $this->periodService->getCompanyPeriod($company, $periodId);
         return $this->sendResponse(new PeriodResource($period), 'Payroll period retrieved successfully.');
     }
 
