@@ -42,7 +42,6 @@ class PayrollController extends Controller
 
     public function show(Company $company, Payroll $payroll): JsonResponse
     {
-        //test change
         $payrollWithEmployee = $this->remember($company, function () use ($payroll, $company) {
             if (!$company->payrolls->contains($payroll)) {
                 return $this->sendError('Payroll not found.');
