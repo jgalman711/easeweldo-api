@@ -52,7 +52,8 @@ class PeriodService
                     $periodStatus = Period::STATUS_PENDING;
                     break;
             }
-            foreach ($period->payrolls as $payroll) {
+            $payrolls = $period->payrolls()->where('status', PayrollEnumerator::STATUS_TO_PAY)->get();
+            foreach ($payrolls as $payroll) {
                 $payroll->status = $payrollStatus;
                 $payroll->save();
             }
