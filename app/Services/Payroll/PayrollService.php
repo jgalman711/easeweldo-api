@@ -166,9 +166,9 @@ class PayrollService
         } elseif ($canceledPayrollsCount == $totalPayrolls) {
             $period->status = Period::STATUS_CANCELLED;
         } elseif ($toPayPayroll == 0) {
-            $period->status = Period::STATUS_ATTENTION_REQUIRED;
+            $period->status = Period::STATUS_COMPLETED;
         } else {
-            $period->status = Period::STATUS_PROCESSING;
+            $period->status = Period::STATUS_PENDING;
         }
         $period->save();
     }

@@ -13,20 +13,14 @@ class Period extends Model
 {
     use HasFactory, SoftDeletes;
 
-    public const STATUS_ATTENTION_REQUIRED = 'attention_required';
     public const STATUS_CANCELLED = 'cancelled';
     public const STATUS_COMPLETED = 'completed';
-    public const STATUS_FAILED = 'failed';
     public const STATUS_PENDING = 'pending';
-    public const STATUS_PROCESSING = 'processing';
 
     public const STATUSES = [
-        self::STATUS_ATTENTION_REQUIRED,
         self::STATUS_CANCELLED,
         self::STATUS_COMPLETED,
-        self::STATUS_FAILED,
-        self::STATUS_PENDING,
-        self::STATUS_PROCESSING
+        self::STATUS_PENDING
     ];
 
     public const TYPE_MONTHLY = 'monthly';
