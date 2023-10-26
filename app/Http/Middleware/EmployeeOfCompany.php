@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Company;
+use App\Models\Employee;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,13 +24,15 @@ class EmployeeOfCompany
             return $next($request);
         }
 
-        $company = $request->route('company');
-        $companySlug = $company instanceof Company ? $company->slug : $request->route('company');
-        $employeeId = $request->route('employee');
+        $company = $request->route('company') instanceof Company
+            ? $request->route('company')
+            : Company::findOrFail($request->route('company'));
+        $employee = $request->route('employee') instanceof Employee
+            ? $request->route('employee')
+            : Employee::findOrFail($request->route('employee'));
 
-        if (
-            $user && optional($user->employee)->id == $employeeId &&
-            $user->companies()->where('slug', $companySlug)->exists()
+        if ($user->companies()->where('slug', $company->slug)->exists()
+            && optional($employee->company)->slug == $company->slug
         ) {
             return $next($request);
         }
