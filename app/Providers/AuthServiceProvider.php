@@ -6,7 +6,6 @@ namespace App\Providers;
 
 use App\Auth\CustomUserProvider;
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,10 +27,6 @@ class AuthServiceProvider extends ServiceProvider
     {
         Auth::provider('custom', function ($app, array $config) {
             return new CustomUserProvider($app['hash'], $config['model']);
-        });
-
-        ResetPassword::createUrlUsing(function (User $user, string $token) {
-            return env('AUTH_APP_URL') . '/reset-password?token=' . $token . '&email_address=' . $user->email_address;
         });
     }
 }

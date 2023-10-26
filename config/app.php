@@ -186,4 +186,5 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+    'auth_url' => env('AUTH_APP_URL')
 ];

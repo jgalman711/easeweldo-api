@@ -12,15 +12,14 @@ class ForgotPasswordController extends Controller
     public function forgot(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email_address' => 'required'
+            'email_address' => 'required',
+            'type' => 'required|in:personal,business'
         ]);
         if ($validator->fails()) {
             return $this->sendError('Validation Error.', $validator->errors());
         }
 
-        $status = Password::sendResetLink([
-            'email_address' => $request->email_address
-        ]);
+        $status = Password::sendResetLink($request->only('email_address'));
 
         if ($status === Password::RESET_LINK_SENT) {
             $response = $this->sendResponse($status, 'Reset password link sent to your email.');
