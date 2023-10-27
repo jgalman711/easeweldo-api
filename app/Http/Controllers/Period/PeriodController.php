@@ -12,7 +12,7 @@ use App\Services\PeriodService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class PeriodsController extends Controller
+class PeriodController extends Controller
 {
     protected $periodService;
 
@@ -23,7 +23,8 @@ class PeriodsController extends Controller
 
     public function index(Request $request, Company $company): JsonResponse
     {
-        $periods = $this->applyFilters($request, $company->periods());
+        $periodsBuilder = $this->periodService->getBuilderPeriodsByType($company, $request->all());
+        $periods = $this->applyFilters($request, $periodsBuilder);
         return $this->sendResponse(
             new BaseResource($periods),
             'Payroll periods retrieved successfully.'

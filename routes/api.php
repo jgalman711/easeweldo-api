@@ -21,7 +21,7 @@ use App\Http\Controllers\Payroll\NthMonthPayrollController;
 use App\Http\Controllers\Payroll\PayrollController;
 use App\Http\Controllers\Payroll\SpecialPayrollController;
 use App\Http\Controllers\Period\PeriodActionController;
-use App\Http\Controllers\Period\PeriodsController;
+use App\Http\Controllers\Period\PeriodController;
 use App\Http\Controllers\PersonalLoginController;
 use App\Http\Controllers\Qr\CompanyQrController;
 use App\Http\Controllers\Qr\EmployeeQrController;
@@ -102,7 +102,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('payrolls/{payroll}/regenerate', [PayrollController::class, 'regenerate']);
             Route::resource('subscriptions', CompanySubscriptionController::class);
             Route::resource('work-schedules', WorkScheduleController::class);
-            Route::resource('periods', PeriodsController::class)->except('store');
+            Route::resource('periods', PeriodController::class)->except('store');
             Route::put('periods/{period}/{action}', [PeriodActionController::class, 'update']);
             Route::resource('reports', ReportController::class);
             Route::resource('settings', SettingController::class)->only('index', 'store');

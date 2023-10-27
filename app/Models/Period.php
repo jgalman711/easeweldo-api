@@ -26,11 +26,15 @@ class Period extends Model
     public const TYPE_MONTHLY = 'monthly';
     public const TYPE_SEMI_MONTHLY = 'semi-monthly';
     public const TYPE_WEEKLY = 'weekly';
+    public const TYPE_FINAL = 'final';
+    public const TYPE_NTH_MONTH_PAY = 'nth_month_pay';
 
     public const TYPES = [
         self::TYPE_MONTHLY,
         self::TYPE_SEMI_MONTHLY,
-        self::TYPE_WEEKLY
+        self::TYPE_WEEKLY,
+        self::TYPE_FINAL,
+        self::TYPE_NTH_MONTH_PAY
     ];
 
     public const ALLOWED_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];

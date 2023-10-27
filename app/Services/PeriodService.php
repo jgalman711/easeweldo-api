@@ -9,6 +9,7 @@ use App\Models\Setting;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -171,6 +172,21 @@ class PeriodService
         } else {
             return $company->periods()->findOrFail($periodId);
         }
+    }
+
+    public function getBuilderPeriodsByType(Company $company, array $data = null): Builder
+    {
+        if (isset($data['filter']) && isset($data['filter']['type'])) {
+            $periods = $company->periods();
+        } else {
+            $periods = $company->periods()
+                ->whereIn('type', [
+                    Period::TYPE_WEEKLY,
+                    Period::TYPE_SEMI_MONTHLY,
+                    Period::TYPE_MONTHLY
+                ]);
+        }
+        return $periods;
     }
 
     private function salaryDayMonthly(int $salaryDay): DateTime
