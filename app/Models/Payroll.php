@@ -74,13 +74,6 @@ class Payroll extends Model
         'net_income'
     ];
 
-    protected $attributes = [
-        'overtime_minutes' => 0,
-        'late_minutes' => 0,
-        'absent_minutes' => 0,
-        'undertime_minutes' => 0
-    ];
-
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);

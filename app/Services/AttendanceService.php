@@ -40,7 +40,7 @@ class AttendanceService
             : 0;
     }
 
-    public function formatHourly(float $minutes, float $hourlyRate): float
+    public function formatHourly(?float $minutes = 0, ?float $hourlyRate = 0): float
     {
         return $minutes / self::SIXTY_MINUTES * $hourlyRate;
     }
