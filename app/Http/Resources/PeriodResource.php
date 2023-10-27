@@ -25,7 +25,7 @@ class PeriodResource extends BaseResource
             'withheld_taxes' => $this->withheld_taxes,
             'total_contributions' => $this->total_contributions,
             'payroll_cost' => $this->payroll_cost,
-            'payrolls' => $this->payrolls
+            'payrolls' => $this->payrolls()->with('employee')->get(),
         ];
     }
 }
