@@ -6,14 +6,23 @@ use App\Enumerators\PayrollEnumerator;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PayrollResource;
 use App\Models\Company;
+use App\Services\PeriodService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class LatestPayrollController extends Controller
 {
+    protected $periodService;
+
+    public function __construct(PeriodService $periodService)
+    {
+        $this->periodService = $periodService;
+    }
+
     public function show(Request $request, Company $company): JsonResponse
     {
-        $latestPeriod = $company->periods()->latest()->first();
+        $periodsBuilder = $this->periodService->getBuilderPeriodsByType($company, $request->all());
+        $latestPeriod = $periodsBuilder->first();
         $payrollsQuery = $company->payrolls()
             ->where('type', PayrollEnumerator::TYPE_REGULAR)
             ->where('period_id', $latestPeriod->id)

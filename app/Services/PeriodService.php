@@ -177,16 +177,16 @@ class PeriodService
     public function getBuilderPeriodsByType(Company $company, array $data = null): Builder
     {
         if (isset($data['filter']) && isset($data['filter']['type'])) {
-            $periods = $company->periods();
+            $builder = $company->periods();
         } else {
-            $periods = $company->periods()
+            $builder = $company->periods()
                 ->whereIn('type', [
                     Period::TYPE_WEEKLY,
                     Period::TYPE_SEMI_MONTHLY,
                     Period::TYPE_MONTHLY
                 ]);
         }
-        return $periods;
+        return $builder;
     }
 
     private function salaryDayMonthly(int $salaryDay): DateTime
