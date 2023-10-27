@@ -9,7 +9,7 @@ class NthMonthPayRequest extends BaseRequest
         return [
             'employee_id' => 'required|array',
             'description' => self::REQUIRED_STRING,
-            'remarks' => self::NULLABLE_NUMERIC,
+            'remarks' => self::NULLABLE_STRING,
             'pay_date' => 'required|date|after_or_equal:today'
         ];
     }
