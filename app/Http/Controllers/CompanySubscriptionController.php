@@ -43,7 +43,8 @@ class CompanySubscriptionController extends Controller
     public function store(SubscriptionRequest $request, Company $company)
     {
         $input = $request->validated();
-        $companySubscription = $this->subscriptionService->subscribe($company, $input);
+        $currentSubscription = $company->companySubscriptions()->latest()->first();
+        $companySubscription = $this->subscriptionService->subscribe($company, $input, $currentSubscription);
         $this->forget($company);
         return $this->sendResponse(
             new CompanySubscriptionResource($companySubscription),
