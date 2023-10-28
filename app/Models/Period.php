@@ -37,6 +37,12 @@ class Period extends Model
         self::TYPE_NTH_MONTH_PAY
     ];
 
+    public const PERIODIC_TYPES = [
+        self::TYPE_MONTHLY,
+        self::TYPE_SEMI_MONTHLY,
+        self::TYPE_WEEKLY
+    ];
+
     public const ALLOWED_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
     protected $fillable = [

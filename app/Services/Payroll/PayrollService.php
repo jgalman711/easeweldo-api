@@ -84,10 +84,12 @@ class PayrollService
         $this->company = $employee->company;
         $this->settings = $employee->company->setting;
         $this->salaryData = $employee->salaryComputation;
-        $this->holidays = Holiday::whereBetween('date', [
-            $period->start_date,
-            $period->end_date
-        ])->get();
+        if (in_array($period->type, Period::PERIODIC_TYPES)) {
+            $this->holidays = Holiday::whereBetween('date', [
+                $period->start_date,
+                $period->end_date
+            ])->get();
+        }
 
         throw_unless($this->company, new Exception("Company not found."));
 
@@ -144,6 +146,7 @@ class PayrollService
         $data = self::parseAttendance($data);
         $payroll->update($data);
         $payroll = self::calculateAttendancePay($payroll, $this->salaryData->hourly_rate);
+        $payroll = self::calculateHolidayHours($payroll);
         $payroll = self::calculateHolidayPay($payroll);
         $payroll = self::calculateLeaves($payroll);
         $payroll = self::calculateContributions($payroll);
@@ -258,6 +261,9 @@ class PayrollService
     private function calculateHolidayHours(Payroll $payroll, Collection $timesheet = null): Payroll
     {
         $holidaysPay = [];
+        if ($payroll->holidays) {
+            return $payroll;
+        }
         foreach (Holiday::HOLIDAY_TYPES as $type) {
             $holidays = $this->holidays->where('simplified_type', $type);
             if (!$holidays) {
@@ -288,8 +294,10 @@ class PayrollService
         if ($holidays) {
             foreach ($holidays as $type => $holiday) {
                 $rate = $this->salaryData->{"{$type}_holiday_rate"};
+                $holiday['hours'] = $holiday['hours'] ?? $holiday['hours_worked'];
                 $holidays[$type] = [
                     ...$holidays[$type],
+                    'hours' => $holiday['hours'],
                     'hours_pay' => $holiday['hours'] * $this->salaryData->hourly_rate,
                     'hours_worked_pay' => $holiday['hours_worked'] * $this->salaryData->hourly_rate * $rate
                 ];
@@ -355,13 +363,16 @@ class PayrollService
     private function parseHoliday(Payroll $payroll, array $data): array
     {
         $holidays = $payroll->holidays;
-        if (isset($data['regular_holiday_hours_worked'])) {
-            $holidays[Holiday::REGULAR_HOLIDAY]['hours_worked'] = floatval($data['regular_holiday_hours_worked']);
-            unset($data['regular_holiday_hours_worked']);
-        }
-        if (isset($data['special_holiday_hours_worked'])) {
-            $holidays[Holiday::SPECIAL_HOLIDAY]['hours_worked'] = floatval($data['special_holiday_hours_worked']);
-            unset($data['special_holiday_hours_worked']);
+
+        foreach (Holiday::HOLIDAY_TYPES as $type) {
+            if (isset($data["{$type}_holiday_hours_worked"])) {
+                $holidays[$type]['hours_worked'] = floatval($data["{$type}_holiday_hours_worked"]);
+                unset($data["{$type}_holiday_hours_worked"]);
+            }
+            if (isset($data["{$type}_holiday_hours"])) {
+                $holidays[$type]['hours'] = floatval($data["{$type}_holiday_hours"]);
+                unset($data["{$type}_holiday_hours"]);
+            }
         }
         $data['holidays'] = $holidays;
         return $data;
