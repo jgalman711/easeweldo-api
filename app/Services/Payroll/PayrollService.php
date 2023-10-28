@@ -191,27 +191,27 @@ class PayrollService
             $holidaysHoursWorked[$type] = 0;
         }
 
-        foreach ($timesheet as $record) {
-            $expectedClockIn = self::parseClockRecord($record->expected_clock_in);
-            $expectedClockOut = self::parseClockRecord($record->expected_clock_out);
-            $clockIn = self::parseClockRecord($record->clock_in);
-            $clockOut = self::parseClockRecord($record->clock_out);
-            $minutesWorked = self::getMinutesWorked($clockIn, $clockOut);
-
-            if (!$record->clock_in && !$record->clock_out) {
-                $absentMinutes += $this->attendanceService->calculateAbsences($working_hours_per_day);
-            } else {
-                if ($expectedClockIn && $expectedClockOut) {
-                    $lateMinutes += $this->attendanceService->calculateLates($clockIn, $expectedClockIn);
-                    $underMinutes += $this->attendanceService->calculateUndertimes($clockOut, $expectedClockOut);
-                    if ($expectedClockOut) {
-                        $expectedClockOut->addMinutes($this->settings->minimum_overtime);
+        if ($timesheet) {
+            foreach ($timesheet as $record) {
+                $expectedClockIn = self::parseClockRecord($record->expected_clock_in);
+                $expectedClockOut = self::parseClockRecord($record->expected_clock_out);
+                $clockIn = self::parseClockRecord($record->clock_in);
+                $clockOut = self::parseClockRecord($record->clock_out);
+                $minutesWorked = self::getMinutesWorked($clockIn, $clockOut);
+                if (!$record->clock_in && !$record->clock_out) {
+                    $absentMinutes += $this->attendanceService->calculateAbsences($working_hours_per_day);
+                } else {
+                    if ($expectedClockIn && $expectedClockOut) {
+                        $lateMinutes += $this->attendanceService->calculateLates($clockIn, $expectedClockIn);
+                        $underMinutes += $this->attendanceService->calculateUndertimes($clockOut, $expectedClockOut);
+                        if ($expectedClockOut) {
+                            $expectedClockOut->addMinutes($this->settings->minimum_overtime);
+                        }
+                        $overtimeMinutes += $this->attendanceService->calculateOvertime($clockOut, $expectedClockOut);
                     }
-                    $overtimeMinutes += $this->attendanceService->calculateOvertime($clockOut, $expectedClockOut);
                 }
             }
         }
-
         $payroll->absent_minutes = $absentMinutes;
         $payroll->late_minutes = $lateMinutes;
         $payroll->undertime_minutes = $underMinutes;
@@ -265,10 +265,12 @@ class PayrollService
             }
             $hours = 0;
             $hoursWorked = 0;
-            foreach ($holidays as $holiday) {
-                $hours += $this->salaryData->working_hours_per_day;
-                if ($timesheet) {
-                    $hoursWorked += $this->calculateHolidayHoursWorked($timesheet, $holiday);
+            if ($holidays) {
+                foreach ($holidays as $holiday) {
+                    $hours += $this->salaryData->working_hours_per_day;
+                    if ($timesheet) {
+                        $hoursWorked += $this->calculateHolidayHoursWorked($timesheet, $holiday);
+                    }
                 }
             }
             $holidaysPay[$type] = [
@@ -283,15 +285,15 @@ class PayrollService
     private function calculateHolidayPay(Payroll $payroll): Payroll
     {
         $holidays = $payroll->holidays;
-        foreach ($holidays as $type => $holiday) {
-
-            $rate = $this->salaryData->{"{$type}_holiday_rate"};
-
-            $holidays[$type] = [
-                ...$holidays[$type],
-                'hours_pay' => $holiday['hours'] * $this->salaryData->hourly_rate,
-                'hours_worked_pay' => $holiday['hours_worked'] * $this->salaryData->hourly_rate * $rate
-            ];
+        if ($holidays) {
+            foreach ($holidays as $type => $holiday) {
+                $rate = $this->salaryData->{"{$type}_holiday_rate"};
+                $holidays[$type] = [
+                    ...$holidays[$type],
+                    'hours_pay' => $holiday['hours'] * $this->salaryData->hourly_rate,
+                    'hours_worked_pay' => $holiday['hours_worked'] * $this->salaryData->hourly_rate * $rate
+                ];
+            }
         }
         $payroll->holidays = $holidays;
         return $payroll;
