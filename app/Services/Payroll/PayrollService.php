@@ -118,7 +118,7 @@ class PayrollService
         throw_if($payroll->status == PayrollEnumerator::STATUS_PAID, new Exception('Payroll already paid.'));
         $payroll = $this->getLeaves($payroll);
         $payroll->basic_salary = $this->salaryData->basic_salary / self::CYCLE_DIVISOR[$this->settings->period_cycle];
-
+        $payroll->pay_date = $period->salary_date;
         $employeeSchedule = $employee->employeeSchedules()
             ->whereDate('start_date', '<', now())
             ->orderBy('start_date', 'desc')

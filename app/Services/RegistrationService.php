@@ -3,14 +3,11 @@
 namespace App\Services;
 
 use App\Models\Company;
-use App\Models\CompanySubscription;
 use App\Models\Subscription;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
-
-use function PHPSTORM_META\map;
 
 class RegistrationService
 {
@@ -65,10 +62,5 @@ class RegistrationService
             DB::rollBack();
             throw $e;
         }
-    }
-
-    public function confirmEmail(string $email): void
-    {
-
     }
 }
