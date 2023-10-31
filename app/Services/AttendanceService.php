@@ -19,23 +19,23 @@ class AttendanceService
         return $workingHoursPerDay * self::SIXTY_MINUTES;
     }
 
-    public function calculateLates(Carbon $clockIn, Carbon $expectedClockIn): float
+    public function calculateLates(Carbon $expectedClockIn, ?Carbon $clockIn): float
     {
-        return $clockIn->gt($expectedClockIn)
+        return $clockIn && $clockIn->gt($expectedClockIn)
             ? $clockIn->diffInMinutes($expectedClockIn)
             : 0;
     }
 
-    public function calculateUndertimes(Carbon $clockOut, Carbon $expectedClockOut): float
+    public function calculateUndertimes(Carbon $expectedClockOut, ?Carbon $clockOut): float
     {
-        return $clockOut->gt($expectedClockOut)
+        return $clockOut && $clockOut->gt($expectedClockOut)
             ? $clockOut->diffInMinutes($expectedClockOut)
             : 0;
     }
 
-    public function calculateOvertime(Carbon $clockOut, Carbon $expectedClockOut): float
+    public function calculateOvertime(Carbon $expectedClockOut, ?Carbon $clockOut): float
     {
-        return $clockOut->gt($expectedClockOut)
+        return $clockOut && $clockOut->gt($expectedClockOut)
             ? $clockOut->diffInMinutes($expectedClockOut)
             : 0;
     }

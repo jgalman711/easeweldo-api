@@ -95,7 +95,7 @@ class FinalPayrollStrategy implements PayrollStrategy
         $thirteenthMonthPay = $payrolls->sum('net_taxable_income') / 12;
 
         $payroll = $this->payrollService->generate($period, $employee, [
-            "pay_date" => $period->salary_date,
+            "pay_date" => $payrollData['pay_date'] ?? $period->salary_date,
             "taxable_earnings" => [
                 [
                     "pay" => $thirteenthMonthPay,

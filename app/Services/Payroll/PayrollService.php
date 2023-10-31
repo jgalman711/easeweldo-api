@@ -118,7 +118,7 @@ class PayrollService
         throw_if($payroll->status == PayrollEnumerator::STATUS_PAID, new Exception('Payroll already paid.'));
         $payroll = $this->getLeaves($payroll);
         $payroll->basic_salary = $this->salaryData->basic_salary / self::CYCLE_DIVISOR[$this->settings->period_cycle];
-        $payroll->pay_date = $period->salary_date;
+        $payroll->pay_date = $additional['pay_date'] ?? $period->salary_date;
         $employeeSchedule = $employee->employeeSchedules()
             ->whereDate('start_date', '<', now())
             ->orderBy('start_date', 'desc')
@@ -205,12 +205,12 @@ class PayrollService
                     $absentMinutes += $this->attendanceService->calculateAbsences($working_hours_per_day);
                 } else {
                     if ($expectedClockIn && $expectedClockOut) {
-                        $lateMinutes += $this->attendanceService->calculateLates($clockIn, $expectedClockIn);
-                        $underMinutes += $this->attendanceService->calculateUndertimes($clockOut, $expectedClockOut);
+                        $lateMinutes += $this->attendanceService->calculateLates($expectedClockIn, $clockIn);
+                        $underMinutes += $this->attendanceService->calculateUndertimes($expectedClockOut, $clockOut);
                         if ($expectedClockOut) {
                             $expectedClockOut->addMinutes($this->settings->minimum_overtime);
                         }
-                        $overtimeMinutes += $this->attendanceService->calculateOvertime($clockOut, $expectedClockOut);
+                        $overtimeMinutes += $this->attendanceService->calculateOvertime($expectedClockOut, $clockOut);
                     }
                 }
             }
@@ -261,7 +261,7 @@ class PayrollService
     private function calculateHolidayHours(Payroll $payroll, Collection $timesheet = null): Payroll
     {
         $holidaysPay = [];
-        if ($payroll->holidays) {
+        if ($payroll->holidays || !$this->holidays) {
             return $payroll;
         }
         foreach (Holiday::HOLIDAY_TYPES as $type) {
