@@ -9,6 +9,7 @@ class EmployeeRequest extends BaseRequest
 {
     public function rules(): array
     {
+        $employee = Employee::find($this->employee);
         return [
             'user_id' => [
                 'nullable',
@@ -51,7 +52,7 @@ class EmployeeRequest extends BaseRequest
                 'sometimes',
                 Rule::unique('users', 'email_address')
                     ->whereNull('deleted_at')
-                    ->ignore(optional($this->employee)->user),
+                    ->ignore(optional($employee)->user),
             ],
             'mobile_number' => [
                 'nullable',
@@ -63,8 +64,8 @@ class EmployeeRequest extends BaseRequest
             ],
             'address_line' => self::REQUIRED_STRING,
             'barangay_town_city_province' => self::REQUIRED_STRING,
-            'date_of_hire' => ['nullable', 'date'],
-            'date_of_termination' => ['nullable', 'date'],
+            'date_of_hire' => self::NULLABLE_DATE,
+            'date_of_termination' => self::NULLABLE_DATE_AFTER_TODAY,
             'sss_number' => [
                 'nullable',
                 'string',
