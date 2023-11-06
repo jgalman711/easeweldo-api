@@ -96,11 +96,11 @@ class FinalPayrollStrategy implements PayrollStrategy
 
         $payroll = $this->payrollService->generate($period, $employee, [
             "pay_date" => $payrollData['pay_date'] ?? $period->salary_date,
+            "type" => PayrollEnumerator::TYPE_FINAL,
             "taxable_earnings" => [
                 [
                     "pay" => $thirteenthMonthPay,
                     "name" => $payrollData['description'],
-                    "type" => PayrollEnumerator::TYPE_FINAL
                 ]
             ]
         ]);

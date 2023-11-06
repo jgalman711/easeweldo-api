@@ -253,8 +253,8 @@ class PayrollService
 
     private function calculateOtherEarnings(Payroll $payroll): Payroll
     {
-        $payroll->non_taxable_earnings = $this->salaryData->non_taxable_earnings;
-        $payroll->taxable_earnings = $this->salaryData->taxable_earnings;
+        $payroll->non_taxable_earnings = $payroll->non_taxable_earnings ?? $this->salaryData->non_taxable_earnings;
+        $payroll->taxable_earnings = $payroll->taxable_earnings ?? $this->salaryData->taxable_earnings;
         return $payroll;
     }
 
