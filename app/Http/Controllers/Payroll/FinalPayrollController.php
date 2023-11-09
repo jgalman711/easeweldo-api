@@ -6,8 +6,10 @@ use App\Enumerators\PayrollEnumerator;
 use App\Factories\PayrollStrategyFactory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FinalPayrollRequest;
-use App\Http\Resources\BaseResource;
+use App\Http\Requests\PayrollRequest;
+use App\Http\Resources\PayrollResource;
 use App\Models\Company;
+use App\Models\Payroll;
 use App\Traits\PayrollFilter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -27,8 +29,18 @@ class FinalPayrollController extends Controller
     {
         $payrolls = $company->payrolls()->where('type', PayrollEnumerator::TYPE_FINAL)->with('employee');
         $finalPayroll = $this->applyFilters($request, $payrolls);
-        return $this->sendResponse(BaseResource::collection($finalPayroll),
+        return $this->sendResponse(PayrollResource::collection($finalPayroll),
             "Payrolls retrieved successfully.");
+    }
+
+    public function show(Company $company, int $payrollId)
+    {
+        $payroll = Payroll::findOrFail($payrollId);
+        if (!$company->payrolls->contains($payroll)) {
+            return $this->sendError('Payroll not found.');
+        }
+        $payroll->load('employee');
+        return $this->sendResponse(new PayrollResource($payroll), 'Payroll retrieved successfully.');
     }
 
     public function store(FinalPayrollRequest $request, Company $company): JsonResponse
@@ -45,10 +57,9 @@ class FinalPayrollController extends Controller
         } else {
             $message = "Final payroll generated successfully.";
         }
-        return $this->sendResponse(BaseResource::collection([
+        return $this->sendResponse(PayrollResource::collection([
             'success' => $payrolls,
             'failed' => $errors
         ]), $message);
     }
-
 }

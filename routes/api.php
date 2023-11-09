@@ -98,7 +98,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::resource('payrolls', PayrollController::class)->except('delete');
             Route::resource('special-payrolls', SpecialPayrollController::class)->only('index', 'store');
             Route::resource('nth-month-payrolls', NthMonthPayrollController::class)->only('index', 'store');
-            Route::resource('final-payrolls', FinalPayrollController::class)->only('index', 'store');
+            Route::resource('final-payrolls', FinalPayrollController::class)->only('index', 'show', 'store');
             Route::post('payrolls/{payroll}/regenerate', [PayrollController::class, 'regenerate']);
             Route::resource('subscriptions', CompanySubscriptionController::class);
             Route::resource('work-schedules', WorkScheduleController::class);

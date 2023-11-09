@@ -79,7 +79,8 @@ class FinalPayrollStrategy implements PayrollStrategy
         } else {
             $startDate = $employee->date_of_hire;
         }
-        $period = Period::create([
+
+        $period = Period::firstOrCreate([
             'company_id' => $payrollData['company']->id,
             'description' => 'Final Pay Period',
             'start_date' => $startDate,
@@ -94,7 +95,7 @@ class FinalPayrollStrategy implements PayrollStrategy
             ->get();
         $thirteenthMonthPay = $payrolls->sum('net_taxable_income') / 12;
 
-        $payroll = $this->payrollService->generate($period, $employee, [
+        return $this->payrollService->generate($period, $employee, [
             "pay_date" => $payrollData['pay_date'] ?? $period->salary_date,
             "type" => PayrollEnumerator::TYPE_FINAL,
             "taxable_earnings" => [
@@ -104,18 +105,8 @@ class FinalPayrollStrategy implements PayrollStrategy
                 ]
             ]
         ]);
-
-        $this->unlink($payroll, $period);
-        return $payroll;
     }
 
-    protected function unlink(Payroll $payroll, Period $period): void
-    {
-        $payroll->period_id = null;
-        $period->delete();
-        $period->save();
-        $payroll->save();
-    }
     protected function getLatestPayroll(Employee $employee, string $status = PayrollEnumerator::STATUS_PAID): ?Payroll
     {
         return $employee->payrolls()
