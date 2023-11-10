@@ -18,9 +18,10 @@ class Controller
     {
         $response = [
             'success' => true,
-            'data'    => $result,
+            ...$result->response()->getData(true),
             'message' => $message,
         ];
+
 
         return response()->json($response, 200);
     }
