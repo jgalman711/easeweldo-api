@@ -57,6 +57,16 @@ class FinalPayrollStrategy implements PayrollStrategy
         return [$finalPayrolls, $errors];
     }
 
+    public function update(Company $company, int $payrollId, array $data): Payroll
+    {
+        $payroll = $company->payrolls()
+            ->where('type', PayrollEnumerator::TYPE_FINAL)
+            ->findOrFail($payrollId);
+        throw_if($payroll->status == PayrollEnumerator::STATUS_PAID, new Exception('Payroll already paid.'));
+        $payroll->update($data);
+        return $payroll;
+    }
+
     public function getEmployees(Company $company, array $input)
     {
         $employees = $company->employees()->where('status', Employee::ACTIVE)

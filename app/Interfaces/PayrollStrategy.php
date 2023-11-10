@@ -16,5 +16,7 @@ interface PayrollStrategy
      */
     public function generate($employeeOrCompany, $periodOrData);
 
+    public function update(Company $company, int $payrollId, array $data);
+
     public function getEmployees(Company $company, array $data);
 }

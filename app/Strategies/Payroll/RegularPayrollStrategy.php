@@ -44,8 +44,9 @@ class RegularPayrollStrategy implements PayrollStrategy
         return [$payrolls, $errors];
     }
 
-    public function update(Payroll $payroll, array $data): Payroll
+    public function update(Company $company, int $payrollId, array $data): Payroll
     {
+        $payroll = $company->payrolls()->findOrFail($payrollId);
         throw_if($payroll->status == PayrollEnumerator::STATUS_PAID, new Exception('Payroll already paid.'));
         $payroll = $this->payrollService->update($payroll, $data);
         $payroll->makeHidden('employee');

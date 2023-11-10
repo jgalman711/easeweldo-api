@@ -5,11 +5,9 @@ namespace App\Http\Controllers\Payroll;
 use App\Enumerators\PayrollEnumerator;
 use App\Factories\PayrollStrategyFactory;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\FinalPayrollRequest;
-use App\Http\Requests\PayrollRequest;
+use App\Http\Requests\Payroll\FinalPayrollRequest;
 use App\Http\Resources\PayrollResource;
 use App\Models\Company;
-use App\Models\Payroll;
 use App\Traits\PayrollFilter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -35,10 +33,9 @@ class FinalPayrollController extends Controller
 
     public function show(Company $company, int $payrollId)
     {
-        $payroll = Payroll::findOrFail($payrollId);
-        if (!$company->payrolls->contains($payroll)) {
-            return $this->sendError('Payroll not found.');
-        }
+        $payroll = $company->payrolls()
+            ->where('type', PayrollEnumerator::TYPE_FINAL)
+            ->findOrFail($payrollId);
         $payroll->load('employee');
         return $this->sendResponse(new PayrollResource($payroll), 'Payroll retrieved successfully.');
     }

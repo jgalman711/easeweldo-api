@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Payroll;
+
+use App\Http\Requests\BaseRequest;
 
 class NthMonthPayRequest extends BaseRequest
 {

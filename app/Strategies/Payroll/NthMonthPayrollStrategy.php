@@ -21,20 +21,19 @@ class NthMonthPayrollStrategy implements PayrollStrategy
         $employees = $this->getEmployees($company, $payrollData);
         $periods = $company->periodsForYear(date('Y'));
         $now = Carbon::now();
+        $period = Period::firstOrCreate([
+            'company_id' => $company->id,
+            'description' => $payrollData['description'],
+            'start_date' =>  $now->copy()->startOfYear()->format('Y-m-d'),
+            'end_date' => $now->copy()->endOfYear()->format('Y-m-d'),
+            'type' => Period::TYPE_NTH_MONTH_PAY
+        ], [
+            'status' => Period::STATUS_PENDING,
+            'salary_date' => Carbon::parse($payrollData['pay_date'])->format('Y-m-d')
+        ]);
         foreach ($employees as $employee) {
             try {
                 DB::beginTransaction();
-                $period = Period::firstOrCreate([
-                    'company_id' => $company->id,
-                    'description' => $payrollData['description'],
-                    'start_date' =>  $now->copy()->startOfYear()->format('Y-m-d'),
-                    'end_date' => $now->copy()->endOfYear()->format('Y-m-d'),
-                    'type' => Period::TYPE_NTH_MONTH_PAY
-                ], [
-                    'status' => Period::STATUS_PENDING,
-                    'salary_date' => Carbon::parse($payrollData['pay_date'])->format('Y-m-d')
-                ]);
-
                 $payrolls = $employee->payrolls()
                     ->whereIn('period_id', $periods->pluck('id'))
                     ->get();
@@ -51,6 +50,17 @@ class NthMonthPayrollStrategy implements PayrollStrategy
             }
         }
         return $nthMonthPayrolls;
+    }
+
+    public function update(Company $company, int $payrollId, array $data): Payroll
+    {
+        $payroll = $company->payrolls()
+            ->where('type', PayrollEnumerator::TYPE_NTH_MONTH_PAY)
+            ->findOrFail($payrollId);
+        throw_if($payroll->status == PayrollEnumerator::STATUS_PAID, new Exception('Payroll already paid.'));
+        $data['basic_salary'] = $data['pay_amount'];
+        $payroll->update($data);
+        return $payroll;
     }
 
     public function getEmployees(Company $company, array $input)

@@ -6,6 +6,7 @@ use App\Enumerators\PayrollEnumerator;
 use App\Interfaces\PayrollStrategy;
 use App\Models\Company;
 use App\Models\Employee;
+use App\Models\Payroll;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -40,5 +41,17 @@ class SpecialPayrollStrategy implements PayrollStrategy
             throw new Exception('Employee not found.');
         }
         return $employees;
+    }
+
+    public function update(Company $company, int $payrollId, array $data): Payroll
+    {
+        $payroll = $company->payrolls()
+            ->where('type', PayrollEnumerator::TYPE_SPECIAL)
+            ->findOrFail($payrollId);
+
+        throw_if($payroll->status == PayrollEnumerator::STATUS_PAID, new Exception('Payroll already paid.'));
+        $data['basic_salary'] = $data['pay_amount'];
+        $payroll->update($data);
+        return $payroll;
     }
 }

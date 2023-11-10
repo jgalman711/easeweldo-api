@@ -6,7 +6,7 @@ use App\Enumerators\ErrorMessagesEnumerator;
 use App\Enumerators\PayrollEnumerator;
 use App\Factories\PayrollStrategyFactory;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\PayrollRequest;
+use App\Http\Requests\Payroll\PayrollRequest;
 use App\Http\Resources\PayrollResource;
 use App\Models\Company;
 use App\Models\Payroll;
@@ -73,13 +73,8 @@ class PayrollController extends Controller
     public function update(PayrollRequest $request, Company $company, int $payrollId): JsonResponse
     {
         $input = $request->validated();
-        $payroll = $company->payrolls()->find($payrollId);
-        if (!$payroll) {
-            return $this->sendError("Payroll not found");
-        }
-
         try {
-            $payroll = $this->payrollStrategy->update($payroll, $input);
+            $payroll = $this->payrollStrategy->update($company, $payrollId, $input);
             $payroll->makeHidden('employee');
             $payroll->makeHidden('period');
             $this->forget($company);

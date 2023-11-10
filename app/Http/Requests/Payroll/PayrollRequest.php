@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Payroll;
 
 use App\Enumerators\PayrollEnumerator;
+use App\Http\Requests\BaseRequest;
 use App\Rules\EarningTypeJsonRule;
 use App\Rules\LeavesJsonRule;
 
@@ -13,6 +14,7 @@ class PayrollRequest extends BaseRequest
         return [
             'status' => 'nullable|string|in:' . implode(',', PayrollEnumerator::STATUSES),
             'description' => self::NULLABLE_STRING,
+            'pay_date' => self::NULLABLE_DATE_AFTER_TODAY,
             'overtime_hours' => self::NULLABLE_NUMERIC,
             'late_hours' => self::NULLABLE_NUMERIC,
             'absent_hours' => self::NULLABLE_NUMERIC,
