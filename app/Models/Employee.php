@@ -70,8 +70,6 @@ class Employee extends Model
         'status',
         'employment_status',
         'employment_type',
-        'working_days_per_week',
-        'working_hours_per_day',
         'mobile_number',
         'address_line',
         'barangay_town_city_province',

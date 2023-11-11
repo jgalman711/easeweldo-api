@@ -40,7 +40,7 @@ class UserEmployeeService
             $employee = $this->employeeService->create($company, $employeesData);
             return [$employee, $user];
         } catch (Exception $e) {
-            dd($e->getMessage());
+            throw new Exception($e->getMessage());
         }
     }
 
