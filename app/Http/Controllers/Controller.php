@@ -16,10 +16,11 @@ class Controller
 
     public function sendResponse($result, $message): JsonResponse
     {
+        $data = is_array($result) ? $result : $result->response()->getData(true);
         $response = [
             'success' => true,
-            ...$result->response()->getData(true),
             'message' => $message,
+            ...$data,
         ];
 
 

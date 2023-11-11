@@ -90,9 +90,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     });
     Route::prefix('companies/{company}')->group(function () {
         Route::group(['middleware' => ['role:super-admin|business-admin']], function () {
-            Route::get('/', [CompanyController::class, 'show']);
-            Route::put('/', [CompanyController::class, 'update']);
-            Route::get('dashboard', [DashboardController::class, 'index']);
+            Route::resource('/', CompanyController::class)->only('show', 'update');
+            Route::resource('dashboard', DashboardController::class)->only('index');
             Route::resource('employees', EmployeeController::class);
             Route::get('payrolls/latest', [LatestPayrollController::class, 'show']);
             Route::resource('payrolls', PayrollController::class)->except('delete');

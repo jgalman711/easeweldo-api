@@ -40,7 +40,7 @@ class CompanySubscriptionController extends Controller
         );
     }
 
-    public function store(SubscriptionRequest $request, Company $company)
+    public function store(SubscriptionRequest $request, Company $company): JsonResponse
     {
         $input = $request->validated();
         $currentSubscription = $company->companySubscriptions()->latest()->first();
