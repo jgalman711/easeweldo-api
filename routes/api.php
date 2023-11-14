@@ -15,6 +15,7 @@ use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\OvertimeRequestController;
 use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\Payroll\ActionPayrollController;
 use App\Http\Controllers\Payroll\FinalPayrollController;
 use App\Http\Controllers\Payroll\LatestPayrollController;
 use App\Http\Controllers\Payroll\NthMonthPayrollController;
@@ -94,6 +95,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::resource('dashboard', DashboardController::class)->only('index');
             Route::resource('employees', EmployeeController::class);
             Route::get('payrolls/latest', [LatestPayrollController::class, 'show']);
+            Route::put('payrolls/{payroll}/{status}', [ActionPayrollController::class, 'update']);
             Route::resource('payrolls', PayrollController::class)->except('delete');
             Route::resource('special-payrolls', SpecialPayrollController::class);
             Route::resource('nth-month-payrolls', NthMonthPayrollController::class);
