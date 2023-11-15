@@ -25,6 +25,10 @@ class PeriodResource extends BaseResource
             'withheld_taxes' => $this->withheld_taxes,
             'total_contributions' => $this->total_contributions,
             'payroll_cost' => $this->payroll_cost,
+            'base_pay' => $this->payrolls->sum('base_pay'),
+            'leaves_pay' => $this->payrolls->sum('leaves_pay'),
+            'holiday_pay' => $this->payrolls->sum('holiday_pay'),
+            'overtime_pay' => $this->payrolls->sum('overtime_pay'),
             'payrolls' => $this->payrolls()->with('employee')->get(),
         ];
     }

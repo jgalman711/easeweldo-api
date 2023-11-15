@@ -103,8 +103,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('payrolls/{payroll}/regenerate', [PayrollController::class, 'regenerate']);
             Route::resource('subscriptions', CompanySubscriptionController::class);
             Route::resource('work-schedules', WorkScheduleController::class);
-            Route::resource('periods', PeriodController::class)->except('store');
             Route::put('periods/{period}/{action}', [PeriodActionController::class, 'update']);
+            Route::resource('periods', PeriodController::class)->except('store');
             Route::resource('expenses-reports', ExpensesReportController::class);
             Route::resource('settings', SettingController::class)->only('index', 'store');
             Route::post('timesheet/upload', [TimesheetUploadController::class, 'store']);

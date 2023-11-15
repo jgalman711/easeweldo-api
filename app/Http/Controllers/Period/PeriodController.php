@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Period;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PeriodRequest;
-use App\Http\Resources\BaseResource;
 use App\Http\Resources\PeriodResource;
 use App\Models\Company;
 use App\Models\Period;
@@ -27,7 +26,7 @@ class PeriodController extends Controller
         $periodsBuilder = $this->periodService->getBuilderPeriodsByType($company, $type);
         $periods = $this->applyFilters($request, $periodsBuilder);
         return $this->sendResponse(
-            new BaseResource($periods),
+            PeriodResource::collection($periods),
             'Payroll periods retrieved successfully.'
         );
     }
