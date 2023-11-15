@@ -21,8 +21,8 @@ class LatestPayrollController extends Controller
 
     public function show(Request $request, Company $company): JsonResponse
     {
-        $periodsBuilder = $this->periodService->getBuilderPeriodsByType($company, $request->all());
-        $latestPeriod = $periodsBuilder->first();
+        $type = $request->filter['type'] ?? null;
+        $latestPeriod = $this->periodService->getLatestPeriod($company, $type);
         $payrollsQuery = $company->payrolls()
             ->where('type', PayrollEnumerator::TYPE_REGULAR)
             ->where('period_id', $latestPeriod->id)

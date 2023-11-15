@@ -52,6 +52,7 @@ class Payroll extends Model
     ];
 
     protected $appends = [
+        'base_pay',
         'absent_hours',
         'late_hours',
         'overtime_hours',
@@ -82,6 +83,22 @@ class Payroll extends Model
     public function period(): BelongsTo
     {
         return $this->belongsTo(Period::class);
+    }
+
+    public function getBasePayAttribute(): float
+    {
+        return $this->basic_salary +
+            $this->total_non_taxable_earnings +
+            $this->total_taxable_earnings -
+            $this->absent_deductions;
+    }
+
+    public function getHolidayPayAttribute(): float
+    {
+        return $this->regular_holiday_hours_worked_pay +
+            $this->special_holiday_hours_worked_pay +
+            $this->regular_holiday_hours_pay +
+            $this->special_holiday_hours_pay;
     }
 
     public function getLeavesAttribute($value)

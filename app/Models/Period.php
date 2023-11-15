@@ -46,14 +46,8 @@ class Period extends Model
     public const ALLOWED_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
     protected $fillable = [
-        'name',
         'company_id',
-        'company_period_number',
-        'payroll_cost',
-        'employees_count',
-        'employees_net_pay',
-        'withheld_taxes',
-        'total_contributions',
+        'company_period_id',
         'description',
         'type',
         'start_date',

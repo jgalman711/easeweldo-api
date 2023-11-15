@@ -174,19 +174,24 @@ class PeriodService
         }
     }
 
-    public function getBuilderPeriodsByType(Company $company, array $data = null): Builder
+    public function getBuilderPeriodsByType(Company $company, string $type = null): Builder
     {
-        if (isset($data['filter']) && isset($data['filter']['type'])) {
-            $builder = $company->periods();
+        if ($type) {
+            $builder = $company->periods()->where('type', $type);
         } else {
-            $builder = $company->periods()
-                ->whereIn('type', [
-                    Period::TYPE_WEEKLY,
-                    Period::TYPE_SEMI_MONTHLY,
-                    Period::TYPE_MONTHLY
-                ]);
+            $builder = $company->periods()->whereIn('type', [
+                Period::TYPE_WEEKLY,
+                Period::TYPE_SEMI_MONTHLY,
+                Period::TYPE_MONTHLY
+            ]);
         }
         return $builder;
+    }
+
+    public function getLatestPeriod(Company $company, string $type = null): Period
+    {
+        $periodBuilder = $this->getBuilderPeriodsByType($company, $type);
+        return $periodBuilder->orderBy('id', 'desc')->first();
     }
 
     private function salaryDayMonthly(int $salaryDay): DateTime
