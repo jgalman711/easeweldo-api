@@ -26,7 +26,7 @@ use App\Http\Controllers\Period\PeriodController;
 use App\Http\Controllers\PersonalLoginController;
 use App\Http\Controllers\Qr\CompanyQrController;
 use App\Http\Controllers\Qr\EmployeeQrController;
-use App\Http\Controllers\Report\ExpensesReportController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalaryComputationController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SubscriptionController;
@@ -105,7 +105,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::resource('work-schedules', WorkScheduleController::class);
             Route::put('periods/{period}/{action}', [PeriodActionController::class, 'update']);
             Route::resource('periods', PeriodController::class)->except('store');
-            Route::resource('expenses-reports', ExpensesReportController::class);
+            Route::resource('reports', ReportController::class)->only('show');
             Route::resource('settings', SettingController::class)->only('index', 'store');
             Route::post('timesheet/upload', [TimesheetUploadController::class, 'store']);
             Route::middleware('check-company-subscriptions')->group(function () {
