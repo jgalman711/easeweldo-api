@@ -19,9 +19,12 @@ class RegistrationService
 
     protected $subscriptionService;
 
-    public function __construct(SubscriptionService $subscriptionService)
+    protected $employeeService;
+
+    public function __construct(SubscriptionService $subscriptionService, EmployeeService $employeeService)
     {
         $this->subscriptionService = $subscriptionService;
+        $this->employeeService = $employeeService;
     }
 
     public function register(array $input): array
@@ -37,6 +40,9 @@ class RegistrationService
                 'email_address' => $user->email_address
             ]);
 
+            $this->employeeService->create($company, [
+                'user_id' => $user->id
+            ]);
             $company->users()->attach($user->id);
 
             $role = Role::where('name', self::BUSINESS_ADMIN_ROLE)->first();
