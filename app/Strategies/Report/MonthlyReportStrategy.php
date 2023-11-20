@@ -32,7 +32,12 @@ class MonthlyReportStrategy implements ReportStrategy
         $report = [];
         foreach ($payrollsByMonth as $month => $payrolls) {
             $report[$month] = [
+                'sss_contributions' => $payrolls->sum('sss_contributions'),
+                'philhealth_contributions' => $payrolls->sum('philhealth_contributions'),
+                'pagibig_contributions' => $payrolls->sum('pagibig_contributions'),
                 'total_contributions' => $payrolls->sum('total_contributions'),
+                'net_taxable_income' => $payrolls->sum('net_taxable_income'),
+                'total_non_taxable_earnings' => $payrolls->sum('total_non_taxable_earnings'),
                 'withheld_tax' => $payrolls->sum('withheld_tax'),
                 'net_income' => $payrolls->sum('net_income'),
             ];
