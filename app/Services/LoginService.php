@@ -25,6 +25,7 @@ class LoginService
                 'roles'
             ]);
 
+            $user->token = $user->createToken(env('APP_NAME'))->plainTextToken;
             throw_if($this->isTemporaryPasswordExpired($user), new Exception('Your temporary password has expired.'));
             
             throw_if(

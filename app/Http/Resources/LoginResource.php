@@ -3,13 +3,13 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 
 class LoginResource extends BaseResource
 {
     public function toArray(Request $request): array
     {
         return [
+            "token" => $this->token,
             "username" => $this->username,
             "first_name" => $this->first_name,
             "last_name" => $this->last_name,
