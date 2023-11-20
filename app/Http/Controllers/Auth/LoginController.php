@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\LoginResource;
 use App\Services\LoginService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -21,8 +22,9 @@ class LoginController extends Controller
     {
         $credentials = $request->only(['username', 'email_address', 'password']);
         try {
-            list($success, $message) = $this->loginService->login($credentials, $this->loginService::TYPE_BUSINESS);
-            return $this->sendResponse($success, $message);
+            $user = $this->loginService->login($credentials, $this->loginService::TYPE_BUSINESS);
+            $message = $this->loginService->getSuccessMessage($user);
+            return $this->sendResponse(new LoginResource($user), $message);
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }

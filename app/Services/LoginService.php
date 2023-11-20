@@ -15,10 +15,15 @@ class LoginService
     public const TYPE_BUSINESS = 'business';
     public const TYPE_PERSONAL = 'personal';
 
-    public function login(array $credentials, string $type = self::TYPE_BUSINESS, bool $remember = false): array
+    public function login(array $credentials, string $type = self::TYPE_BUSINESS, bool $remember = false): User
     {
         if (Auth::attempt($credentials, $remember)) {
-            $user = Auth::user()->load(['companies.companySubscriptions', 'employee', 'roles']);
+            $user = Auth::user()->load([
+                'companies.subscriptions',
+                'companies.companySubscriptions',
+                'employee',
+                'roles'
+            ]);
 
             throw_if($this->isTemporaryPasswordExpired($user), new Exception('Your temporary password has expired.'));
             
@@ -27,17 +32,19 @@ class LoginService
                 new Exception('Unauthorized request.')
             );
          
-            $success['token'] =  $user->createToken(env('APP_NAME'))->plainTextToken;
-            $success['user'] = $user;
-            $message = 'User login successfully.';
-
-            if ($this->hasTemporaryPassword($user)) {
-                $message .= " Please go to your profile and change your temporary password.";
-            }
-            return [$success, $message];
+            return $user;
         } else {
             throw new Exception('Incorrect email or password.');
         }
+    }
+
+    public function getSuccessMessage(User $user): string
+    {
+        $message = 'User login successfully.';
+        if ($this->hasTemporaryPassword($user)) {
+            $message .= " Please go to your profile and change your temporary password.";
+        }
+        return $message;
     }
 
     protected function hasTemporaryPassword(User $user): bool

@@ -22,15 +22,6 @@ class Company extends Model
         self::STATUS_PENDING
     ];
 
-    protected $appends = [
-        'has_time_and_attendance_subscription',
-        'has_core_subscription',
-        'subscription_amount',
-        'subscription_amount_paid',
-        'subscription_balance',
-        'subscription_status'
-    ];
-
     public const STATUS_ACTIVE = 'active';
 
     public const STATUS_INACTIVE = 'inactive';
@@ -139,7 +130,7 @@ class Company extends Model
             'id',
             'id',
             'subscription_id'
-        );
+        )->where('company_subscriptions.end_date', '>', now());
     }
 
     public function getEmployeeById(int $employeeId): ?Employee
@@ -185,62 +176,6 @@ class Company extends Model
             throw new \Exception('Work schedule not found');
         }
         return $workSchedule;
-    }
-
-    public function getHasTimeAndAttendanceSubscriptionAttribute()
-    {
-        $subscription = Subscription::where('name', SubscriptionEnumerator::CORE_TIME)
-            ->orWhere('name', SubscriptionEnumerator::CORE_TIME_DISBURSE)
-            ->first();
-
-        foreach ($this->companySubscriptions as $companySubscription) {
-            if ($companySubscription->subscription_id == $subscription->id
-                && $companySubscription->status == SubscriptionEnumerator::PAID_STATUS
-                && Carbon::now()->lte($subscription->end_date)
-            ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public function getHasCoreSubscriptionAttribute()
-    {
-        $subscriptions = Subscription::whereIn('name', SubscriptionEnumerator::NAMES)->pluck('id');
-        foreach ($this->companySubscriptions as $companySubscription) {
-            if (in_array($companySubscription->subscription_id, $subscriptions->toArray())
-                && $companySubscription->status == SubscriptionEnumerator::PAID_STATUS
-                && Carbon::now()->lte($companySubscription->end_date)
-            ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public function getSubscriptionBalanceAttribute(): float
-    {
-        return $this->companySubscriptions()->sum('balance');
-    }
-
-    public function getSubscriptionAmountPaidAttribute(): float
-    {
-        return $this->companySubscriptions()->sum('amount_paid');
-    }
-
-    public function getSubscriptionAmountAttribute(): float
-    {
-        return $this->companySubscriptions()->sum('amount');
-    }
-
-    public function getSubscriptionStatusAttribute(): string
-    {
-        $unpaidSubscriptionsCount = $this->companySubscriptions()
-            ->where('status', SubscriptionEnumerator::UNPAID_STATUS)
-            ->count();
-        return $unpaidSubscriptionsCount > 0
-            ? SubscriptionEnumerator::UNPAID_STATUS
-            : SubscriptionEnumerator::PAID_STATUS;
     }
 
     public function periodsForYear(int $year): Collection
