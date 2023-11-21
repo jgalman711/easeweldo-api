@@ -20,7 +20,7 @@ class ReportController extends Controller
     {
         $filter = $reportRequest->validated();
         $reportStrategy = $this->reportStrategyFactory->createStrategy($type);
-        $reports = $reportStrategy->generate($company, $filter);
-        return $this->sendResponse($reports, 'Reports successfully retrieved.');
+        $response['data'] = $reportStrategy->generate($company, $filter);
+        return $this->sendResponse($response, 'Reports successfully retrieved.');
     }
 }
