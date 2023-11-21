@@ -28,10 +28,14 @@ class MonthlyReportStrategy implements ReportStrategy
         $payrollsByMonth = $payrolls->groupBy(function ($payroll) {
             return Carbon::parse($payroll->pay_date)->format('Y F');
         });
-
+        
         $report = [];
+
         foreach ($payrollsByMonth as $month => $payrolls) {
-            $report[$month] = [
+            $date = explode(" ", $month);
+            array_push($report, [
+                'year' => $date[0],
+                'month' => $date[1],
                 'sss_contributions' => $payrolls->sum('sss_contributions'),
                 'philhealth_contributions' => $payrolls->sum('philhealth_contributions'),
                 'pagibig_contributions' => $payrolls->sum('pagibig_contributions'),
@@ -40,7 +44,7 @@ class MonthlyReportStrategy implements ReportStrategy
                 'total_non_taxable_earnings' => $payrolls->sum('total_non_taxable_earnings'),
                 'withheld_tax' => $payrolls->sum('withheld_tax'),
                 'net_income' => $payrolls->sum('net_income'),
-            ];
+            ]);
         }
         return $report;
     }
