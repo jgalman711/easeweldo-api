@@ -47,10 +47,8 @@ class EmployeeService
         }
 
         $employee->update($input);
-        if ($request->has('email_address')) {
-            $employee->user->update([
-                'email_address' => $request->email_address
-            ]);
+        if ($employee->user) {
+            $employee->user->update($input);
         }
         return $employee;
     }

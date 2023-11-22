@@ -73,8 +73,8 @@ class EmployeeController extends Controller
             DB::beginTransaction();
             $employee = $company->getEmployeeById($employeeId);
             $employee = $this->employeeService->update($request, $company, $employee);
-            $this->forget($company, $employee->id);
             DB::commit();
+            $this->forget($company, $employee->id);
             return $this->sendResponse(new EmployeeResource($employee), 'Employee updated successfully.');
         } catch (Exception $e) {
             DB::rollBack();
