@@ -2,31 +2,20 @@
 
 namespace App\Services;
 
-use App\Mail\ResetTemporaryPassword;
 use App\Mail\UserRegistered;
 use App\Models\User;
+use App\Traits\Password;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 class UserService
 {
-    private const PASSWORD_LENGTH = 6;
-
-    private const EXPIRATION_MINUTES = 60;
+    use Password;
 
     private const BUSINESS_ADMIN_ROLE = 'business-admin';
-
-    public function employeeResetPassword(User $user): string
-    {
-        $temporaryPassword = Str::random(self::PASSWORD_LENGTH);
-        $user->password = bcrypt($temporaryPassword);
-        $user->save();
-        return $temporaryPassword;
-    }
 
     public function create(Collection $companies, array $userData): User
     {
@@ -77,21 +66,6 @@ class UserService
             }
         }
         return $username;
-    }
-
-    public function generateTemporaryPassword(): array
-    {
-        return [Str::random(self::PASSWORD_LENGTH), now()->addMinutes(self::EXPIRATION_MINUTES)];
-    }
-
-    public function temporaryPasswordReset(User $user): User
-    {
-        list($temporaryPassword, $temporaryPasswordExpiresAt) = $this->generateTemporaryPassword();
-        $user->temporary_password = $temporaryPassword;
-        $user->temporary_password_expires_at = $temporaryPasswordExpiresAt;
-        $user->save();
-        Mail::to($user->email_address)->send(new ResetTemporaryPassword($user));
-        return $user;
     }
 
     public function getExistingUser(int $userId): User

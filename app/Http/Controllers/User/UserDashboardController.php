@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\DashboardResource;
 use App\Models\Company;
 use App\Services\TimeRecordService;
-use Illuminate\Http\Request;
 
 class UserDashboardController extends Controller
 {

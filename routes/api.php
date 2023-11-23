@@ -35,7 +35,6 @@ use App\Http\Controllers\SynchBiometricsController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\TimesheetUploadController;
 use App\Http\Controllers\Upload\UploadEmployeeController;
-use App\Http\Controllers\User\EmployeeChangePasswordController;
 use App\Http\Controllers\User\UserChangePasswordController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserDashboardController;
@@ -85,8 +84,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::resource('companies', CompanyController::class);
         Route::resource('holidays', HolidayController::class);
         Route::resource('users', UserController::class);
-        Route::put('users/{user}/change-password', [UserChangePasswordController::class, 'update']);
-        Route::put('users/{user}/reset-temporary-password', [UserTemporaryPasswordResetController::class, 'update']);
         Route::get('employees', [EmployeeController::class, 'all']);
     });
     Route::prefix('companies/{company}')->group(function () {
@@ -117,6 +114,13 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::resource('leave-requests', LeaveController::class);
             Route::get('qrcode', [CompanyQrController::class, 'index']);
         });
+
+        /**
+         * @TODO
+         *
+         * Should have the business-admin middleware as well.
+         * Employee of company middleware should also check if the logged in user is the employee.
+         */
         Route::group(['prefix' => 'employees/{employee}', 'middleware' => ['employee-of-company']], function () {
             Route::get('/', [EmployeeController::class, 'show']);
             Route::get('dashboard', [UserDashboardController::class, 'index']);
@@ -129,7 +133,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('salary-computation', [SalaryComputationController::class, 'store']);
             Route::put('salary-computation', [SalaryComputationController::class, 'update']);
             Route::delete('salary-computation', [SalaryComputationController::class, 'delete']);
-            Route::patch('change-password', [EmployeeChangePasswordController::class, 'update']);
+            Route::put('change-password', [UserChangePasswordController::class, 'update']);
+            Route::put('reset-temporary-password', [UserTemporaryPasswordResetController::class, 'update']);
 
              // QR - START
             Route::get('qrcode', [EmployeeQrController::class, 'index']);

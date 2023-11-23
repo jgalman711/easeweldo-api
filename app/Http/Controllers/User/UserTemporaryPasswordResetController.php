@@ -3,21 +3,27 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Services\UserService;
+use App\Http\Resources\EmployeeResource;
+use App\Models\Company;
+use App\Services\AuthService;
+use Illuminate\Http\JsonResponse;
 
 class UserTemporaryPasswordResetController extends Controller
 {
-    protected $userService;
+    protected $authService;
 
-    public function __construct(UserService $userService)
+    public function __construct(AuthService $authService)
     {
-        $this->userService = $userService;
+        $this->authService = $authService;
     }
 
-    public function update(User $user)
+    public function update(Company $company, int $employeeId): JsonResponse
     {
-        $user = $this->userService->temporaryPasswordReset($user);
-        return $this->sendResponse($user, "User's temporary password: {$user->temporary_password}. It expires after an hour. Please change it upon login.");
+        $employee = $company->employees()->findOrFail($employeeId);
+        $user = $this->authService->temporaryPasswordReset($employee->user);
+        return $this->sendResponse(
+            new EmployeeResource($employee),
+            "User's temporary password: {$user->temporary_password}. It expires after an hour. Please change it upon login."
+        );
     }
 }
