@@ -26,18 +26,11 @@ class SettingController extends Controller
     public function store(SettingRequest $request, Company $company): JsonResponse
     {
         $input = $request->validated();
-        $companyPreviousPeriod = $company->periods()->latest()->first();
-        if ($companyPreviousPeriod) {
-            $companyPreviousPeriod->delete();
-        }
         $settings = Setting::updateOrCreate(
             ['company_id' => $company->id],
             $input
         );
-
-        $salaryDate = $this->periodService->convertSalaryDayToDate($settings->salary_day, $settings->period_cycle);
-
-        $this->periodService->initializeFromSalaryDate($company, $salaryDate, $settings->period_cycle);
+        $this->periodService->convertSalaryDayToDate($settings->salary_day, $settings->period_cycle);
         return $this->sendResponse(new BaseResource($settings), 'Company settings updated successfully.');
     }
 }
