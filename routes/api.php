@@ -8,7 +8,6 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BiometricsController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanySubscriptionController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeScheduleController;
 use App\Http\Controllers\HolidayController;
@@ -69,9 +68,9 @@ Route::post('reset-password', [PasswordResetController::class, 'reset'])->name('
 Route::get('reset-password', [PasswordResetController::class, 'index']);
 Route::post('forgot-password', [ForgotPasswordController::class, 'forgot']);
 
-Route::resource('/subscriptions', SubscriptionController::class)->only('index', 'show');
-Route::resource('/subscription-prices', SubscriptionPricesController::class)->only('index');
-Route::resource('/payment-methods', PaymentMethodController::class)->only('index');
+Route::apiResource('/subscriptions', SubscriptionController::class)->only('index', 'show');
+Route::apiResource('/subscription-prices', SubscriptionPricesController::class)->only('index');
+Route::apiResource('/payment-methods', PaymentMethodController::class)->only('index');
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logout', [LoginController::class, 'logout']);
@@ -80,38 +79,37 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
      * Super Admin Only Route
      */
     Route::group(['middleware' => ['role:super-admin']], function () {
-        Route::resource('biometrics', AdminBiometricsController::class);
-        Route::resource('companies', CompanyController::class);
-        Route::resource('holidays', HolidayController::class);
-        Route::resource('users', UserController::class);
+        Route::apiResource('biometrics', AdminBiometricsController::class);
+        Route::apiResource('companies', CompanyController::class);
+        Route::apiResource('holidays', HolidayController::class);
+        Route::apiResource('users', UserController::class);
         Route::get('employees', [EmployeeController::class, 'all']);
     });
     Route::prefix('companies/{company}')->group(function () {
         Route::group(['middleware' => ['role:super-admin|business-admin']], function () {
-            Route::resource('/', CompanyController::class)->only('show', 'update');
-            Route::resource('dashboard', DashboardController::class)->only('index');
-            Route::resource('employees', EmployeeController::class);
+            Route::apiResource('/', CompanyController::class)->only('show', 'update');
+            Route::apiResource('employees', EmployeeController::class);
             Route::get('payrolls/latest', [LatestPayrollController::class, 'show']);
             Route::put('payrolls/{payroll}/{status}', [ActionPayrollController::class, 'update']);
-            Route::resource('payrolls', PayrollController::class)->except('delete');
-            Route::resource('special-payrolls', SpecialPayrollController::class);
-            Route::resource('nth-month-payrolls', NthMonthPayrollController::class);
-            Route::resource('final-payrolls', FinalPayrollController::class)->only('index', 'show', 'store');
+            Route::apiResource('payrolls', PayrollController::class)->except('delete');
+            Route::apiResource('special-payrolls', SpecialPayrollController::class);
+            Route::apiResource('nth-month-payrolls', NthMonthPayrollController::class);
+            Route::apiResource('final-payrolls', FinalPayrollController::class)->only('index', 'show', 'store');
             Route::post('payrolls/{payroll}/regenerate', [PayrollController::class, 'regenerate']);
-            Route::resource('subscriptions', CompanySubscriptionController::class);
-            Route::resource('work-schedules', WorkScheduleController::class);
+            Route::apiResource('subscriptions', CompanySubscriptionController::class);
+            Route::apiResource('work-schedules', WorkScheduleController::class);
             Route::put('periods/{period}/{action}', [PeriodActionController::class, 'update']);
-            Route::resource('periods', PeriodController::class)->except('store');
-            Route::resource('reports', ReportController::class)->only('show');
-            Route::resource('settings', SettingController::class)->only('index', 'store');
+            Route::apiResource('periods', PeriodController::class)->except('store');
+            Route::apiResource('reports', ReportController::class)->only('show');
+            Route::apiResource('settings', SettingController::class)->only('index', 'store');
             Route::post('timesheet/upload', [TimesheetUploadController::class, 'store']);
             Route::middleware('check-company-subscriptions')->group(function () {
                 Route::post('synch-biometrics/{module}/', [SynchBiometricsController::class, 'store']);
-                Route::resource('biometrics', BiometricsController::class);
+                Route::apiResource('biometrics', BiometricsController::class);
             });
             Route::post('upload/employees', [UploadEmployeeController::class, 'store']);
-            Route::resource('overtime-requests', OvertimeRequestController::class);
-            Route::resource('leave-requests', LeaveController::class);
+            Route::apiResource('overtime-requests', OvertimeRequestController::class);
+            Route::apiResource('leave-requests', LeaveController::class);
             Route::get('qrcode', [CompanyQrController::class, 'index']);
         });
 
@@ -125,10 +123,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('/', [EmployeeController::class, 'show']);
             Route::get('dashboard', [UserDashboardController::class, 'index']);
             Route::post('clock', [TimeRecordController::class, 'clock']);
-            Route::resource('leaves', LeaveController::class);
-            Route::resource('time-records', TimeRecordController::class);
-            Route::resource('work-schedules', EmployeeScheduleController::class);
-            Route::resource('payrolls', UserPayrollController::class)->only('index', 'show');
+            Route::apiResource('leaves', LeaveController::class);
+            Route::apiResource('time-records', TimeRecordController::class);
+            Route::apiResource('work-schedules', EmployeeScheduleController::class);
+            Route::apiResource('payrolls', UserPayrollController::class)->only('index', 'show');
             Route::get('salary-computation', [SalaryComputationController::class, 'show']);
             Route::post('salary-computation', [SalaryComputationController::class, 'store']);
             Route::put('salary-computation', [SalaryComputationController::class, 'update']);

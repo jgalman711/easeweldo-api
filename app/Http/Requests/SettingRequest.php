@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Period;
+use Carbon\Carbon;
 use Closure;
 
 class SettingRequest extends BaseRequest
@@ -37,8 +38,8 @@ class SettingRequest extends BaseRequest
         }
 
         sort($value);
-        $day1 = \Carbon\Carbon::createFromFormat('d', $value[0]);
-        $day2 = \Carbon\Carbon::createFromFormat('d', $value[1]);
+        $day1 = Carbon::createFromFormat('d', $value[0]);
+        $day2 = Carbon::createFromFormat('d', $value[1]);
         if ($day1->diffInDays($day2) !== 15) {
             $fail("The salary days for semi-monthly period cycle must be 15 days apart.");
         }
