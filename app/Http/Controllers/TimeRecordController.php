@@ -44,6 +44,14 @@ class TimeRecordController extends Controller
         return TimeRecord::create($input);
     }
 
+    public function show(Company $company, int $employeeId, int $timeRecordId): JsonResponse
+    {
+        $employee = $company->getEmployeeById($employeeId);
+        $timeRecord = $employee->timeRecords()->findOrFail($timeRecordId);
+        return $this->sendResponse(new BaseResource($timeRecord), 'Time records updated successfully.');
+    }
+
+
     public function update(
         TimeRecordRequest $request,
         Company $company,
@@ -71,7 +79,7 @@ class TimeRecordController extends Controller
         $employee = $company->getEmployeeById($employeeId);
         $timeRecord = $employee->timeRecords()->findOrFail($timeRecordId);
         $timeRecord->delete();
-        return $this->sendResponse(new BaseResource($timeRecord), 'Time records updated successfully.');
+        return $this->sendResponse(new BaseResource($timeRecord), 'Time records deleted successfully.');
     }
 
     public function clock(Company $company, int $employeeId): JsonResponse
