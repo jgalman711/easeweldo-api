@@ -178,6 +178,23 @@ class Company extends Model
         return $workSchedule;
     }
 
+    public function getHasTimeAndAttendanceSubscriptionAttribute(): bool
+    {
+        $subscription = Subscription::where('name', SubscriptionEnumerator::CORE_TIME)
+            ->orWhere('name', SubscriptionEnumerator::CORE_TIME_DISBURSE)
+            ->first();
+
+        foreach ($this->companySubscriptions as $companySubscription) {
+            if ($companySubscription->subscription_id == $subscription->id
+                && $companySubscription->status == SubscriptionEnumerator::PAID_STATUS
+                && Carbon::now()->lte($subscription->end_date)
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function periodsForYear(int $year): Collection
     {
         return $this->periods()
