@@ -14,7 +14,7 @@ class PayrollRequest extends BaseRequest
         return [
             'status' => 'nullable|string|in:' . implode(',', PayrollEnumerator::STATUSES),
             'description' => self::NULLABLE_STRING,
-            'pay_date' => self::NULLABLE_DATE_AFTER_TODAY,
+            'pay_date' => self::NULLABLE_DATE,
             'overtime_hours' => self::NULLABLE_NUMERIC,
             'late_hours' => self::NULLABLE_NUMERIC,
             'absent_hours' => self::NULLABLE_NUMERIC,

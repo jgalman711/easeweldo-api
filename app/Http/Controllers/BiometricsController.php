@@ -38,18 +38,24 @@ class BiometricsController extends Controller
 
     public function store(BiometricsRequest $request, Company $company): JsonResponse
     {
-        $biometrics = Biometrics::create([
+        $biometrics = Biometrics::updateOrCreate([
             'company_id' => $company->id,
-            'status' => Biometrics::STATUS_INACTIVE,
-            ...$request->validated(),
+            'ip_address' => $request->ip_address,
+            'port' => $request->port,
+        ], [
+            'provider' => $request->provider,
+            'model' => $request->model,
+            'product_number' => $request->product_number,
+            'status' => Biometrics::STATUS_INACTIVE
         ]);
         try {
             $this->biometricsService->initialize($biometrics);
             $biometrics->status = Biometrics::STATUS_ACTIVE;
-            return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data saved successfully.');
+            $message = 'Biometrics data saved successfully.';
         } catch (Exception $e) {
-            return $this->sendError($e->getMessage());
+            $message = 'Biometrics data saved successfully but was not able to connect to the device.';
         }
+        return $this->sendResponse(new BaseResource($biometrics), $message);
     }
 
     public function update(BiometricsRequest $request, Company $company, int $biometricsId): JsonResponse
