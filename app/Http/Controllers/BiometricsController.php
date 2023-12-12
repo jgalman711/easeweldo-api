@@ -9,6 +9,7 @@ use App\Models\Company;
 use App\Services\BiometricsService;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class BiometricsController extends Controller
 {
@@ -20,11 +21,9 @@ class BiometricsController extends Controller
         $this->setCacheIdentifier('employees');
     }
 
-    public function index(Company $company): JsonResponse
+    public function index(Request $request, Company $company): JsonResponse
     {
-        $biometrics = $this->remember($company, function () use ($company) {
-            return $company->biometrics;
-        });
+        $biometrics = $this->applyFilters($request, $company->biometrics());
         return $this->sendResponse(BaseResource::collection($biometrics), 'Biometrics data retrieved successfully.');
     }
 
@@ -52,7 +51,7 @@ class BiometricsController extends Controller
             $this->biometricsService->initialize($biometrics);
             $biometrics->status = Biometrics::STATUS_ACTIVE;
             $message = 'Biometrics data saved successfully.';
-        } catch (Exception $e) {
+        } catch (Exception) {
             $message = 'Biometrics data saved successfully but was not able to connect to the device.';
         }
         return $this->sendResponse(new BaseResource($biometrics), $message);
