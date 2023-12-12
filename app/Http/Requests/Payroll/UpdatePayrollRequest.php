@@ -12,7 +12,7 @@ class UpdatePayrollRequest extends SpecialPayrollRequest
             'status' => 'nullable|string|in:' . implode(',', PayrollEnumerator::STATUSES),
             'description' => self::REQUIRED_STRING,
             'pay_amount' => self::REQUIRED_NUMERIC,
-            'pay_date' => 'required|date|after_or_equal:today',
+            'pay_date' => self::REQUIRED_DATE,
             'remarks' => self::NULLABLE_STRING
         ];
     }

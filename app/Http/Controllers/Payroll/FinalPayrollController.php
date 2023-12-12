@@ -6,6 +6,7 @@ use App\Enumerators\PayrollEnumerator;
 use App\Factories\PayrollStrategyFactory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Payroll\FinalPayrollRequest;
+use App\Http\Requests\Payroll\UpdatePayrollRequest;
 use App\Http\Resources\PayrollResource;
 use App\Models\Company;
 use App\Traits\PayrollFilter;
@@ -58,5 +59,12 @@ class FinalPayrollController extends Controller
             'success' => $payrolls,
             'failed' => $errors
         ]), $message);
+    }
+
+    public function update(UpdatePayrollRequest $request, Company $company, int $payrollId): JsonResponse
+    {
+        $input = $request->validated();
+        $payroll = $this->finalPayrollStrategy->update($company, $payrollId, $input);
+        return $this->sendResponse(new PayrollResource($payroll), 'Payroll retrieved successfully.');
     }
 }
