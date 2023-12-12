@@ -50,6 +50,7 @@ class BiometricsController extends Controller
         try {
             $this->biometricsService->initialize($biometrics);
             $biometrics->status = Biometrics::STATUS_ACTIVE;
+            $biometrics->save();
             $message = 'Biometrics data saved successfully.';
         } catch (Exception) {
             $message = 'Biometrics data saved successfully but was not able to connect to the device.';
