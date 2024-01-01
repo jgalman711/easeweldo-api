@@ -58,13 +58,4 @@ class RegularPayrollStrategy implements PayrollStrategy
     {
         return $company->employees()->where('status', Employee::ACTIVE)->get();
     }
-
-    public function regenerate(Payroll $payroll): Payroll
-    {
-        try {
-            return $this->payrollService->generate($payroll->period, $payroll->employee);
-        } catch (Exception $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
 }

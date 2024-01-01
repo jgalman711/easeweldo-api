@@ -178,6 +178,20 @@ class Company extends Model
         return $workSchedule;
     }
 
+    public function getHasCoreSubscriptionAttribute()
+    {
+        $subscriptions = Subscription::whereIn('name', SubscriptionEnumerator::NAMES)->pluck('id');
+        foreach ($this->companySubscriptions as $companySubscription) {
+            if (in_array($companySubscription->subscription_id, $subscriptions->toArray())
+                && $companySubscription->status == SubscriptionEnumerator::PAID_STATUS
+                && Carbon::now()->lte($companySubscription->end_date)
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function getHasTimeAndAttendanceSubscriptionAttribute(): bool
     {
         $subscription = Subscription::where('name', SubscriptionEnumerator::CORE_TIME)

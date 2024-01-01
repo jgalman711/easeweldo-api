@@ -90,12 +90,13 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::apiResource('/', CompanyController::class)->only('show', 'update');
             Route::apiResource('employees', EmployeeController::class);
             Route::get('payrolls/latest', [LatestPayrollController::class, 'show']);
+            Route::get('payrolls/{payroll}/download', [ActionPayrollController::class, 'download']);
+            Route::post('payrolls/{payroll}/regenerate', [ActionPayrollController::class, 'regenerate']);
             Route::put('payrolls/{payroll}/{status}', [ActionPayrollController::class, 'update']);
             Route::apiResource('payrolls', PayrollController::class)->except('delete');
             Route::apiResource('special-payrolls', SpecialPayrollController::class);
             Route::apiResource('nth-month-payrolls', NthMonthPayrollController::class);
             Route::apiResource('final-payrolls', FinalPayrollController::class);
-            Route::post('payrolls/{payroll}/regenerate', [PayrollController::class, 'regenerate']);
             Route::apiResource('subscriptions', CompanySubscriptionController::class);
             Route::apiResource('work-schedules', WorkScheduleController::class);
             Route::put('periods/{period}/{action}', [PeriodActionController::class, 'update']);

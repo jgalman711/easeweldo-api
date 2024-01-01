@@ -237,6 +237,11 @@ class PayrollService
         return $payroll;
     }
 
+    public function download(Payroll $payroll)
+    {
+        return $payroll;
+    }
+
     private function calculateContributions(Payroll $payroll): Payroll
     {
         $payroll->sss_contributions = $this->sssService->compute($payroll->gross_income);
