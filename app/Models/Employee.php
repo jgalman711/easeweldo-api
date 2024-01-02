@@ -166,4 +166,14 @@ class Employee extends Model
     {
         return optional($this->user)->last_name;
     }
+
+    public function getFullAddressAttribute(): string
+    {
+        return trim($this->address_line . " " . $this->barangay_town_city_province);
+    }
+
+    public function getEmailAddressAttribute(): ?string
+    {
+        return optional($this->user)->email_address;
+    }
 }

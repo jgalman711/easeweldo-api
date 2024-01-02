@@ -101,7 +101,7 @@ class Payroll extends Model
             $this->special_holiday_hours_pay;
     }
 
-    public function getLeavesAttribute($value)
+    public function getLeavesAttribute($value): ?array
     {
         return json_decode($value, true);
     }
@@ -124,14 +124,15 @@ class Payroll extends Model
             $this->regular_holiday_hours_worked_pay +
             $this->regular_holiday_hours_pay +
             $this->special_holiday_hours_worked_pay +
-            $this->special_holiday_hours_pay -
+            $this->special_holiday_hours_pay +
+            $this->total_taxable_earnings -
             $this->total_deductions;
         return max(0, $grossIncome);
     }
 
     public function getTaxableIncomeAttribute(): float
     {
-        $taxableIncome = $this->gross_income - $this->total_contributions + $this->total_taxable_earnings;
+        $taxableIncome = $this->gross_income - $this->total_contributions;
         return $taxableIncome >= 0 ? $taxableIncome : 0;
     }
 

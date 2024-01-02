@@ -209,6 +209,11 @@ class Company extends Model
         return false;
     }
 
+    public function getFullAddressAttribute(): string
+    {
+        return trim($this->address_line . " " . $this->barangay_town_city_province);
+    }
+
     public function periodsForYear(int $year): Collection
     {
         return $this->periods()

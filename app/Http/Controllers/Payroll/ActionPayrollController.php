@@ -9,6 +9,7 @@ use App\Models\Company;
 use App\Services\Payroll\PayrollService;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 
 class ActionPayrollController extends Controller
 {
@@ -37,10 +38,11 @@ class ActionPayrollController extends Controller
         return $this->sendResponse(new PayrollResource($payroll), 'Payrolls retrieved successfully.');
     }
 
-    public function download(Company $company, int $payrollId)
+    public function download(Company $company, int $payrollId): Response
     {
         $payroll = $company->payrolls()->find($payrollId);
         $pdf = $this->payrollService->download($payroll);
+        return $pdf;
     }
 
     public function regenerate(Company $company, int $payrollId): JsonResponse
