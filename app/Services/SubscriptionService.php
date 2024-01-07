@@ -138,10 +138,9 @@ class SubscriptionService
             'start_date' => $startDate,
             'end_date' => $startDate->clone()->addMonth($subscriptionData['months'])
         ])->load('company', 'subscription');
-        $user = Auth::user();
 
         try {
-            Mail::to($user->email_address)->send(new UserSubscribed($companySubscription));
+            Mail::to($company->email_address)->send(new UserSubscribed($companySubscription));
         } catch (Exception $e) {
             Log::error($e->getMessage());
         }

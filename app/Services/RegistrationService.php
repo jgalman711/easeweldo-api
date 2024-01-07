@@ -7,6 +7,7 @@ use App\Models\Subscription;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 
 class RegistrationService
@@ -39,7 +40,6 @@ class RegistrationService
                 'status' => Company::STATUS_TRIAL,
                 'email_address' => $user->email_address
             ]);
-
             $this->employeeService->create($company, [
                 'user_id' => $user->id
             ]);
@@ -66,6 +66,7 @@ class RegistrationService
             ];
         } catch (Exception $e) {
             DB::rollBack();
+            Log::error($e->getMessage());
             throw $e;
         }
     }

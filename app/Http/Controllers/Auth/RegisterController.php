@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CompanyRegistrationRequest;
+use App\Http\Resources\BaseResource;
 use App\Services\RegistrationService;
 
 class RegisterController extends Controller
@@ -19,6 +20,6 @@ class RegisterController extends Controller
     {
         $input = $request->validated();
         $result = $this->registrationService->register($input);
-        return $this->sendResponse($result, 'Company registered successfully.');
+        return $this->sendResponse(new BaseResource($result), 'Company registered successfully.');
     }
 }
