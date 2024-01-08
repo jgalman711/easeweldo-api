@@ -27,7 +27,7 @@ class PayrollService
         return $this->regularPayrollService->update($payroll, $data);
     }
 
-    public function download(Payroll $payroll): Response
+    public function download(Payroll $payroll): string
     {
         $pdf = Pdf::loadView('pdf.payslip', [
             'payroll' => $payroll,
@@ -35,6 +35,6 @@ class PayrollService
             'employee' => $payroll->employee,
             'company' => optional($payroll->employee)->company
         ]);
-        return $pdf->download();
+        return base64_encode($pdf->output());
     }
 }

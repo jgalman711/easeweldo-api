@@ -87,7 +87,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     });
     Route::prefix('companies/{company}')->group(function () {
         Route::group(['middleware' => ['role:super-admin|business-admin']], function () {
-            Route::apiResource('/', CompanyController::class)->only('show', 'update');
+            Route::get('/', [CompanyController::class, 'show']);
+            Route::put('/', [CompanyController::class, 'update']);
             Route::apiResource('employees', EmployeeController::class);
             Route::get('payrolls/latest', [LatestPayrollController::class, 'show']);
             Route::get('payrolls/{payroll}/download', [ActionPayrollController::class, 'download']);

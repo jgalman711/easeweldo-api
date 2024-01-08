@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Payroll;
 
 use App\Enumerators\PayrollEnumerator;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\BaseResource;
 use App\Http\Resources\PayrollResource;
 use App\Models\Company;
 use App\Services\Payroll\PayrollService;
@@ -38,11 +39,11 @@ class ActionPayrollController extends Controller
         return $this->sendResponse(new PayrollResource($payroll), 'Payrolls retrieved successfully.');
     }
 
-    public function download(Company $company, int $payrollId): Response
+    public function download(Company $company, int $payrollId): JsonResponse
     {
         $payroll = $company->payrolls()->find($payrollId);
         $pdf = $this->payrollService->download($payroll);
-        return $pdf;
+        return $this->sendResponse(new BaseResource(['payslip' => $pdf]), 'Payslip generated successfully.');
     }
 
     public function regenerate(Company $company, int $payrollId): JsonResponse
