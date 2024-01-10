@@ -35,7 +35,6 @@ class EmployeeController extends Controller
     
     public function index(Request $request, Company $company): JsonResponse
     {
-        $this->forget($company);
         $employees = $this->applyFilters($request, $company->employees()->with('user'), [
             'user.first_name',
             'user.last_name',
@@ -50,13 +49,9 @@ class EmployeeController extends Controller
     {
         $input = $request->validated();
         try {
-            DB::beginTransaction();
             list($employee) = $this->userEmployeeService->create($company, $input);
-            $this->forget($company);
-            DB::commit();
             return $this->sendResponse(new EmployeeResource($employee), "Employee created successfully.");
         } catch (Exception $e) {
-            DB::rollBack();
             return $this->sendError($e->getMessage());
         }
     }

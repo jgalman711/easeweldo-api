@@ -9,7 +9,6 @@ use App\Services\CompanyService;
 use App\Traits\Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class CompanyController extends Controller
@@ -161,7 +160,7 @@ class CompanyController extends Controller
      *         ),
      *     ),
      *     @OA\Response(
-     *         response="201",
+     *         response="200",
      *         description="Company created successfully",
      *         @OA\MediaType(
      *             mediaType="application/json",
@@ -361,7 +360,7 @@ class CompanyController extends Controller
      *         ),
      *     ),
      *     @OA\Response(
-     *         response="201",
+     *         response="200",
      *         description="Company created successfully",
      *         @OA\MediaType(
      *             mediaType="application/json",
@@ -374,8 +373,18 @@ class CompanyController extends Controller
      *                     @OA\Property(property="name", type="string", example="Eksa Corporation 3"),
      *                     @OA\Property(property="slug", type="string", example="eksa-corporation-3"),
      *                     @OA\Property(property="status", type="string", example="active"),
-     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-01-10T15:58:09.000000Z"),
-     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-10T15:58:09.000000Z"),
+     *                     @OA\Property(
+     *                          property="updated_at",
+     *                          type="string",
+     *                          format="date-time",
+     *                          example="2024-01-10T15:58:09.000000Z"
+     *                     ),
+     *                     @OA\Property(
+     *                          property="created_at",
+     *                          type="string",
+     *                          format="date-time",
+     *                          example="2024-01-10T15:58:09.000000Z"
+     *                     ),
      *                     @OA\Property(property="id", type="integer", example=88),
      *                 )
      *             )

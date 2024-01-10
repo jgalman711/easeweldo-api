@@ -7,8 +7,8 @@ use App\Models\Company;
 use App\Models\Employee;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class UserEmployeeService
 {
@@ -25,6 +25,7 @@ class UserEmployeeService
     public function create(Company $company, array $employeesData): array
     {
         try {
+            DB::beginTransaction();
             if (isset($employeesData['user_id'])) {
                 $user = $this->userService->getExistingUser($employeesData['user_id']);
             } else {
@@ -38,8 +39,10 @@ class UserEmployeeService
             }
             $employeesData['user_id'] = $user->id;
             $employee = $this->employeeService->create($company, $employeesData);
+            DB::commit();
             return [$employee, $user];
         } catch (Exception $e) {
+            DB::rollBack();
             throw new Exception($e->getMessage());
         }
     }
