@@ -29,7 +29,7 @@ class EmployeeRequest extends BaseRequest
             'working_days_per_week' => [
                 'nullable',
                 'integer',
-                'unsigned',
+                'min:1',
                 function ($attribute, $value, $fail) {
                     if ($this->input('employment_type') == Employee::FULL_TIME && empty($value)) {
                         $fail('The working days per week field is required for full-time employees.');
@@ -39,7 +39,7 @@ class EmployeeRequest extends BaseRequest
             'working_hours_per_day' => [
                 'nullable',
                 'integer',
-                'unsigned',
+                'min:1',
                 function ($attribute, $value, $fail) {
                     if ($this->input('employment_type') == Employee::FULL_TIME && empty($value)) {
                         $fail('The working hours per day field is required for full-time employees.');

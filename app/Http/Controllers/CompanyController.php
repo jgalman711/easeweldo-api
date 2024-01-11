@@ -70,7 +70,11 @@ class CompanyController extends Controller
      *                     property="logo",
      *                     type="string",
      *                     format="binary",
-     *                     description="Company logo image file (nullable, max size: 2048 bytes, allowed formats: jpeg, png, jpg, gif, svg)"
+     *                     description="Company logo image file (
+     *                          nullable,
+     *                          max size: 2048 bytes,
+     *                          allowed formats: jpeg, png, jpg, gif, svg
+     *                     )"
      *                 ),
      *                 @OA\Property(
      *                     property="address_line",
@@ -173,8 +177,18 @@ class CompanyController extends Controller
      *                     @OA\Property(property="name", type="string", example="Eksa Corporation 3"),
      *                     @OA\Property(property="slug", type="string", example="eksa-corporation-3"),
      *                     @OA\Property(property="status", type="string", example="active"),
-     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-01-10T15:58:09.000000Z"),
-     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-10T15:58:09.000000Z"),
+     *                     @OA\Property(
+     *                          property="updated_at",
+     *                          type="string",
+     *                          format="date-time",
+     *                          example="2024-01-10 15:58:09"
+     *                     ),
+     *                     @OA\Property(
+     *                          property="created_at",
+     *                          type="string",
+     *                          format="date-time",
+     *                          example="2024-01-10 15:58:09"
+     *                     ),
      *                     @OA\Property(property="id", type="integer", example=88),
      *                 )
      *             )
@@ -191,7 +205,14 @@ class CompanyController extends Controller
      *                 @OA\Property(
      *                     property="errors",
      *                     type="object",
-     *                     @OA\Property(property="name", type="array", @OA\Items(type="string", example="['The name field is required.']")),
+     *                     @OA\Property(
+     *                          property="name",
+     *                          type="array",
+     *                          @OA\Items(
+     *                              type="string",
+     *                              example="['The name field is required.']"
+     *                          )
+     *                     ),
      *                     example={"name": "['The name field is required.']"}
      *                 ),
      *             )
@@ -270,7 +291,11 @@ class CompanyController extends Controller
      *                     property="logo",
      *                     type="string",
      *                     format="binary",
-     *                     description="Company logo image file (nullable, max size: 2048 bytes, allowed formats: jpeg, png, jpg, gif, svg)"
+     *                     description="Company logo image file (
+     *                          nullable,
+     *                          max size: 2048 bytes,
+     *                          allowed formats: jpeg, png, jpg, gif, svg
+     *                     )"
      *                 ),
      *                 @OA\Property(
      *                     property="address_line",
@@ -401,7 +426,14 @@ class CompanyController extends Controller
      *                 @OA\Property(
      *                     property="errors",
      *                     type="object",
-     *                     @OA\Property(property="name", type="array", @OA\Items(type="string", example="['The name field is required.']")),
+     *                     @OA\Property(
+     *                          property="name",
+     *                          type="array",
+     *                          @OA\Items(
+     *                              type="string",
+     *                              example="['The name field is required.']"
+     *                          )
+     *                     ),
      *                     example={"name": "['The name field is required.']"}
      *                 ),
      *             )
