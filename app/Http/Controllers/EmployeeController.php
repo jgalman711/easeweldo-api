@@ -38,7 +38,7 @@ class EmployeeController extends Controller
      *     path="/api/companies/{company-slug}/employees",
      *     summary="Get a list of employees for a specific company",
      *     security={{"bearerAuth":{}}},
-     *     tags={"Employees"},
+     *     tags={"Company Employees"},
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
@@ -114,7 +114,7 @@ class EmployeeController extends Controller
      *     path="/api/companies/{company-slug}/employees",
      *     summary="Create a new employee for a specific company",
      *     security={{"bearerAuth":{}}},
-     *     tags={"Employees"},
+     *     tags={"Company Employees"},
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
@@ -177,7 +177,7 @@ class EmployeeController extends Controller
      *     path="/api/companies/{company-slug}/employees/{employee_id}",
      *     summary="Get details of a specific employee",
      *     security={{"bearerAuth":{}}},
-     *     tags={"Employees"},
+     *     tags={"Company Employees"},
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
@@ -207,7 +207,7 @@ class EmployeeController extends Controller
      *     path="/api/companies/{company-slug}/employees/{employee_id}",
      *     summary="Update details of a specific employee",
      *     security={{"bearerAuth":{}}},
-     *     tags={"Employees"},
+     *     tags={"Company Employees"},
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
@@ -282,7 +282,7 @@ class EmployeeController extends Controller
      *     path="/api/companies/{company-slug}/employees/{employee_id}",
      *     summary="Delete a specific employee",
      *     security={{"bearerAuth":{}}},
-     *     tags={"Employees"},
+     *     tags={"Company Employees"},
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",

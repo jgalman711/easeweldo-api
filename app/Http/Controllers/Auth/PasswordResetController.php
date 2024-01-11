@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PasswordResetRequest;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
@@ -11,7 +12,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class PasswordResetController extends Controller
@@ -29,17 +29,40 @@ class PasswordResetController extends Controller
         return $this->sendError(self::INVALID_TOKEN_MESSAGE);
     }
 
-    public function reset(Request $request): JsonResponse
+    /**
+     * @OA\Post(
+     *     path="/api/reset-password",
+     *     summary="Reset user's password",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 @OA\Property(property="token", type="string", description="Password reset token"),
+     *                 @OA\Property(property="email_address", type="string", format="email", description="User's email address", maxLength=255),
+     *                 @OA\Property(property="password", type="string", format="password", description="New password", minLength=6),
+     *                 @OA\Property(property="password_confirmation", type="string", format="password", description="Password confirmation"),
+     *             ),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response="200",
+     *         description="Password reset successfully",
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 @OA\Property(property="success", type="boolean", example=true),
+     *                 @OA\Property(property="message", type="string", example="Password reset successfully."),
+     *             ),
+     *         ),
+     *     ),
+     *     @OA\Response(response="422", description="Validation errors"),
+     *     @OA\Response(response="404", description="Token or user not found"),
+     * )
+     */
+    public function reset(PasswordResetRequest $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'token' => 'required',
-            'email_address' => 'required|email',
-            'password' => 'required|min:6|confirmed',
-        ]);
-        if ($validator->fails()) {
-            return $this->sendError('Validation Error.', $validator->errors());
-        }
-
         $status = Password::reset(
             $request->only('email_address', 'password', 'password_confirmation', 'token'),
             function (User $user, string $password) {
