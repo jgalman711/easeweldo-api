@@ -174,7 +174,7 @@ class EmployeeController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/companies/{company-slug}/employees/{employee_id}",
+     *     path="/api/companies/{company-slug}/employees/{employee-id}",
      *     summary="Get details of a specific employee",
      *     security={{"bearerAuth":{}}},
      *     tags={"Company Employees"},
@@ -186,7 +186,7 @@ class EmployeeController extends Controller
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Parameter(
-     *         name="employee_id",
+     *         name="employee-id",
      *         in="path",
      *         required=true,
      *         description="ID of the employee",
@@ -204,7 +204,7 @@ class EmployeeController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/api/companies/{company-slug}/employees/{employee_id}",
+     *     path="/api/companies/{company-slug}/employees/{employee-id}",
      *     summary="Update details of a specific employee",
      *     security={{"bearerAuth":{}}},
      *     tags={"Company Employees"},
@@ -216,7 +216,7 @@ class EmployeeController extends Controller
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Parameter(
-     *         name="employee_id",
+     *         name="employee-id",
      *         in="path",
      *         required=true,
      *         description="ID of the employee",
@@ -279,7 +279,7 @@ class EmployeeController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/api/companies/{company-slug}/employees/{employee_id}",
+     *     path="/api/companies/{company-slug}/employees/{employee-id}",
      *     summary="Delete a specific employee",
      *     security={{"bearerAuth":{}}},
      *     tags={"Company Employees"},
@@ -291,7 +291,7 @@ class EmployeeController extends Controller
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Parameter(
-     *         name="employee_id",
+     *         name="employee-id",
      *         in="path",
      *         required=true,
      *         description="ID of the employee",

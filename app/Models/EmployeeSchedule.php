@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class EmployeeSchedule extends Model
 {
-    use HasFactory, SoftDeletes;
+    use SoftDeletes;
 
     protected $fillable = [
         'employee_id',
@@ -21,8 +20,8 @@ class EmployeeSchedule extends Model
         return $this->belongsTo(Employee::class);
     }
     
-    public function schedule()
+    public function workSchedule()
     {
-        return $this->belongsTo(Schedule::class);
+        return $this->belongsTo(WorkSchedule::class);
     }
 }
