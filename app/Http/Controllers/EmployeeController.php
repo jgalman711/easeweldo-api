@@ -262,7 +262,7 @@ class EmployeeController extends Controller
      *     @OA\Response(response="422", description="Validation errors")
      * )
      */
-    public function update(EmployeeRequest $request, Company $company, int $employeeId): JsonResponse
+    public function update(Request $request, Company $company, int $employeeId): JsonResponse
     {
         try {
             DB::beginTransaction();
