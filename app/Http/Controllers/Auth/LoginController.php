@@ -28,7 +28,12 @@ class LoginController extends Controller
      *         @OA\MediaType(
      *             mediaType="application/json",
      *             @OA\Schema(
-     *                 @OA\Property(property="email_address", type="string", format="email", description="User's email address"),
+     *                 @OA\Property(
+     *                      property="email_address",
+     *                      type="string",
+     *                      format="email",
+     *                      description="User's email address"
+     *                 ),
      *                 @OA\Property(property="password", type="string", description="User's password"),
      *             ),
      *         ),
@@ -46,14 +51,38 @@ class LoginController extends Controller
      *                     type="object",
      *                     @OA\Property(property="token", type="string", description="Generated access token"),
      *                     @OA\Property(property="username", type="string", description="User's username"),
-     *                     @OA\Property(property="first_name", type="string", nullable=true, description="User's first name"),
-     *                     @OA\Property(property="last_name", type="string", nullable=true, description="User's last name"),
+     *                     @OA\Property(
+     *                          property="first_name",
+     *                          type="string",
+     *                          nullable=true,
+     *                          description="User's first name"
+     *                    ),
+     *                     @OA\Property(
+     *                          property="last_name",
+     *                          type="string",
+     *                          nullable=true,
+     *                          description="User's last name"
+     *                     ),
      *                     @OA\Property(property="status", type="string", description="User's status"),
      *                     @OA\Property(property="email", type="string", description="User's email"),
      *                     @OA\Property(property="email_address", type="string", description="User's email address"),
-     *                     @OA\Property(property="email_verified_at", type="string", nullable=true, description="Timestamp when email was verified"),
-     *                     @OA\Property(property="companies", type="array", description="User's associated companies", @OA\Items()),
-     *                     @OA\Property(property="employee", type="object", description="User's associated employee details"),
+     *                     @OA\Property(
+     *                          property="email_verified_at",
+     *                          type="string",
+     *                          nullable=true,
+     *                          description="Timestamp when email was verified"
+     *                     ),
+     *                     @OA\Property(
+     *                          property="companies",
+     *                          type="array",
+     *                          description="User's associated companies",
+     *                          @OA\Items()
+     *                     ),
+     *                     @OA\Property(
+     *                          property="employee",
+     *                          type="object",
+     *                          description="User's associated employee details"
+     *                     ),
      *                     @OA\Property(property="roles", type="array", description="User's roles", @OA\Items(
      *                         @OA\Property(property="id", type="integer", description="Role ID"),
      *                         @OA\Property(property="name", type="string", description="Role name"),
@@ -71,7 +100,7 @@ class LoginController extends Controller
     {
         $credentials = $request->only(['username', 'email_address', 'password']);
         try {
-            $user = $this->loginService->login($credentials, $this->loginService::TYPE_BUSINESS);
+            $user = $this->loginService->login($credentials, $request->remember);
             $message = $this->loginService->getSuccessMessage($user);
             return $this->sendResponse(new LoginResource($user), $message);
         } catch (Exception $e) {

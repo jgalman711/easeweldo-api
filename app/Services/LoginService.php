@@ -15,7 +15,7 @@ class LoginService
     public const TYPE_BUSINESS = 'business';
     public const TYPE_PERSONAL = 'personal';
 
-    public function login(array $credentials, string $type = self::TYPE_BUSINESS, bool $remember = false): User
+    public function login(array $credentials, bool $remember = false): User
     {
         if (Auth::attempt($credentials, $remember)) {
             $user = Auth::user()->load([
@@ -27,11 +27,6 @@ class LoginService
 
             $user->token = $user->createToken(env('APP_NAME'))->plainTextToken;
             throw_if($this->isTemporaryPasswordExpired($user), new Exception('Your temporary password has expired.'));
-            
-            throw_if(
-                $type == self::TYPE_BUSINESS && !$user->hasRole('business-admin') && !$user->hasRole('super-admin'),
-                new Exception('Unauthorized request.')
-            );
          
             return $user;
         } else {
