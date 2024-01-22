@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Http\Requests\EmployeeRequest;
 use App\Models\Company;
 use App\Models\Employee;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -28,7 +28,7 @@ class EmployeeService
         return $employee;
     }
 
-    public function update(EmployeeRequest $request, Company $company, Employee $employee): Employee
+    public function update(Request $request, Company $company, Employee $employee): Employee
     {
         $input = $request->validated();
         if (isset($input['profile_picture']) && $input['profile_picture']) {
