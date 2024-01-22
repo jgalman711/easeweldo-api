@@ -30,7 +30,7 @@ class EmployeeService
 
     public function update(Request $request, Company $company, Employee $employee): Employee
     {
-        $input = $request->validated();
+        $input = $request->all();
         if (isset($input['profile_picture']) && $input['profile_picture']) {
             if ($employee->profile_picture) {
                 Storage::delete(self::PUBLIC_PATH . $employee->profile_picture);
