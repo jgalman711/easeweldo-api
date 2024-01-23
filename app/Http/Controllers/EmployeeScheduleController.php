@@ -194,8 +194,8 @@ class EmployeeScheduleController extends Controller
      *         name="schedule-id",
      *         in="path",
      *         required=true,
-     *         description="ID of the employee schedule",
-     *         @OA\Schema(type="integer")
+     *         description="ID of the employee schedule or 'latest' to get the latest schedule",
+     *         @OA\Schema(type="string", default="latest"),
      *     ),
      *     @OA\Response(
      *         response="200",
@@ -224,11 +224,17 @@ class EmployeeScheduleController extends Controller
      *     )
      * )
      */
-    public function show(Company $company, Employee $employee, int $employeeScheduleId): JsonResponse
+    public function show(Company $company, Employee $employee, $employeeSchedule): JsonResponse
     {
         try {
             $company->getEmployeeById($employee->id);
-            $employeeSchedule = $employee->employeeSchedules()->find($employeeScheduleId);
+            if ($employeeSchedule === 'latest') {
+                $employeeSchedule = $employee->employeeSchedules()
+                    ->latest('start_date')
+                    ->first();
+            } else {
+                $employeeSchedule = $employee->employeeSchedules()->find($employeeSchedule);
+            }
             throw_unless(
                 $employeeSchedule,
                 'Work schedule not found.'
