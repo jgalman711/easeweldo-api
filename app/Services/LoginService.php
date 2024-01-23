@@ -15,7 +15,7 @@ class LoginService
     public const TYPE_BUSINESS = 'business';
     public const TYPE_PERSONAL = 'personal';
 
-    public function login(array $credentials, bool $remember = false): User
+    public function login(array $credentials, ?bool $remember = false): User
     {
         if (Auth::attempt($credentials, $remember)) {
             $user = Auth::user()->load([
