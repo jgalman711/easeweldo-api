@@ -347,7 +347,8 @@ class RegularPayrollService
                 $transformedLeaves[] = [
                     'type' => $leave->type,
                     'date' => $leave->date,
-                    'hours' => $leave->hours
+                    'hours' => $leave->hours,
+                    'pay' => $leave->hours * $this->salaryData->hourly_rate
                 ];
             }
             $payroll->leaves = $transformedLeaves;

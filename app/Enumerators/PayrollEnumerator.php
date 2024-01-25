@@ -24,4 +24,11 @@ class PayrollEnumerator
     public const TYPE_SPECIAL = 'special';
     public const TYPE_NTH_MONTH_PAY = 'nth_month_pay';
     public const TYPE_FINAL = 'final';
+
+    public const FORMATS = [
+        self::FORMAT_DEFAULT,
+        self::FORMAT_DETAILS
+    ];
+    public const FORMAT_DEFAULT = 'default';
+    public const FORMAT_DETAILS = 'details';
 }
