@@ -6,7 +6,6 @@ use App\Models\Employee;
 use App\Models\Payroll;
 use App\Models\Period;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Response;
 
 class PayrollService
 {
