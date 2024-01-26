@@ -97,7 +97,7 @@ class PayrollDetailsResouce extends BaseResource
             }
         }
 
-        if ($this->absent_minutes > 0) {
+        if ($this->absent_minutes > 0 && $this->absent_deductions > 0) {
             array_push($taxableEarnings, [
                 'label' => 'Absent Deductions',
                 'rate' => 1.0,
@@ -106,18 +106,9 @@ class PayrollDetailsResouce extends BaseResource
             ]);
         }
 
-        if ($this->late_minutes > 0) {
+        if ($this->late_minutes > 0 && $this->late_deductions > 0) {
             array_push($taxableEarnings, [
                 'label' => 'Late Deductions',
-                'rate' => 1.0,
-                'hours' => $this->late_minutes / 60,
-                'amount' => "-" . number_format($this->late_deductions, 2)
-            ]);
-        }
-
-        if ($this->late_minutes > 0) {
-            array_push($taxableEarnings, [
-                'label' => 'Regular Holiday',
                 'rate' => 1.0,
                 'hours' => $this->late_minutes / 60,
                 'amount' => "-" . number_format($this->late_deductions, 2)

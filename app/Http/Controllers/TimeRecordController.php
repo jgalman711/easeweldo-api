@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\TimeRecordRequest;
-use App\Http\Resources\BaseResource;
+use App\Http\Resources\TimerecordResource;
 use App\Models\Company;
 use App\Models\TimeRecord;
 use App\Services\ClockService;
@@ -86,7 +86,10 @@ class TimeRecordController extends Controller
             $request->date_to,
         );
         $timeRecords = $this->applyFilters($request, $timeRecords);
-        return $this->sendResponse(BaseResource::collection($timeRecords), 'Time records retrieved successfully.');
+        return $this->sendResponse(
+            TimerecordResource::collection($timeRecords),
+            'Time records retrieved successfully.'
+        );
     }
 
     /**
@@ -140,7 +143,8 @@ class TimeRecordController extends Controller
         $employee = $company->getEmployeeById($employeeId);
         $input = $request->validated();
         $input['employee_id'] = $employee->id;
-        return TimeRecord::create($input);
+        $timeRecord = TimeRecord::create($input);
+        return $this->sendResponse(new TimerecordResource($timeRecord), 'Time records saved successfully.');
     }
 
     /**
@@ -187,7 +191,7 @@ class TimeRecordController extends Controller
     {
         $employee = $company->getEmployeeById($employeeId);
         $timeRecord = $employee->timeRecords()->findOrFail($timeRecordId);
-        return $this->sendResponse(new BaseResource($timeRecord), 'Time records updated successfully.');
+        return $this->sendResponse(new TimerecordResource($timeRecord), 'Time records updated successfully.');
     }
 
     /**
@@ -262,7 +266,7 @@ class TimeRecordController extends Controller
         }
 
         $timeRecord->update($input);
-        return $this->sendResponse(new BaseResource($timeRecord), 'Time records updated successfully.');
+        return $this->sendResponse(new TimerecordResource($timeRecord), 'Time records updated successfully.');
     }
 
     /**
@@ -310,7 +314,7 @@ class TimeRecordController extends Controller
         $employee = $company->getEmployeeById($employeeId);
         $timeRecord = $employee->timeRecords()->findOrFail($timeRecordId);
         $timeRecord->delete();
-        return $this->sendResponse(new BaseResource($timeRecord), 'Time records deleted successfully.');
+        return $this->sendResponse(new TimerecordResource($timeRecord), 'Time records deleted successfully.');
     }
 
     /**
@@ -351,7 +355,7 @@ class TimeRecordController extends Controller
         try {
             $employee = $company->getEmployeeById($employeeId);
             list($timeRecord, $message) = $this->clockService->clockAction($employee);
-            return $this->sendResponse(new BaseResource($timeRecord), $message);
+            return $this->sendResponse(new TimerecordResource($timeRecord), $message);
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
