@@ -89,10 +89,10 @@ class PayrollDetailsResouce extends BaseResource
         }
 
         if ($this->taxable_earnings && !empty($this->taxable_earnings)) {
-            foreach ($this->taxable_earnings as $earnings) {
+            foreach ($this->taxable_earnings as $taxableEarnings) {
                 array_push($earnings, [
-                    'label' => ucwords($earnings['name']),
-                    'amount' => number_format($earnings['pay'], 2)
+                    'label' => ucwords($taxableEarnings['name']),
+                    'amount' => number_format($taxableEarnings['pay'], 2)
                 ]);
             }
         }
@@ -115,19 +115,19 @@ class PayrollDetailsResouce extends BaseResource
             ]);
         }
 
+        if ($this->non_taxable_earnings && !empty($this->non_taxable_earnings)) {
+            foreach ($this->non_taxable_earnings as $nonTaxableEarnings) {
+                array_push($earnings, [
+                    'label' => ucwords($nonTaxableEarnings['name']) . " (Non-taxable {$nonTaxableEarnings['type']})",
+                    'amount' => number_format($nonTaxableEarnings['pay'], 2)
+                ]);
+            }
+        }
+
         array_push($earnings, [
             'label' => 'Gross Income',
             'amount' => number_format($this->gross_income, 2)
         ]);
-
-        if ($this->non_taxable_earnings && !empty($this->non_taxable_earnings)) {
-            foreach ($this->non_taxable_earnings as $earnings) {
-                array_push($earnings, [
-                    'label' => ucwords($earnings['name']),
-                    'amount' => number_format($earnings['pay'], 2)
-                ]);
-            }
-        }
 
         return $earnings;
     }

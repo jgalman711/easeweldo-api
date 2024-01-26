@@ -125,6 +125,7 @@ class Payroll extends Model
             $this->regular_holiday_hours_pay +
             $this->special_holiday_hours_worked_pay +
             $this->special_holiday_hours_pay +
+            $this->total_non_taxable_earnings +
             $this->total_taxable_earnings -
             $this->total_deductions;
         return max(0, $grossIncome);
@@ -132,7 +133,7 @@ class Payroll extends Model
 
     public function getTaxableIncomeAttribute(): float
     {
-        $taxableIncome = $this->gross_income - $this->total_contributions;
+        $taxableIncome = $this->gross_income - $this->total_contributions - $this->total_non_taxable_earnings;
         return $taxableIncome >= 0 ? $taxableIncome : 0;
     }
 
