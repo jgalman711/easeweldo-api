@@ -20,7 +20,7 @@ class TimerecordResource extends BaseResource
             "original_clock_out" => $this->original_clock_out,
             "source" => $this->source,
             "remarks" => $this->remarks,
-            "attendance_status" =>ucfirst($this->attendance_status),
+            "attendance_status" => $this->attendance_status,
             "next_action" => $this->next_action
         ];
     }
