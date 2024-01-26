@@ -95,7 +95,7 @@ class TimeRecord extends Model
             $attendanceStatus = self::MISSED_CLOCK_IN;
         } elseif ($clockIn && !$clockOut) {
             $attendanceStatus = self::MISSED_CLOCK_OUT;
-        } elseif (!$expectedClockIn || $expectedClockOut) {
+        } elseif (!$expectedClockIn || !$expectedClockOut) {
             $attendanceStatus = self::OVERTIME;
         } else {
             $attendanceStatus = self::ABSENT;
