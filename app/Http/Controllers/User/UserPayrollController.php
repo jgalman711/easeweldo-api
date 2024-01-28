@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\PayrollResource;
 use App\Models\Company;
 use App\Services\Payroll\PayrollResourceService;
+use App\Traits\PayrollFilter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class UserPayrollController extends Controller
 {
+    use PayrollFilter;
+
     protected $payrollService;
 
     public function __construct(PayrollResourceService $payrollService)
@@ -71,10 +74,10 @@ class UserPayrollController extends Controller
      *     )
      * )
      */
-    public function index(Company $company, int $employeeId): JsonResponse
+    public function index(Request $request, Company $company, int $employeeId): JsonResponse
     {
         $employee = $company->employees()->findOrFail($employeeId);
-        $payrolls = $employee->payrolls()->with('period')->get();
+        $payrolls = $this->applyFilters($request, $employee->payrolls());
         if ($payrolls) {
             return $this->sendResponse(PayrollResource::collection($payrolls), 'Payrolls retrieved successfully.');
         } else {
