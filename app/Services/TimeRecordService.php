@@ -78,19 +78,23 @@ class TimeRecordService
         string $dateFrom = null,
         string $dateTo = null
     ): Relation {
-        if ($dateFrom) {
-            $timeRecordsQuery->where(function ($query) use ($dateFrom) {
-                $query->whereDate('expected_clock_in', '>=', $dateFrom)
+        return $timeRecordsQuery
+            ->where(function ($query) {
+                $query->whereNotNull('clock_in')
+                    ->orWhereNotNull('clock_out')
+                    ->orWhereNotNull('expected_clock_in')
+                    ->orWhereNotNull('expected_clock_out');
+        })->when($dateFrom, function ($query) use ($dateFrom) {
+            $query->where(function ($innerQuery) use ($dateFrom) {
+                $innerQuery->whereDate('expected_clock_in', '>=', $dateFrom)
                     ->orWhereDate('clock_in', '>=', $dateFrom);
             });
-        }
-        if ($dateTo) {
-            $timeRecordsQuery->where(function ($query) use ($dateTo) {
-                $query->whereDate('expected_clock_in', '<=', $dateTo)
+        })->when($dateTo, function ($query) use ($dateTo) {
+            $query->where(function ($innerQuery) use ($dateTo) {
+                $innerQuery->whereDate('expected_clock_in', '<=', $dateTo)
                     ->orWhereDate('clock_in', '<=', $dateTo);
             });
-        }
-        return $timeRecordsQuery;
+        });
     }
 
     public function getTimeRecordToday(Employee $employee): ?TimeRecord
