@@ -31,6 +31,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SubscriptionPricesController;
 use App\Http\Controllers\SynchBiometricsController;
+use App\Http\Controllers\TimeCorrectionController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\TimesheetUploadController;
 use App\Http\Controllers\Upload\UploadEmployeeController;
@@ -127,6 +128,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('clock', [TimeRecordController::class, 'clock']);
             Route::apiResource('leaves', LeaveController::class);
             Route::apiResource('time-records', TimeRecordController::class);
+            Route::apiResource('time-corrections', TimeCorrectionController::class);
             Route::apiResource('work-schedules', EmployeeScheduleController::class);
             Route::apiResource('payrolls', UserPayrollController::class)->only('index', 'show');
             Route::get('salary-computation', [SalaryComputationController::class, 'show']);

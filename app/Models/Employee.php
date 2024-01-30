@@ -127,6 +127,11 @@ class Employee extends Model
         return $this->hasMany(TimeRecord::class);
     }
 
+    public function timeCorrections(): HasMany
+    {
+        return $this->hasMany(TimeCorrection::class);
+    }
+
     public function leaves(): HasMany
     {
         return $this->hasMany(Leave::class);
