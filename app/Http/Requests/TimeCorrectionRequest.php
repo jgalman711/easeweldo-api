@@ -10,8 +10,8 @@ class TimeCorrectionRequest extends BaseRequest
             'date' => self::REQUIRED_DATE,
             'clock_in' => 'nullable|date',
             'clock_out' => 'nullable|date|after:clock_in',
-            'title' => self::NULLABLE_STRING,
-            'description' => self::REQUIRED_STRING,
+            'title' => self::REQUIRED_STRING,
+            'description' => self::NULLABLE_STRING,
             'remarks' => self::NULLABLE_STRING,
         ];
     }
