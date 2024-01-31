@@ -26,6 +26,7 @@ class TimeCorrection extends Model
         'clock_in',
         'clock_out',
         'title',
+        'description',
         'remarks',
         'status',
     ];

@@ -128,7 +128,6 @@ class TimeCorrectionController extends Controller
             $input = $request->validated();
             $employee = $company->getEmployeeById($employeeId);
             $input['company_id'] = $company->id;
-            $input['title'] = $request->date . " Time Correction";
             $timeCorrection = $employee->timeCorrections()->create($input);
             return $this->sendResponse(
                 new TimeCorrectionResource($timeCorrection),
