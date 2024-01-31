@@ -13,13 +13,14 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained();
             $table->foreignId('company_id')->constrained();
             $table->string('title')->nullable();
+            $table->text('description')->nullable();
             $table->date('date');
             $table->timestamp('clock_in')->nullable();
             $table->timestamp('clock_out')->nullable();
             $table->text('remarks')->nullable();
-            $table->string('status')->default('pending'); // You can adjust the default value as needed
-            $table->softDeletes();
+            $table->string('status')->default('pending');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

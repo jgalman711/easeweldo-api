@@ -11,12 +11,13 @@ class TimeCorrectionResource extends BaseResource
     {
         return [
             'id' => $this->id,
+            'title' => $this->title,
+            'description' => $this->description,
             'employee_id' => $this->employee_id,
             'company_id' => $this->company_id,
             'date' => $this->date,
             'clock_in' => $this->timeFormat($this->clock_in),
             'clock_out' => $this->timeFormat($this->clock_out),
-            'title' => $this->title,
             'remarks' => $this->remarks,
             'status' => $this->status
         ];
