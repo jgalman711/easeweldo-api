@@ -112,7 +112,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             });
             Route::post('upload/employees', [UploadEmployeeController::class, 'store']);
             Route::apiResource('overtime-requests', OvertimeRequestController::class);
-            Route::apiResource('leave-requests', LeaveController::class);
             Route::get('qrcode', [CompanyQrController::class, 'index']);
         });
 

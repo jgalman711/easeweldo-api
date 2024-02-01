@@ -30,7 +30,8 @@ class Leave extends Model
     public const TYPES = [
         self::TYPE_SICK_LEAVE,
         self::TYPE_VACATION_LEAVE,
-        self::TYPE_EMERGENCY_LEAVE
+        self::TYPE_EMERGENCY_LEAVE,
+        self::TYPE_WITHOUT_PAY
     ];
 
     protected $fillable = [
