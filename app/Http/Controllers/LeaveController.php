@@ -4,10 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LeaveRequest;
 use App\Http\Requests\LeaveUpdateRequest;
-use App\Http\Resources\BaseResource;
 use App\Http\Resources\LeaveResource;
 use App\Models\Company;
-use App\Models\Employee;
 use App\Services\LeaveService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -48,7 +46,7 @@ class LeaveController extends Controller
     {
         $employee = $company->getEmployeeById($employeeId);
         $leave = $employee->getLeaveById($leaveId);
-        return $this->sendResponse(new BaseResource($leave), 'Leave retrieved successfully');
+        return $this->sendResponse(new LeaveResource($leave), 'Leave retrieved successfully');
     }
 
     public function update(
@@ -61,7 +59,7 @@ class LeaveController extends Controller
         $employee = $company->getEmployeeById($employeeId);
         $leave = $employee->getLeaveById($leaveId);
         $leave->update($input);
-        return $this->sendResponse(new BaseResource($leave), 'Leave updated successfully.');
+        return $this->sendResponse(new LeaveResource($leave), 'Leave updated successfully.');
     }
 
     public function destroy(Company $company, int $employeeId, int $leaveId): JsonResponse
@@ -69,6 +67,6 @@ class LeaveController extends Controller
         $employee = $company->getEmployeeById($employeeId);
         $leave = $employee->getLeaveById($leaveId);
         $leave->delete();
-        return $this->sendResponse(new BaseResource($leave), 'Leave deleted successfully');
+        return $this->sendResponse(new LeaveResource($leave), 'Leave deleted successfully');
     }
 }
