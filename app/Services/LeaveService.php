@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Http\Requests\LeaveRequest;
+use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Leave;
 use Carbon\Carbon;
@@ -9,6 +11,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class LeaveService
 {
@@ -64,41 +67,37 @@ class LeaveService
         return $query->get();
     }
 
-    public function apply(Employee $employee, array $data): array
+    public function apply(Company $company, Employee $employee, LeaveRequest $leaveRequest): array
     {
-        $employeeSalaryDetails = $employee->salaryComputation;
-        $workHoursPerDay = $employeeSalaryDetails->working_hours_per_day;
-
-        $availableHoursLeaveType = "available_" . $data['type'] . "_leave_hours";
-        $remainingLeaveHours = $employee->salaryComputation->{$availableHoursLeaveType};
-        $fromDate = Carbon::parse($data['from_date']);
-        $toDate = Carbon::parse($data['to_date']);
-        $days = $fromDate->diffInDays($toDate);
         $leaves = [];
-        throw_if($remainingLeaveHours <= 0, new Exception('No available leaves left for this type.'));
-        if ($days > 0) {
-            $currentDate = $fromDate;
-            while ($currentDate <= $toDate && $remainingLeaveHours > 0) {
-                $leaves[] = $this->createLeave($employee, $data);
-                $currentDate->addDay();
-            }
-        } else {
-            $data['date'] = $fromDate;
-            $hours = $fromDate->diffInMinutes($toDate) / 60;
-            $breakHours = $employeeSalaryDetails->break_hours_per_day;
-
-            $hours = $hours < ($workHoursPerDay / 2) + $breakHours ? $hours : $hours - $breakHours;
-            if ($remainingLeaveHours >= $hours) {
-                $data['hours'] = $hours;
-                $remainingLeaveHours -= $hours;
-            } else {
-                $data['hours'] = $remainingLeaveHours;
-                $remainingLeaveHours = 0;
-            }
-            $leaves[] = $this->createLeave($employee, $data);
+        $fromDate = Carbon::parse($leaveRequest->from_date);
+        $toDate = Carbon::parse($leaveRequest->to_date);
+        $days = $fromDate->diffInDays($toDate) + 1;
+        if ($leaveRequest->type !== Leave::TYPE_WITHOUT_PAY) {
+            $availableHoursLeaveType = "available_{$leaveRequest->type}_hours";
+            $remainingLeaveHours = $employee->salaryComputation->{$availableHoursLeaveType};
+            $totalHoursLeave = $leaveRequest->hours * $days;
+            throw_if(
+                $remainingLeaveHours <= $totalHoursLeave,
+                new Exception('No available leaves left for this type.')
+            );
         }
-        $employee->salaryComputation->{$availableHoursLeaveType} = $remainingLeaveHours;
-        $employee->salaryComputation->save();
+        while ($fromDate->lte($toDate)) {
+            $leave = Leave::create([
+                'company_id' => $company->id,
+                'employee_id' => $employee->id,
+                'created_by' => $employee->user->id,
+                'type' => $leaveRequest->type,
+                'description' => $leaveRequest->description,
+                'hours' => $leaveRequest->hours,
+                'date' => $fromDate,
+                'submitted_date' => Carbon::now()->toDateString(),
+                'remarks' => $leaveRequest->remarks,
+                'status' => Leave::PENDING
+            ]);
+            array_push($leaves, $leave);
+            $fromDate->addDay();
+        }
         return $leaves;
     }
 

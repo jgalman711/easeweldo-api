@@ -34,13 +34,10 @@ class LeaveController extends Controller
     
     public function store(LeaveRequest $leaveRequest, Company $company, int $employeeId): JsonResponse
     {
-        $data = $leaveRequest->validated();
         try {
             $employee = $company->employees()->find($employeeId);
-            $data['company_id'] = $company->id;
-            $data['employee_id'] = $employeeId;
-            $leave = $this->leaveService->apply($employee, $data);
-            return $this->sendResponse(new BaseResource($leave), 'Leave created successfully.');
+            $leaves = $this->leaveService->apply($company, $employee, $leaveRequest);
+            return $this->sendResponse(LeaveResource::collection($leaves), 'Leaves created successfully.');
         } catch (Exception $e) {
             return $this->sendError("Unable to apply leave.", $e->getMessage());
         }
