@@ -51,8 +51,12 @@ class LeaveController extends Controller
         return $this->sendResponse(new BaseResource($leave), 'Leave retrieved successfully');
     }
 
-    public function update(LeaveUpdateRequest $leaveRequest, Company $company, int $employeeId, int $leaveId): JsonResponse
-    {
+    public function update(
+        LeaveUpdateRequest $leaveRequest,
+        Company $company,
+        int $employeeId,
+        int $leaveId
+    ): JsonResponse {
         $input = $leaveRequest->validated();
         $employee = $company->getEmployeeById($employeeId);
         $leave = $employee->getLeaveById($leaveId);
