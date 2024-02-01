@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LeaveRequest;
+use App\Http\Requests\LeaveUpdateRequest;
 use App\Http\Resources\BaseResource;
 use App\Http\Resources\LeaveResource;
 use App\Models\Company;
@@ -50,7 +51,7 @@ class LeaveController extends Controller
         return $this->sendResponse(new BaseResource($leave), 'Leave retrieved successfully');
     }
 
-    public function update(LeaveRequest $leaveRequest, Company $company, int $employeeId, int $leaveId): JsonResponse
+    public function update(LeaveUpdateRequest $leaveRequest, Company $company, int $employeeId, int $leaveId): JsonResponse
     {
         $input = $leaveRequest->validated();
         $employee = $company->getEmployeeById($employeeId);
