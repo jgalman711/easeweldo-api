@@ -6,25 +6,54 @@ use Illuminate\Http\Request;
 
 class WorkScheduleResource extends BaseResource
 {
+    protected $days = [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday"
+    ];
+
     public function toArray(Request $request): array
     {
-        return [
+        if ($request->format == "tabular") {
+            $schedule = $this->formatAdminView();
+        } else {
+            $schedule = $this->formatDefault();
+        }
+        return $schedule;
+    }
+
+    private function formatDefault()
+    {
+        $schedule = [
             "id" => $this->id,
-            "name" => $this->name,
-            "monday_clock_in_time" => $this->monday_clock_in_time,
-            "monday_clock_out_time" => $this->monday_clock_out_time,
-            "tuesday_clock_in_time" => $this->tuesday_clock_in_time,
-            "tuesday_clock_out_time" => $this->tuesday_clock_out_time,
-            "wednesday_clock_in_time" => $this->wednesday_clock_in_time,
-            "wednesday_clock_out_time" => $this->wednesday_clock_out_time,
-            "thursday_clock_in_time" => $this->thursday_clock_in_time,
-            "thursday_clock_out_time" => $this->thursday_clock_out_time,
-            "friday_clock_in_time" => $this->friday_clock_in_time,
-            "friday_clock_out_time" => $this->friday_clock_out_time,
-            "saturday_clock_in_time" => $this->saturday_clock_in_time,
-            "saturday_clock_out_time" => $this->saturday_clock_out_time,
-            "sunday_clock_in_time" => $this->sunday_clock_in_time,
-            "sunday_clock_out_time" => $this->sunday_clock_out_time
+            "name" => $this->name
         ];
+        foreach ($this->days as $day) {
+            $schedule["{$day}_clock_in_time"] = $this->{$day . '_clock_in_time'};
+            $schedule["{$day}_clock_out_time"] = $this->{$day . '_clock_out_time'};
+        }
+        return $schedule;
+    }
+
+    private function formatAdminView()
+    {
+        $schedule = [
+            "id" => $this->id,
+            "name" => $this->name
+        ];
+        foreach ($this->days as $day) {
+            if ($this->{$day . '_clock_in_time'}) {
+                $clockIn = substr($this->{$day . '_clock_in_time'}, 0, -3);
+                $clockOut = substr($this->{$day . '_clock_out_time'}, 0, -3);
+                $schedule[$day] = "$clockIn - $clockOut";
+            } else {
+                $schedule[$day] = "Rest Day";
+            }
+        }
+        return $schedule;
     }
 }
