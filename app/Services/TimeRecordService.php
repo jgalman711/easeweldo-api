@@ -5,14 +5,12 @@ namespace App\Services;
 use App\Models\Biometrics;
 use App\Models\Company;
 use App\Models\Employee;
-use App\Models\Leave;
 use App\Models\Period;
 use App\Models\TimeRecord;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Collection;
 
 class TimeRecordService
 {

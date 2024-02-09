@@ -194,12 +194,12 @@ class PeriodService
         return $periodBuilder->orderBy('id', 'desc')->first();
     }
 
-    public function getCurrentPeriod(Company $company, string $type = null): Period
+    public function getCurrentPeriod(Company $company, string $type = null): ?Period
     {
         $periodBuilder = $this->getBuilderPeriodsByType($company, $type);
         $currentDate = now();
         $periodBuilder->where('start_date', '<=', $currentDate)
-            ->where('end_date', '>=', $currentDate);
+            ->where('salary_date', '>=', $currentDate);
         return $periodBuilder->orderBy('id', 'desc')->first();
     }
 

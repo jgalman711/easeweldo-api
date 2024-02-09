@@ -121,6 +121,11 @@ class Company extends Model
         return $this->hasMany(Leave::class);
     }
 
+    public function timeRecords(): HasMany
+    {
+        return $this->hasMany(TimeRecord::class);
+    }
+
     public function subscriptions(): HasManyThrough
     {
         return $this->hasManyThrough(
