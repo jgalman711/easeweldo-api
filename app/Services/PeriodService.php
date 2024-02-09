@@ -98,7 +98,7 @@ class PeriodService
     public function initializeFromPreviousPeriod(Company $company): ?Period
     {
         $currentDate = Carbon::now()->toDateString();
-        $companyPreviousPeriod = $company->periods()->latest()->first();
+        $companyPreviousPeriod = $company->periods()->whereNotNull('type')->latest()->first();
         if ($companyPreviousPeriod) {
             $salaryDate = Carbon::parse($companyPreviousPeriod->salary_date);
         } else {
@@ -192,6 +192,35 @@ class PeriodService
     {
         $periodBuilder = $this->getBuilderPeriodsByType($company, $type);
         return $periodBuilder->orderBy('id', 'desc')->first();
+    }
+
+    public function getCurrentPeriod(Company $company, string $type = null): Period
+    {
+        $periodBuilder = $this->getBuilderPeriodsByType($company, $type);
+        $currentDate = now();
+        $periodBuilder->where('start_date', '<=', $currentDate)
+            ->where('end_date', '>=', $currentDate);
+        return $periodBuilder->orderBy('id', 'desc')->first();
+    }
+
+    public function generateDashboardDetails(Company $company): array
+    {
+        $period = $this->getCurrentPeriod($company);
+        $formattedStartDate = Carbon::parse($period->start_date)->isoFormat('MMM D');
+        $formattedEndDate = Carbon::parse($period->end_date)->isoFormat('MMM D');
+        $previousPeriod = Period::where('company_period_id', $period->company_period_id - 1)->first();
+        if ($previousPeriod && $previousPeriod->payrollCost > 0) {
+            $diff = number_format(
+                ($period->payrollCost - $previousPeriod->payrollCost) / $previousPeriod->payrollCost * 100, 2
+            );
+        }
+        return [
+            'payroll_cost' => $period->payrollCost,
+            'pay_date' => Carbon::parse($period->salary_date)->isoFormat('MMM D'),
+            'period' => "Period $period->company_period_id: $formattedStartDate - $formattedEndDate",
+            'status' => $period->status,
+            'difference' => $diff ?? 0
+        ];
     }
 
     private function salaryDayMonthly(int $salaryDay): DateTime

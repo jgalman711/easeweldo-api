@@ -72,7 +72,7 @@ class EmployeeService
 
         $retention = $this->generateRetentionRateByMonth($employees, $currentMonthStart);
         return [
-            'active' => $employees->count(),
+            'active_employees' => $employees->count(),
             'employment_type_count' => $typeCount,
             'employment_type_percentatge' => $typePercentage,
             'retention' => $retention
