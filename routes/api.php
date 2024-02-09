@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BiometricsController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanySubscriptionController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeScheduleController;
 use App\Http\Controllers\HolidayController;
@@ -113,6 +114,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('upload/employees', [UploadEmployeeController::class, 'store']);
             Route::apiResource('overtime-requests', OvertimeRequestController::class);
             Route::get('qrcode', [CompanyQrController::class, 'index']);
+            Route::get('dashboard', [DashboardController::class, 'index']);
         });
 
         /**
