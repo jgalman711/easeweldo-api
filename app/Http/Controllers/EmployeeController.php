@@ -102,6 +102,7 @@ class EmployeeController extends Controller
         $employees = $this->applyFilters($request, $company->employees()->with('user'), [
             'user.first_name',
             'user.last_name',
+            'user.full_name',
             'job_title',
             'employment_status',
             'department'
