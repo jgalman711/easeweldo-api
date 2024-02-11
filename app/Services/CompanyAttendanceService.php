@@ -37,26 +37,32 @@ class CompanyAttendanceService
         $date = Carbon::now();
         $days = [];
         for ($i = 1; $i <= 7; $i++) {
-            $dayOfWeek = $date->dayName;
             $formattedDate = $date->toDateString();
-            $days[$dayOfWeek] = [
-                'absents' => 0,
-                'lates' => 0
-            ];
+            $days[] = $date->shortEnglishDayOfWeek;
+            $absentsPerDay = 0;
+            $latesPerDay = 0;
             if (isset($groupedRecords[$formattedDate])) {
                 foreach ($groupedRecords[$formattedDate] as $record) {
                     if (!$record->clock_in && !$record->clock_out) {
-                        $days[$dayOfWeek]['absents']++;
+                        $absentsPerDay++;
                         $summary['total_absents']++;
                     } elseif($this->attendanceService->calculateLates($record->expected_clock_in, $record->clock_in)) {
-                        $days[$dayOfWeek]['lates']++;
+                        $latesPerDay++;
                         $summary['total_lates']++;
                     }
                 }
             }
+            $lates[] = $latesPerDay;
+            $absents[] = $absentsPerDay;
             $date->subDays(1);
         }
-        $summary['days'] = $days;
+        $summary['week'] = [
+            'days' => array_reverse($days),
+            'lates' => array_reverse($lates),
+            'absents' => array_reverse($absents),
+        ];
+        $summary['lates'] = array_reverse($lates);
+        $summary['absents'] = array_reverse($absents);
         $summary['average_absents'] = round($summary['total_absents'] / 7, 2);
         $summary['average_lates'] = round($summary['total_lates'] / 7, 2);
         $summary['average_absents_lates'] = round(
