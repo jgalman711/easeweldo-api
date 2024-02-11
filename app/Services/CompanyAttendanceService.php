@@ -61,8 +61,6 @@ class CompanyAttendanceService
             'lates' => array_reverse($lates),
             'absents' => array_reverse($absents),
         ];
-        $summary['lates'] = array_reverse($lates);
-        $summary['absents'] = array_reverse($absents);
         $summary['average_absents'] = round($summary['total_absents'] / 7, 2);
         $summary['average_lates'] = round($summary['total_lates'] / 7, 2);
         $summary['average_absents_lates'] = round(

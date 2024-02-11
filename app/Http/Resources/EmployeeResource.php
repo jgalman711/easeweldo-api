@@ -9,6 +9,7 @@ class EmployeeResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $latestSchedule = $this->employeeSchedules()->latest('start_date')->first();
         return [
             "id" => $this->id,
             "company" => $this->company->name,
@@ -50,7 +51,11 @@ class EmployeeResource extends JsonResource
                 "last_name" => $this->user->last_name,
                 "status" => $this->user->status,
                 "temporary_password" => $this->user->temporary_password
-            ] : null
+            ] : null,
+            "work_schedule" => [
+                "start_date" => optional($latestSchedule)->start_date,
+                "name" => optional($latestSchedule)->workSchedule->name
+            ]
         ];
     }
 }
