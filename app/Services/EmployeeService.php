@@ -70,7 +70,13 @@ class EmployeeService
             $typePercentage[$type] = round(($count / $employees->count()) * 100, 2);
         }
 
-        $retention = $this->generateRetentionRateByMonth($employees, $currentMonthStart);
+        $previousMonthStart = Carbon::now()->subMonth()->startOfMonth();
+        $previousEmployees = $company->employees->filter(function ($employee) use ($previousMonthStart) {
+            return is_null($employee->date_of_termination)
+                || $employee->date_of_termination > $previousMonthStart;
+        });
+
+        $retention = $this->generateRetentionRateByMonth($previousEmployees, $previousMonthStart);
         return [
             'active_employees' => $employees->count(),
             'employment_type_count' => $typeCount,
@@ -84,19 +90,23 @@ class EmployeeService
         $activeEmployeesBeforeMonthStart = $employees->filter(function ($employee) use ($month) {
             return ($employee->date_of_hire < $month) &&
                 (is_null($employee->date_of_termination) || $employee->date_of_termination > $month);
-        });
+        })->count();
+
         $terminatedEmployees = $employees->filter(function ($employee) use ($month) {
             return !is_null($employee->date_of_termination)
                 && ($employee->date_of_termination >= $month)
                 && ($employee->date_of_termination <= Carbon::now()->endOfMonth());
-        });
+        })->count();
+
+        $newlyHiredEmployees = $employees->count() - $activeEmployeesBeforeMonthStart;
 
         return [
-            'active_employees_start_of_month' => $activeEmployeesBeforeMonthStart->count(),
-            'terminated_employees' => $terminatedEmployees->count(),
+            'active_employees_start_of_month' => $activeEmployeesBeforeMonthStart,
+            'newly_hired_employees' => $newlyHiredEmployees,
+            'terminated_employees' => $terminatedEmployees,
             'retention_rate' =>  $this->calculateRetentionRate(
-                $activeEmployeesBeforeMonthStart->count(),
-                $terminatedEmployees->count()
+                $activeEmployeesBeforeMonthStart,
+                $terminatedEmployees
             ),
         ];
     }
