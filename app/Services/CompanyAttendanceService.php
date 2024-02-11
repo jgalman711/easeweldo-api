@@ -55,9 +55,9 @@ class CompanyAttendanceService
                 }
             }
         }
-        $summary['average_absents'] = number_format($summary['total_absents'] / 7, 2);
-        $summary['average_lates'] = number_format($summary['total_lates'] / 7, 2);
-        $summary['average_absents_lates'] = number_format(
+        $summary['average_absents'] = round($summary['total_absents'] / 7, 2);
+        $summary['average_lates'] = round($summary['total_lates'] / 7, 2);
+        $summary['average_absents_lates'] = round(
             $summary['average_absents'] +
             $summary['average_lates'] / 2
         , 2);
