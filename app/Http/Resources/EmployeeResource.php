@@ -52,10 +52,8 @@ class EmployeeResource extends JsonResource
                 "status" => $this->user->status,
                 "temporary_password" => $this->user->temporary_password
             ] : null,
-            "work_schedule" => [
-                "start_date" => optional($latestSchedule)->start_date,
-                "name" => optional(optional($latestSchedule)->workSchedule)->name
-            ]
+            "work_schedule_start_date" => optional($latestSchedule)->start_date,
+            "work_schedule_name" => optional(optional($latestSchedule)->workSchedule)->name
         ];
     }
 }
