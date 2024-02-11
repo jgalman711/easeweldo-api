@@ -67,7 +67,7 @@ class EmployeeService
         foreach(Employee::EMPLOYMENT_TYPE as $type) {
             $count = $employees->where('employment_type', $type)->count();
             $typeCount[$type] = $count;
-            $typePercentage[$type] = number_format($count / $employees->count() * 100, 2);
+            $typePercentage[$type] = round(($count / $employees->count()) * 100, 2);
         }
 
         $retention = $this->generateRetentionRateByMonth($employees, $currentMonthStart);
