@@ -54,7 +54,7 @@ class EmployeeResource extends JsonResource
             ] : null,
             "work_schedule" => [
                 "start_date" => optional($latestSchedule)->start_date,
-                "name" => optional($latestSchedule)->workSchedule->name
+                "name" => optional(optional($latestSchedule)->workSchedule)->name
             ]
         ];
     }
