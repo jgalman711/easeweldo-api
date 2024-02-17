@@ -8,7 +8,7 @@ class WorkScheduleRequest extends BaseRequest
 {
     public function rules(): array
     {
-        $companyId = optional($this->work_schedule)->company_id;
+        $companyId = $this->company->id;
         return [
             'name' => [
                 'required',
@@ -17,9 +17,9 @@ class WorkScheduleRequest extends BaseRequest
                 Rule::unique('work_schedules', 'name')
                     ->where(function ($query) use ($companyId) {
                         $query->where('company_id', $companyId)
-                            ->whereNull('deleted_at');
+                              ->whereNull('deleted_at');
                     })
-                    ->ignore($this->work_schedule),
+                    ->ignore($this->work_schedule->id ?? null)
             ],
             'monday_clock_in_time' => self::NULLABLE_TIME_FORMAT,
             'monday_clock_out_time' => 'nullable|date_format:H:i:s|after:monday_clock_in_time',
