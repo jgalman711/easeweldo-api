@@ -14,6 +14,7 @@ class WorkSchedule extends Model
     protected $fillable = [
         'name',
         'company_id',
+        'type',
         'monday_clock_in_time',
         'monday_clock_out_time',
         'tuesday_clock_in_time',

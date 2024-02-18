@@ -9,14 +9,18 @@ use App\Models\Company;
 use App\Models\Employee;
 use App\Models\EmployeeSchedule;
 use App\Models\WorkSchedule;
+use App\Services\EmployeeScheduleService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class EmployeeScheduleController extends Controller
 {
-    public function __construct()
+    protected $employeeScheduleService;
+
+    public function __construct(EmployeeScheduleService $employeeScheduleService)
     {
+        $this->employeeScheduleService = $employeeScheduleService;
         $this->setCacheIdentifier('employee-schedules');
     }
 
@@ -159,13 +163,7 @@ class EmployeeScheduleController extends Controller
     {
         try {
             $employee = $company->getEmployeeById($employeeId);
-            $input = $request->validated();
-            $company->getWorkScheduleById($request->work_schedule_id);
-            $employeeSchedule = EmployeeSchedule::updateOrCreate([
-                'employee_id' => $employee->id,
-                'work_schedule_id' => $request->work_schedule_id,
-                'start_date' => $request->start_date
-            ], $input);
+            $employeeSchedule = $this->employeeScheduleService->create($request, $employee);
             $this->forget($company);
             return $this->sendResponse(
                 new EmployeeScheduleResource($employeeSchedule),
