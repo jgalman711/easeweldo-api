@@ -12,8 +12,20 @@ class EmployeeSchedule extends Model
     protected $fillable = [
         'employee_id',
         'work_schedule_id',
-        'start_date'
+        'start_date',
+        'status',
+        'remarks'
     ];
+
+    public const STATUS_TYPES = [
+        self::TYPE_ACTIVE,
+        self::TYPE_INACTIVE,
+        self::TYPE_UPCOMING
+    ];
+
+    public const TYPE_ACTIVE = 'active';
+    public const TYPE_INACTIVE = 'inactive';
+    public const TYPE_UPCOMING = 'upcoming';
 
     public function employee()
     {

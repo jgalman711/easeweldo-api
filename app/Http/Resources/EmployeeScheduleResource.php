@@ -18,6 +18,7 @@ class EmployeeScheduleResource extends BaseResource
             'start_date' => $this->start_date,
             'work_schedule_id' => optional($this->workSchedule)->id,
             'name' => optional($this->workSchedule)->name,
+            'status' => $this->status,
             'is_clock_required' => $this->is_clock_required,
             'monday_clock_in_time' => self::format(optional($this->workSchedule)->monday_clock_in_time),
             'monday_clock_out_time' => self::format(optional($this->workSchedule)->monday_clock_out_time),
@@ -33,6 +34,7 @@ class EmployeeScheduleResource extends BaseResource
             'saturday_clock_out_time' => self::format(optional($this->workSchedule)->saturday_clock_out_time),
             'sunday_clock_in_time' => self::format(optional($this->workSchedule)->sunday_clock_in_time),
             'sunday_clock_out_time' => self::format(optional($this->workSchedule)->sunday_clock_out_time),
+            'remarks' => $this->remarks,
         ];
     }
 

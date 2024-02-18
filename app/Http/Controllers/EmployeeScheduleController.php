@@ -164,7 +164,10 @@ class EmployeeScheduleController extends Controller
             $input['employee_id'] = $employee->id;
             $employeeSchedule = EmployeeSchedule::firstOrCreate($input);
             $this->forget($company);
-            return $this->sendResponse(new BaseResource($employeeSchedule), 'Employee schedule created successfully.');
+            return $this->sendResponse(
+                new EmployeeScheduleResource($employeeSchedule),
+                'Employee schedule created successfully.'
+            );
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
@@ -209,7 +212,12 @@ class EmployeeScheduleController extends Controller
      *                 type="object",
      *                 @OA\Property(property="work_schedule_id", type="integer", example=123),
      *                 @OA\Property(property="start_date", type="string", format="date", example="2024-01-15"),
-     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-15T12:00:00Z")
+     *                 @OA\Property(
+     *                      property="created_at",
+     *                      type="string",
+     *                      format="date-time",
+     *                      example="2024-01-15T12:00:00Z"
+     *                 )
      *             )
      *         )
      *     ),
