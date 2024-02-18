@@ -30,6 +30,14 @@ class WorkSchedule extends Model
         'sunday_clock_out_time'
     ];
 
+    public const TYPES = [
+        self::STANDARD,
+        self::CUSTOM
+    ];
+
+    public const STANDARD = 'standard';
+    public const CUSTOM = 'custom';
+
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
