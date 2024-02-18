@@ -161,8 +161,11 @@ class EmployeeScheduleController extends Controller
             $employee = $company->getEmployeeById($employeeId);
             $input = $request->validated();
             $company->getWorkScheduleById($request->work_schedule_id);
-            $input['employee_id'] = $employee->id;
-            $employeeSchedule = EmployeeSchedule::firstOrCreate($input);
+            $employeeSchedule = EmployeeSchedule::updateOrCreate([
+                'employee_id' => $employee->id,
+                'work_schedule_id' => $request->work_schedule_id,
+                'start_date' => $request->start_date
+            ], $input);
             $this->forget($company);
             return $this->sendResponse(
                 new EmployeeScheduleResource($employeeSchedule),
