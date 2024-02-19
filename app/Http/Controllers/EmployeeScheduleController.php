@@ -82,8 +82,11 @@ class EmployeeScheduleController extends Controller
     {
         try {
             $company->getEmployeeById($employee->id);
-            $employeeSchedule = $this->applyFilters($request, $employee->employeeSchedules(), [
-                'name'
+            $employeeSchedule = $this->applyFilters($request, $employee->employeeSchedules()->with('workSchedule'), [
+                'status',
+                'start_date',
+                'workSchedule.name',
+                'workSchedule.type'
             ]);
             return $this->sendResponse(
                 EmployeeScheduleResource::collection($employeeSchedule),
