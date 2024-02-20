@@ -16,7 +16,7 @@ class PayrollResource extends BaseResource
             "status" => $this->status,
             "description" => $this->description,
             "pay_date" => $this->pay_date ? $this->formatDate($this->pay_date) : null,
-            "basic_salary" => $this->basic_salary,
+            "basic_salary" => number_format($this->basic_salary, 2),
             "hours_worked" => $this->hours_worked,
             "expected_hours_worked" => $this->expected_hours_worked,
             "overtime_minutes" => $this->overtime_minutes,
