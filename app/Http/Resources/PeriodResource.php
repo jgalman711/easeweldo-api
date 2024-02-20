@@ -16,7 +16,7 @@ class PeriodResource extends BaseResource
             "type" => $this->type,
             "start_date" => $this->start_date,
             "end_date" => $this->end_date,
-            "duration" => $this->formatDate($this->start_date) . " to " . $this->formatDate($this->end_date),
+            "duration" => $this->formatCompactDate($this->start_date) . " - " . $this->formatDate($this->end_date),
             "pay_day" => $this->formatDate($this->salary_date),
             "salary_date" => $this->salary_date,
             "status" => $this->status,

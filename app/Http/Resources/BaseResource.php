@@ -22,4 +22,9 @@ class BaseResource extends JsonResource
     {
         return Carbon::createFromFormat('Y-m-d', $date)->format('M d, Y');
     }
+
+    protected function formatCompactDate(string $date): string
+    {
+        return Carbon::createFromFormat('Y-m-d', $date)->format('M d');
+    }
 }
