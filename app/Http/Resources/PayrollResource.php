@@ -10,6 +10,7 @@ class PayrollResource extends BaseResource
     public function toArray(Request $request): array
     {
         return [
+            "id" => $this->id,
             "employee_full_name" => optional($this->employee)->full_name,
             "period_id" => $this->period_id,
             "type" => $this->type,
