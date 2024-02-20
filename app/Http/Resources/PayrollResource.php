@@ -53,6 +53,7 @@ class PayrollResource extends BaseResource
             "total_taxable_earnings" => number_format($this->total_taxable_earnings, 2),
             "total_contributions" => number_format($this->total_contributions, 2),
             "total_deductions" => number_format($this->total_deductions, 2),
+            "total_deductions_contributions" => number_format($this->total_deductions + $this->total_contributions, 2),
             "gross_income" => number_format($this->gross_income, 2),
             "taxable_income" => number_format($this->taxable_income, 2),
             "net_taxable_income" => number_format($this->net_taxable_income, 2),
