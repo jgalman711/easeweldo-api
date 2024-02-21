@@ -152,7 +152,7 @@ class PayrollResource extends BaseResource
                     'label' => ucfirst($leave['type']) . " Leave ({$leave['date']})",
                     'rate' => 1.0,
                     'hours' => $leave['hours'],
-                    'amount' => number_format($leave['pay'], 2)
+                    // 'amount' => number_format($leave['pay'], 2)
                 ]);
             }
         }
