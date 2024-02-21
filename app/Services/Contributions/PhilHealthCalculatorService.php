@@ -4,7 +4,7 @@ namespace App\Services\Contributions;
 
 use App\Models\PhilHealth;
 
-class PhilHealthService extends ContributionService
+class PhilHealthCalculatorService
 {
     
     public function compute(float $salary): float

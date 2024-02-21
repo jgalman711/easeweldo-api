@@ -4,7 +4,7 @@ namespace App\Services\Contributions;
 
 use App\Models\Pagibig;
 
-class PagIbigService extends ContributionService
+class PagIbigCalculatorService
 {
     protected $employeeShare;
     protected $employerShare;

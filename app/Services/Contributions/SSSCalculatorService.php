@@ -3,9 +3,8 @@
 namespace App\Services\Contributions;
 
 use App\Models\SSS;
-use Illuminate\Support\Facades\Cache;
 
-class SSSService extends ContributionService
+class SSSCalculatorService
 {
     protected $employeeShare;
     protected $employerShare;

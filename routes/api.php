@@ -17,6 +17,7 @@ use App\Http\Controllers\OvertimeRequestController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\Payroll\ActionPayrollController;
 use App\Http\Controllers\Payroll\FinalPayrollController;
+use App\Http\Controllers\Payroll\GeneratePayrollController;
 use App\Http\Controllers\Payroll\LatestPayrollController;
 use App\Http\Controllers\Payroll\NthMonthPayrollController;
 use App\Http\Controllers\Payroll\PayrollController;
@@ -92,6 +93,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('/', [CompanyController::class, 'show']);
             Route::put('/', [CompanyController::class, 'update']);
             Route::apiResource('employees', EmployeeController::class);
+
+            // Payroll Routes
+            Route::post('periods/{period}/generate-payroll', GeneratePayrollController::class);
             Route::get('payrolls/latest', [LatestPayrollController::class, 'show']);
             Route::get('payrolls/{payroll}/download', [ActionPayrollController::class, 'download']);
             Route::post('payrolls/{payroll}/regenerate', [ActionPayrollController::class, 'regenerate']);
@@ -100,6 +104,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::apiResource('special-payrolls', SpecialPayrollController::class);
             Route::apiResource('nth-month-payrolls', NthMonthPayrollController::class);
             Route::apiResource('final-payrolls', FinalPayrollController::class);
+            // End Payroll Routes
+
             Route::apiResource('subscriptions', CompanySubscriptionController::class);
             Route::apiResource('work-schedules', WorkScheduleController::class);
             Route::put('periods/{period}/{action}', [PeriodActionController::class, 'update']);

@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Tax;
-use Illuminate\Support\Facades\Cache;
 
 class TaxService
 {
