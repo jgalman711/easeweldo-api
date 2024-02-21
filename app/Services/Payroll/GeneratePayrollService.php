@@ -51,11 +51,38 @@ class GeneratePayrollService
             'basic_salary' => $salaryComputation->basic_salary / self::CYCLE_DIVISOR[$companySettings->period_cycle],
             'pay_date' => $period->salary_date,
             'period_cycle' => $companySettings->period_cycle,
+            'taxable_earnings' => $salaryComputation->taxable_earnings,
+            'non_taxable_earnings' => $salaryComputation->non_taxable_earnings,
         ];
         $this->payroll = new Payroll($data);
+        $this->calculateLeaves($salaryComputation->hourly_rate);
         $this->calculateContributions($companySettings->period_cycle);
         $this->payroll->save();
         return $this->payroll;
+    }
+
+    protected function calculateLeaves(float $hourlyRate): void
+    {
+        $leaves = $this->payroll->employee->leaves()->where([
+            ['date', '>=', $this->payroll->period->start_date],
+            ['date', '<=', $this->payroll->period->end_date]
+        ])->get();
+
+        $leavePay = 0;
+        if ($leaves->isNotEmpty()) {
+            foreach ($leaves as $leave) {
+                $pay = $leave->hours * $hourlyRate;
+                $transformedLeaves[] = [
+                    'type' => $leave->type,
+                    'date' => $leave->date,
+                    'hours' => $leave->hours,
+                    'pay' => $pay
+                ];
+                $leavePay += $pay;
+            }
+            $this->payroll->leaves = $transformedLeaves;
+            $this->payroll->leaves_pay = $leavePay;
+        }
     }
 
     protected function calculateContributions(string $periodCycle): void
