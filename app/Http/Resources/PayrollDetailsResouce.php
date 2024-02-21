@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 
 class PayrollDetailsResouce extends BaseResource
 {
+    /**
+     * TODO: remove this. Already moved to PayrollResource.php
+     */
     public function toArray(Request $request): array
     {
         return [

@@ -38,7 +38,7 @@ class PayrollController extends Controller
         return $this->sendResponse(PayrollResource::collection($payrolls), 'Payrolls retrieved successfully.');
     }
 
-    public function show(Company $company, Payroll $payroll): JsonResponse
+    public function show(Request $request, Company $company, Payroll $payroll): JsonResponse
     {
         $payrollWithEmployee = $this->remember($company, function () use ($payroll, $company) {
             if (!$company->payrolls->contains($payroll)) {
