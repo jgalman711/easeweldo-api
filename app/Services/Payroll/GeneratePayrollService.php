@@ -8,10 +8,12 @@ use App\Models\Employee;
 use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\Payroll;
+use App\Models\PayrollAttendance;
 use App\Models\Period;
 use App\Repositories\HolidayRepository;
 use App\Services\Contributions\ContributionsService;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class GeneratePayrollService
 {
@@ -42,25 +44,26 @@ class GeneratePayrollService
     public function generate(Company $company, Period $period, Employee $employee): Payroll
     {
         self::init($company, $employee, $period);
-        $data = [
-            'payroll_number' => $this->generatePayrollNumber(),
-            'employee_id' => $employee->id,
-            'period_id' => $period->id,
-            'type' => PayrollEnumerator::TYPE_REGULAR,
-            'status' => PayrollEnumerator::STATUS_TO_PAY,
-            'description' => "Payroll for {$period->salary_date}",
-            'basic_salary' => $this->salaryComputation->basic_salary / self::CYCLE_DIVISOR[$period->type],
-            'pay_date' => $period->salary_date,
-            'period_cycle' => $this->period->type,
-            'taxable_earnings' => $this->salaryComputation->taxable_earnings,
-            'non_taxable_earnings' => $this->salaryComputation->non_taxable_earnings,
-        ];
-        $this->payroll = new Payroll($data);
-        $this->calculateHoliday($period);
-        $this->calculateLeaves();
-        $this->calculateContributions();
-        $this->payroll->save();
-        return $this->payroll;
+        try {
+            DB::beginTransaction();
+            $this->calculateEarnings();
+            $this->calculateHoliday();
+            $this->calculateLeaves();
+            $this->calculateContributions();
+            $this->payroll->save();
+            DB::commit();
+            return $this->payroll;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw new Exception($e);
+        }
+    }
+
+    protected function calculateEarnings(): void
+    {
+        $this->payroll->basic_salary = $this->salaryComputation->basic_salary / self::CYCLE_DIVISOR[$this->period->type];
+        $this->payroll->taxable_earnings = $this->salaryComputation->taxable_earnings;
+        $this->payroll->non_taxable_earnings = $this->salaryComputation->non_taxable_earnings;
     }
 
     protected function calculateHoliday(): void
@@ -87,9 +90,14 @@ class GeneratePayrollService
 
             $daySchedule = $holidayTimesheet->first();
             if (!$daySchedule->clock_in) {
-                // set to payroll_attendance absent
-            } else {
-                // TODO: set worked holiday
+                PayrollAttendance::create([
+                    'payroll_id' => $this->payroll->id,
+                    'period_id' => $this->period->id,
+                    'type' => 'absent',
+                    'date' => $holiday->date,
+                    'hours' => $hours,
+                    'amount' => $hoursAmount,
+                ]);
             }
         }
         $this->payroll->holidays = empty($payrollHolidays) ? null : $payrollHolidays;
@@ -142,8 +150,8 @@ class GeneratePayrollService
         $companyInitials = substr(str_replace(' ', '', strtoupper($this->company->name)), 0, 3);
         $employeeId = str_pad($this->employee->id, 5, '0', STR_PAD_LEFT);
         $periodId = str_pad($this->period->id, 5, '0', STR_PAD_LEFT);
-        $randomNumber = str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
-        return $companyInitials . date('Ymd') . '-' . $periodId . $employeeId . '-' . $randomNumber;
+        $lastNumber = str_pad($this->payroll->id, 7, '0', STR_PAD_LEFT);
+        return $companyInitials . date('Ymd') . '-' . $periodId . $employeeId . '-' . $lastNumber;
     }
 
     private function init(Company $company, Employee $employee, Period $period): void
@@ -154,19 +162,27 @@ class GeneratePayrollService
         $this->salaryComputation = $employee->salaryComputation;
         $this->schedules = $employee->schedules;
         $this->companySettings = $company->setting;
+
+        $this->payroll = Payroll::create([
+            'employee_id' => $employee->id,
+            'period_id' => $period->id,
+            'type' => PayrollEnumerator::TYPE_REGULAR,
+            'status' => PayrollEnumerator::STATUS_TO_PAY,
+            'description' => "Payroll for {$period->salary_date}",
+            'pay_date' => $period->salary_date,
+            'period_cycle' => $period->type
+        ]);
+
         $this->timesheet = $employee->timeRecords()->byRange([
             'dateFrom' => $period->start_date,
             'dateTo' => $period->end_date
         ])->get();
+        $this->payroll->payroll_number = $this->generatePayrollNumber();
 
-        throw_unless(
-            $this->salaryComputation,
-            new Exception("Salary computation data of employee {$employee->fullName} (ID:$employee->id) not found.")
-        );
-
-        throw_unless(
-            $this->companySettings,
-            new Exception("Company settings not available.")
-        );
+        if (!$this->salaryComputation || !$this->companySettings) {
+            $this->payroll->status = PayrollEnumerator::STATUS_FAILED;
+            $this->payroll->save();
+            throw new Exception("Payroll {$this->payroll->id} generation encountered an error.");
+        }
     }
 }

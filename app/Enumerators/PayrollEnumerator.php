@@ -7,12 +7,14 @@ class PayrollEnumerator
     public const STATUSES = [
         self::STATUS_TO_PAY,
         self::STATUS_PAID,
-        self::STATUS_CANCELED
+        self::STATUS_CANCELLED,
+        self::STATUS_FAILED
     ];
 
     public const STATUS_TO_PAY = 'to-pay';
     public const STATUS_PAID = 'paid';
-    public const STATUS_CANCELED = 'canceled';
+    public const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_FAILED = 'failed';
 
     public const TYPE = [
         self::TYPE_REGULAR,
