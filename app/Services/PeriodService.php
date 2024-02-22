@@ -45,7 +45,7 @@ class PeriodService
                     $periodStatus = Period::STATUS_COMPLETED;
                     break;
                 case "cancel":
-                    $payrollStatus = PayrollEnumerator::STATUS_CANCELED;
+                    $payrollStatus = PayrollEnumerator::STATUS_CANCELLED;
                     $periodStatus = Period::STATUS_CANCELLED;
                     break;
                 default:
@@ -74,11 +74,11 @@ class PeriodService
         if ($salaryDate->day > self::MINIMUM_LAST_DAY || $data['end_date']->day > self::MINIMUM_LAST_DAY) {
             $data['end_date'] = Carbon::now()->setDay(25);
         }
-        if ($periodCycle == Period::TYPE_MONTHLY) {
+        if ($periodCycle == Period::SUBTYPE_MONTHLY) {
             $data['start_date'] = $data['end_date']->copy()->subMonth()->addDay();
-        } elseif ($periodCycle == Period::TYPE_SEMI_MONTHLY) {
+        } elseif ($periodCycle == Period::SUBTYPE_SEMI_MONTHLY) {
             $data['start_date'] = $data['end_date']->copy()->subDays(self::SEMI_MONTHLY_DAYS)->addDay();
-        } elseif ($periodCycle == Period::TYPE_WEEKLY) {
+        } elseif ($periodCycle == Period::SUBTYPE_WEEKLY) {
             $data['end_date'] =  $salaryDate->copy()->subDays(7);
             $data['start_date'] =  $data['end_date']->copy()->subDays(6);
         }
@@ -112,15 +112,15 @@ class PeriodService
             $data['company_period_id'] = $companyPreviousPeriod->company_period_id + 1;
             $data['type'] = $companyPreviousPeriod->type;
             $data['status'] = Period::STATUS_PENDING;
-            if ($data['type'] == Period::TYPE_SEMI_MONTHLY) {
+            if ($data['type'] == Period::SUBTYPE_SEMI_MONTHLY) {
                 $data['start_date'] = Carbon::parse($companyPreviousPeriod->end_date)->addDay();
                 $data['end_date'] = Carbon::parse($companyPreviousPeriod->start_date)->addMonth()->subDay();
                 $data['salary_date'] = $data['end_date']->copy()->addDays(self::PAYROLL_ALLOWANCE_DAY);
-            } elseif ($data['type'] == Period::TYPE_MONTHLY) {
+            } elseif ($data['type'] == Period::SUBTYPE_MONTHLY) {
                 $data['start_date'] = $companyPreviousPeriod->start_date->addMonth();
                 $data['end_date'] = $companyPreviousPeriod->end_date->addMonth();
                 $data['salary_date'] = $companyPreviousPeriod->salary_date->addMonth();
-            } elseif ($data['type'] == Period::TYPE_WEEKLY) {
+            } elseif ($data['type'] == Period::SUBTYPE_WEEKLY) {
                 $data['start_date'] = $companyPreviousPeriod->start_date->addDays(7);
                 $data['end_date'] = $companyPreviousPeriod->end_date->addDays(7);
                 $data['salary_date'] = $companyPreviousPeriod->salary_date->addDays(7);
@@ -149,11 +149,11 @@ class PeriodService
 
     public function convertSalaryDayToDate(string|array|int $salaryDay, string $periodCycle): ?DateTime
     {
-        if ($periodCycle == Period::TYPE_MONTHLY) {
+        if ($periodCycle == Period::SUBTYPE_MONTHLY) {
             $this->salaryDate = $this->salaryDayMonthly($salaryDay);
-        } elseif ($periodCycle == Period::TYPE_SEMI_MONTHLY && is_array($salaryDay)) {
+        } elseif ($periodCycle == Period::SUBTYPE_SEMI_MONTHLY && is_array($salaryDay)) {
             $this->salaryDate = $this->salaryDaySemiMonthly($salaryDay);
-        } elseif ($periodCycle == Period::TYPE_WEEKLY) {
+        } elseif ($periodCycle == Period::SUBTYPE_WEEKLY) {
             $this->salaryDate = $this->salaryWeekly($salaryDay);
         }
         if ($this->salaryDate) {
@@ -180,9 +180,9 @@ class PeriodService
             $builder = $company->periods()->where('type', $type);
         } else {
             $builder = $company->periods()->whereIn('type', [
-                Period::TYPE_WEEKLY,
-                Period::TYPE_SEMI_MONTHLY,
-                Period::TYPE_MONTHLY
+                Period::SUBTYPE_WEEKLY,
+                Period::SUBTYPE_SEMI_MONTHLY,
+                Period::SUBTYPE_MONTHLY
             ]);
         }
         return $builder;
