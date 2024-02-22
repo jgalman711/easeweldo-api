@@ -6,11 +6,12 @@ use App\Enumerators\PayrollEnumerator;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Holiday;
+use App\Models\Leave;
 use App\Models\Payroll;
 use App\Models\Period;
+use App\Repositories\HolidayRepository;
 use App\Services\Contributions\ContributionsService;
 use Exception;
-use Illuminate\Support\Facades\Log;
 
 class GeneratePayrollService
 {
@@ -21,6 +22,7 @@ class GeneratePayrollService
     ];
 
     protected $contributionsService;
+    protected $holidayRepository;
 
     private $payroll;
     private $company;
@@ -31,9 +33,10 @@ class GeneratePayrollService
     private $salaryComputation;
     private $companySettings;
 
-    public function __construct(ContributionsService $contributionsService)
+    public function __construct(ContributionsService $contributionsService, HolidayRepository $holidayRepository)
     {
         $this->contributionsService = $contributionsService;
+        $this->holidayRepository = $holidayRepository;
     }
 
     public function generate(Company $company, Period $period, Employee $employee): Payroll
@@ -63,10 +66,7 @@ class GeneratePayrollService
     protected function calculateHoliday(): void
     {
         if (!$this->schedules || !$this->timesheet) { return; }
-        $holidays = Holiday::whereBetween('date', [
-            $this->period->start_date,
-            $this->period->end_date
-        ])->get(); // TODO: refactor to store in cache
+        $holidays = $this->holidayRepository->getHolidaysForPeriod($this->period->start_date, $this->period->end_date);
         if (!$holidays) { return; }
         $payrollHolidays = [];
         $payrollHolidaysWorked = [];
@@ -103,7 +103,8 @@ class GeneratePayrollService
     {
         $leaves = $this->payroll->employee->leaves()->where([
             ['date', '>=', $this->payroll->period->start_date],
-            ['date', '<=', $this->payroll->period->end_date]
+            ['date', '<=', $this->payroll->period->end_date],
+            ['status', '=' , Leave::APPROVED]
         ])->get();
 
         $leavePay = 0;
