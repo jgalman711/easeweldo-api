@@ -18,6 +18,7 @@ use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\Payroll\ActionPayrollController;
 use App\Http\Controllers\Payroll\GeneratePayrollController;
 use App\Http\Controllers\Payroll\PayrollController;
+use App\Http\Controllers\Payroll\RegeneratePayrollController;
 use App\Http\Controllers\Period\PeriodActionController;
 use App\Http\Controllers\Period\PeriodController;
 use App\Http\Controllers\PersonalLoginController;
@@ -89,19 +90,21 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('/', [CompanyController::class, 'show']);
             Route::put('/', [CompanyController::class, 'update']);
             Route::apiResource('employees', EmployeeController::class);
-
-            // Payroll Routes
+            Route::apiResource('periods', PeriodController::class)->except('store');
             Route::post('periods/{period}/generate-payroll', GeneratePayrollController::class);
-            Route::get('payrolls/{payroll}/download', [ActionPayrollController::class, 'download']);
-            Route::post('payrolls/{payroll}/regenerate', [ActionPayrollController::class, 'regenerate']);
-            Route::put('payrolls/{payroll}/{status}', [ActionPayrollController::class, 'update']);
+            
+            // Payroll Routes
+            // Route::get('payrolls/{payroll}/download', [ActionPayrollController::class, 'download']);
+            // Route::post('payrolls/{payroll}/regenerate', [ActionPayrollController::class, 'regenerate']);
+            // Route::put('payrolls/{payroll}/{status}', [ActionPayrollController::class, 'update']);
             Route::apiResource('payrolls', PayrollController::class)->except('delete');
+            Route::post('payrolls/{payroll}/regenerate', RegeneratePayrollController::class);
             // End Payroll Routes
 
             Route::apiResource('subscriptions', CompanySubscriptionController::class);
             Route::apiResource('work-schedules', WorkScheduleController::class);
             Route::put('periods/{period}/{action}', [PeriodActionController::class, 'update']);
-            Route::apiResource('periods', PeriodController::class)->except('store');
+            
             Route::apiResource('reports', ReportController::class)->only('show');
             Route::apiResource('settings', SettingController::class)->only('index', 'store');
             Route::post('timesheet/upload', [TimesheetUploadController::class, 'store']);

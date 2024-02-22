@@ -5,7 +5,6 @@ namespace App\Services\Payroll;
 use App\Enumerators\PayrollEnumerator;
 use App\Models\Company;
 use App\Models\Employee;
-use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\Payroll;
 use App\Models\PayrollAttendance;
@@ -18,22 +17,22 @@ use Illuminate\Support\Facades\DB;
 class GeneratePayrollService
 {
     protected const CYCLE_DIVISOR = [
-        Period::TYPE_WEEKLY => 4,
-        Period::TYPE_SEMI_MONTHLY => 2,
-        Period::TYPE_MONTHLY => 1,
+        Period::SUBTYPE_WEEKLY => 4,
+        Period::SUBTYPE_SEMI_MONTHLY => 2,
+        Period::SUBTYPE_MONTHLY => 1,
     ];
 
     protected $contributionsService;
     protected $holidayRepository;
 
-    private $payroll;
-    private $company;
-    private $employee;
-    private $period;
-    private $schedules;
-    private $timesheet;
-    private $salaryComputation;
-    private $companySettings;
+    protected $payroll;
+    protected $company;
+    protected $employee;
+    protected $period;
+    protected $schedules;
+    protected $timesheet;
+    protected $salaryComputation;
+    protected $companySettings;
 
     public function __construct(ContributionsService $contributionsService, HolidayRepository $holidayRepository)
     {
@@ -61,9 +60,10 @@ class GeneratePayrollService
 
     protected function calculateEarnings(): void
     {
-        $this->payroll->basic_salary = $this->salaryComputation->basic_salary / self::CYCLE_DIVISOR[$this->period->type];
         $this->payroll->taxable_earnings = $this->salaryComputation->taxable_earnings;
         $this->payroll->non_taxable_earnings = $this->salaryComputation->non_taxable_earnings;
+        $this->payroll->basic_salary = $this->salaryComputation->basic_salary /
+            self::CYCLE_DIVISOR[$this->period->subtype];
     }
 
     protected function calculateHoliday(): void
@@ -159,6 +159,10 @@ class GeneratePayrollService
         $this->company = $company;
         $this->employee = $employee;
         $this->period = $period;
+
+        throw_unless($this->period->type == Period::TYPE_REGULAR,
+            new Exception("Unable to auto-generate disbursement type {$this->period->type}")
+        );
         $this->salaryComputation = $employee->salaryComputation;
         $this->schedules = $employee->schedules;
         $this->companySettings = $company->setting;

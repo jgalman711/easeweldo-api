@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Period;
 use App\Services\Payroll\GeneratePayrollService;
 use Exception;
+use Illuminate\Http\JsonResponse;
 
 class GeneratePayrollController extends Controller
 {
@@ -17,7 +18,7 @@ class GeneratePayrollController extends Controller
         $this->generatePayrollService = $generatePayrollService;
     }
 
-    public function __invoke(Company $company, Period $period)
+    public function __invoke(Company $company, Period $period): JsonResponse
     {
         if ($period->status == Period::STATUS_UNINITIALIZED) {
             $period->status = Period::STATUS_PENDING;
