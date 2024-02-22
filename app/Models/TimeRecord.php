@@ -52,19 +52,21 @@ class TimeRecord extends Model
 
     public function scopeByRange(Builder $timeRecordsQuery, array $range): Builder
     {
-        $timeRecordsQuery->where(function ($query) use ($range) {
-            $query->when($range['dateFrom'] ?? false, function ($dateFromQuery) use ($range) {
-                $dateFromQuery->where('expected_clock_out', '>=', $range['dateFrom']);
+        $start = Carbon::parse($range['dateFrom'])->startOfDay();
+        $end = Carbon::parse($range['dateTo'])->endOfDay();
+        $timeRecordsQuery->where(function ($query) use ($range, $start, $end) {
+            $query->when($range['dateFrom'], function ($dateFromQuery) use ($start) {
+                $dateFromQuery->where('expected_clock_in', '>=', $start);
             });
-            $query->when($range['dateTo'] ?? false, function ($dateToQuery) use ($range) {
-                $dateToQuery->where('expected_clock_in', '<=', $range['dateTo']);
+            $query->when($range['dateTo'], function ($dateToQuery) use ($end) {
+                $dateToQuery->where('expected_clock_out', '<=', $end);
             });
-        })->orWhere(function ($query) use ($range) {
-            $query->when($range['dateFrom'] ?? false, function ($dateFromQuery) use ($range) {
-                $dateFromQuery->where('clock_out', '>=', $range['dateFrom']);
+        })->orWhere(function ($query) use ($range, $start, $end) {
+            $query->when($range['dateFrom'], function ($dateFromQuery) use ($start) {
+                $dateFromQuery->where('clock_in', '>=', $start);
             });
-            $query->when($range['dateTo'] ?? false, function ($dateToQuery) use ($range) {
-                $dateToQuery->where('clock_in', '<=', $range['dateTo']);
+            $query->when($range['dateTo'], function ($dateToQuery) use ($end) {
+                $dateToQuery->where('clock_out', '<=', $end);
             });
         });
         return $timeRecordsQuery;
