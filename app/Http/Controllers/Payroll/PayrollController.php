@@ -24,7 +24,6 @@ class PayrollController extends Controller
 
     public function __construct()
     {
-        $this->payrollStrategy = PayrollStrategyFactory::createStrategy(PayrollEnumerator::TYPE_REGULAR);
         $this->setCacheIdentifier('payrolls');
     }
 
@@ -38,7 +37,7 @@ class PayrollController extends Controller
         return $this->sendResponse(PayrollResource::collection($payrolls), 'Payrolls retrieved successfully.');
     }
 
-    public function show(Request $request, Company $company, Payroll $payroll): JsonResponse
+    public function show(Company $company, Payroll $payroll): JsonResponse
     {
         $payrollWithEmployee = $this->remember($company, function () use ($payroll, $company) {
             if (!$company->payrolls->contains($payroll)) {
@@ -47,40 +46,5 @@ class PayrollController extends Controller
             return $payroll->load('employee');
         }, $payroll);
         return $this->sendResponse(new PayrollResource($payrollWithEmployee), 'Payroll retrieved successfully.');
-    }
-    
-    /*
-     * Generate payroll of all the active employees of the company for the given period.
-     */
-    public function store(Request $request, Company $company): JsonResponse
-    {
-        $validator = Validator::make($request->all(), [
-            'period_id' => 'required|exists:periods,company_period_id'
-        ]);
-        if ($validator->fails()) {
-            return $this->sendError($validator->errors());
-        }
-        if (!$company->hasCoreSubscription) {
-            return $this->sendError(ErrorMessagesEnumerator::COMPANY_NOT_SUBSCRIBED);
-        }
-        $period = $company->period($request->period_id);
-        $employees = $this->payrollStrategy->getEmployees($company);
-        list($payrolls, $errors) = $this->payrollStrategy->generate($employees, $period);
-        $this->forget($company);
-        return $this->sendResponse(new PayrollResource([$payrolls, $errors]), 'Payroll created successfully.');
-    }
-
-    public function update(PayrollRequest $request, Company $company, int $payrollId): JsonResponse
-    {
-        $input = $request->validated();
-        try {
-            $payroll = $this->payrollStrategy->update($company, $payrollId, $input);
-            $payroll->makeHidden('employee');
-            $payroll->makeHidden('period');
-            $this->forget($company);
-            return $this->sendResponse(new PayrollResource($payroll), 'Payroll updated successfully.');
-        } catch (Exception $e) {
-            return $this->sendError("Failed to update payroll.", $e->getMessage());
-        }
     }
 }
