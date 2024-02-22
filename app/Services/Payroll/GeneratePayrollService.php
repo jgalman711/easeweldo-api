@@ -10,6 +10,7 @@ use App\Models\Payroll;
 use App\Models\Period;
 use App\Services\Contributions\ContributionsService;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class GeneratePayrollService
 {
@@ -65,22 +66,37 @@ class GeneratePayrollService
         $holidays = Holiday::whereBetween('date', [
             $this->period->start_date,
             $this->period->end_date
-        ])->get(); // can be refactored to store in cache
+        ])->get(); // TODO: refactor to store in cache
         if (!$holidays) { return; }
-
         $payrollHolidays = [];
-        foreach ($holidays as $type => $holiday) {
-            $filteredCollection = $this->timesheet->where(function ($item) use ($holiday) {
+        $payrollHolidaysWorked = [];
+        foreach ($holidays as $holiday) {
+            $holidayTimesheet = $this->timesheet->where(function ($item) use ($holiday) {
                 $expectedClockInDate = substr($item['expected_clock_in'], 0, 10);
-                return $expectedClockInDate == $holiday->date;
+                $clockInDate = substr($item['clock_in'], 0, 10);
+                return $expectedClockInDate == $holiday->date || $clockInDate == $holiday->date;
             });
-            if ($filteredCollection->isEmpty()) { return; }
-            $payrollHolidays[$type] = [
-                'hours' => $this->salaryComputation->working_hours_per_day,
-                'hours_pay' => $this->salaryComputation->working_hours_per_day * $this->salaryComputation->hourly_rate,
+
+            if ($holidayTimesheet->isEmpty()) { continue; }
+            $hours = $this->salaryComputation->working_hours_per_day;
+            $hoursAmount = $this->salaryComputation->working_hours_per_day * $this->salaryComputation->hourly_rate;
+            $payrollHolidays[$holiday->simplified_type] = [
+                'hours' =>  $hours,
+                'hours_pay' => $hoursAmount,
             ];
+
+            $daySchedule = $holidayTimesheet->first();
+            if (!$daySchedule->clock_in) {
+                $absentMinutes = $hours * 60;
+                $absentDeductions = $hoursAmount;
+                $this->payroll->absent_minutes += $absentMinutes;
+                $this->payroll->absent_deductions += $absentDeductions;
+            } else {
+                // TODO: set worked holiday
+            }
         }
-        $this->payroll->holidays = $payrollHolidays;
+        $this->payroll->holidays = empty($payrollHolidays) ? null : $payrollHolidays;
+        $this->payroll->holidays_worked = empty($payrollHolidaysWorked) ? null : $payrollHolidaysWorked;
     }
 
     protected function calculateLeaves(): void
