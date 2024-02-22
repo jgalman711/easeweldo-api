@@ -30,16 +30,6 @@ class Payroll extends Model
         'description',
         'pay_date',
         'basic_salary',
-        'hours_worked',
-        'expected_hours_worked',
-        'overtime_minutes',
-        'overtime_pay',
-        'late_minutes',
-        'late_deductions',
-        'absent_minutes',
-        'absent_deductions',
-        'undertime_minutes',
-        'undertime_deductions',
         'leaves',
         'leaves_pay',
         'taxable_earnings',
@@ -53,11 +43,6 @@ class Payroll extends Model
     ];
 
     protected $appends = [
-        'base_pay',
-        'absent_hours',
-        'late_hours',
-        'overtime_hours',
-        'undertime_hours',
         'regular_holiday_hours_worked',
         'regular_holiday_hours_worked_pay',
         'regular_holiday_hours',
@@ -69,7 +54,6 @@ class Payroll extends Model
         'total_non_taxable_earnings',
         'total_taxable_earnings',
         'total_contributions',
-        'total_deductions',
         'gross_income',
         'taxable_income',
         'net_taxable_income',
@@ -84,14 +68,6 @@ class Payroll extends Model
     public function period(): BelongsTo
     {
         return $this->belongsTo(Period::class);
-    }
-
-    public function getBasePayAttribute(): float
-    {
-        return $this->basic_salary +
-            $this->total_non_taxable_earnings +
-            $this->total_taxable_earnings -
-            $this->absent_deductions;
     }
 
     public function getHolidayPayAttribute(): float
@@ -112,23 +88,16 @@ class Payroll extends Model
         return $this->sss_contributions + $this->philhealth_contributions + $this->pagibig_contributions;
     }
 
-    public function getTotalDeductionsAttribute(): float
-    {
-        return $this->absent_deductions - $this->undertime_deductions - $this->late_deductions;
-    }
-
     public function getGrossIncomeAttribute(): float
     {
         $grossIncome = $this->basic_salary +
-            $this->overtime_pay +
             $this->leaves_pay +
             $this->regular_holiday_hours_worked_pay +
             $this->regular_holiday_hours_pay +
             $this->special_holiday_hours_worked_pay +
             $this->special_holiday_hours_pay +
             $this->total_non_taxable_earnings +
-            $this->total_taxable_earnings -
-            $this->total_deductions;
+            $this->total_taxable_earnings;
         return max(0, $grossIncome);
     }
 
@@ -220,25 +189,5 @@ class Payroll extends Model
     public function getSpecialHolidayHoursWorkedPayAttribute(): float
     {
         return optional(optional($this->holidays)[Holiday::SPECIAL_HOLIDAY])['hours_worked_pay'] ?? 0;
-    }
-
-    public function getOvertimeHoursAttribute(): float
-    {
-        return $this->overtime_minutes / 60;
-    }
-
-    public function getLateHoursAttribute(): float
-    {
-        return $this->late_minutes / 60;
-    }
-
-    public function getAbsentHoursAttribute(): float
-    {
-        return $this->absent_minutes / 60;
-    }
-
-    public function getUndertimeHoursAttribute(): float
-    {
-        return $this->undertime_minutes / 60;
     }
 }

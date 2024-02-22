@@ -87,10 +87,7 @@ class GeneratePayrollService
 
             $daySchedule = $holidayTimesheet->first();
             if (!$daySchedule->clock_in) {
-                $absentMinutes = $hours * 60;
-                $absentDeductions = $hoursAmount;
-                $this->payroll->absent_minutes += $absentMinutes;
-                $this->payroll->absent_deductions += $absentDeductions;
+                // set to payroll_attendance absent
             } else {
                 // TODO: set worked holiday
             }
