@@ -28,10 +28,9 @@ class PeriodResource extends BaseResource
             'total_contributions' => number_format($this->total_contributions, 2),
             'payroll_cost' => number_format($this->payroll_cost, 2),
             'base_pay' => number_format($this->payrolls->sum('base_pay'), 2),
-            'leaves_pay' => $this->payrolls->sum('leaves_pay'),
-            'holiday_pay' => $this->payrolls->sum('holiday_pay'),
-            'overtime_pay' => $this->payrolls->sum('overtime_pay'),
-            'payrolls' => $this->payrolls()->with('employee')->get(),
+            'leaves_pay' => number_format($this->payrolls->sum('leaves_pay'), 2),
+            'holiday_pay' => number_format($this->payrolls->sum('holiday_pay'), 2),
+            'overtime_pay' => number_format($this->payrolls->sum('overtime_pay'), 2),
         ];
     }
 }

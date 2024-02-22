@@ -22,9 +22,7 @@ class PeriodController extends Controller
 
     public function index(Request $request, Company $company): JsonResponse
     {
-        $type = $request->filter['type'] ?? null;
-        $periodsBuilder = $this->periodService->getBuilderPeriodsByType($company, $type);
-        $periods = $this->applyFilters($request, $periodsBuilder);
+        $periods = $this->applyFilters($request, $company->periods()->with('payrolls'));
         return $this->sendResponse(
             PeriodResource::collection($periods),
             'Payroll periods retrieved successfully.'
