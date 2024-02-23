@@ -2,29 +2,26 @@
 
 namespace App\Http\Controllers\Payroll;
 
-use App\Enumerators\ErrorMessagesEnumerator;
-use App\Enumerators\PayrollEnumerator;
-use App\Factories\PayrollStrategyFactory;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Payroll\PayrollRequest;
+use App\Http\Requests\Payroll\UpdateRegularPayrollRequest;
 use App\Http\Resources\PayrollResource;
 use App\Models\Company;
 use App\Models\Payroll;
+use App\Services\Payroll\PayrollService;
 use App\Traits\PayrollFilter;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class PayrollController extends Controller
 {
     use PayrollFilter;
 
-    protected $payrollStrategy;
+    protected $payrollService;
 
-    public function __construct()
+    public function __construct(PayrollService $payrollService)
     {
         $this->setCacheIdentifier('payrolls');
+        $this->payrollService = $payrollService;
     }
 
     public function index(Request $request, Company $company): JsonResponse
@@ -46,5 +43,11 @@ class PayrollController extends Controller
             return $payroll->load('employee');
         }, $payroll);
         return $this->sendResponse(new PayrollResource($payrollWithEmployee), 'Payroll retrieved successfully.');
+    }
+
+    public function update(UpdateRegularPayrollRequest $request, Company $company, Payroll $payroll): JsonResponse
+    {
+        $payroll = $this->payrollService->update($payroll, $request);
+        return $this->sendResponse(new PayrollResource($payroll), 'Payroll updated successfully');
     }
 }

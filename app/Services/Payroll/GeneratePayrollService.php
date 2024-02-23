@@ -73,6 +73,8 @@ class GeneratePayrollService
         if (!$holidays) { return; }
         $payrollHolidays = [];
         $payrollHolidaysWorked = [];
+        $absents = [];
+        $payrollHolidays = [];
         foreach ($holidays as $holiday) {
             $holidayTimesheet = $this->timesheet->where(function ($item) use ($holiday) {
                 $expectedClockInDate = substr($item['expected_clock_in'], 0, 10);
@@ -83,23 +85,25 @@ class GeneratePayrollService
             if ($holidayTimesheet->isEmpty()) { continue; }
             $hours = $this->salaryComputation->working_hours_per_day;
             $hoursAmount = $this->salaryComputation->working_hours_per_day * $this->salaryComputation->hourly_rate;
-            $payrollHolidays[$holiday->simplified_type] = [
+            $payrollHolidays[] = [
+                'date' => $holiday->date,
                 'hours' =>  $hours,
-                'hours_pay' => $hoursAmount,
+                'amount' => $hoursAmount,
+                'type' => $holiday->simplified_type
             ];
 
             $daySchedule = $holidayTimesheet->first();
+
             if (!$daySchedule->clock_in) {
-                PayrollAttendance::create([
-                    'payroll_id' => $this->payroll->id,
-                    'period_id' => $this->period->id,
-                    'type' => 'absent',
+                $absents[] = [
                     'date' => $holiday->date,
                     'hours' => $hours,
                     'amount' => $hoursAmount,
-                ]);
+                    'type' => 'absent'
+                ];
             }
         }
+        $this->payroll->attendance_earnings = empty($absents) ? null : $absents;
         $this->payroll->holidays = empty($payrollHolidays) ? null : $payrollHolidays;
         $this->payroll->holidays_worked = empty($payrollHolidaysWorked) ? null : $payrollHolidaysWorked;
     }

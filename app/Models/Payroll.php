@@ -43,14 +43,6 @@ class Payroll extends Model
     ];
 
     protected $appends = [
-        'regular_holiday_hours_worked',
-        'regular_holiday_hours_worked_pay',
-        'regular_holiday_hours',
-        'regular_holiday_hours_pay',
-        'special_holiday_hours_worked',
-        'special_holiday_hours_worked_pay',
-        'special_holiday_hours',
-        'special_holiday_hours_pay',
         'total_non_taxable_earnings',
         'total_taxable_earnings',
         'total_contributions',

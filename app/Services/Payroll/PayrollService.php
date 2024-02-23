@@ -2,30 +2,13 @@
 
 namespace App\Services\Payroll;
 
-use App\Models\Employee;
+use App\Http\Requests\Payroll\UpdateRegularPayrollRequest;
 use App\Models\Payroll;
-use App\Models\Period;
+use App\Models\PayrollAttendance;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class PayrollService
 {
-    protected $regularPayrollService;
-
-    public function __construct(RegularPayrollService $regularPayrollService)
-    {
-        $this->regularPayrollService = $regularPayrollService;
-    }
-
-    public function generate(Period $period, Employee $employee, array $additional = []): Payroll
-    {
-        return $this->regularPayrollService->generate($period, $employee, $additional);
-    }
-
-    public function update(Payroll $payroll, array $data): Payroll
-    {
-        return $this->regularPayrollService->update($payroll, $data);
-    }
-
     public function download(Payroll $payroll): string
     {
         $pdf = Pdf::loadView('pdf.payslip', [
@@ -35,5 +18,10 @@ class PayrollService
             'company' => optional($payroll->employee)->company
         ]);
         return base64_encode($pdf->output());
+    }
+
+    public function update(Payroll $payroll, UpdateRegularPayrollRequest $request)
+    {
+       
     }
 }
