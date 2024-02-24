@@ -37,7 +37,7 @@ class RegeneratePayrollService extends GeneratePayrollService
         }
     }
 
-    private function init(Payroll $payroll): void
+    protected function init(Payroll $payroll): void
     {
         $this->payroll = $payroll;
         $this->period = $payroll->period;

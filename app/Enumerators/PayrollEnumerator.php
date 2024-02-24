@@ -35,7 +35,13 @@ class PayrollEnumerator
     public const FORMAT_DETAILS = 'details';
 
     public const ATTENDANCE_EARNINGS_TYPES = [
-        self::ABSENT
+        self::ABSENT,
+        self::LATE,
+        self::UNDERTIME,
+        self::OVERTIME
     ];
     public const ABSENT = 'absent';
+    public const LATE = 'late';
+    public const UNDERTIME = 'undertime';
+    public const OVERTIME = 'overtime';
 }

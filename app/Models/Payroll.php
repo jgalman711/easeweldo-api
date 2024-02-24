@@ -13,6 +13,7 @@ class Payroll extends Model
     protected $casts = [
         'attendance_earnings' => 'json',
         'holidays' => 'json',
+        'holidays_worked' => 'json',
         'leaves' => 'json',
         'taxable_earnings' => 'json',
         'non_taxable_earnings' => 'json'
@@ -31,11 +32,12 @@ class Payroll extends Model
         'description',
         'pay_date',
         'basic_salary',
+        'attendance_earnings',
         'leaves',
-        'leaves_pay',
         'taxable_earnings',
         'non_taxable_earnings',
         'holidays',
+        'holidays_worked',
         'sss_contributions',
         'philhealth_contributions',
         'pagibig_contributions',

@@ -9,8 +9,10 @@ use App\Models\Company;
 use App\Models\Payroll;
 use App\Services\Payroll\PayrollService;
 use App\Traits\PayrollFilter;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class PayrollController extends Controller
 {
@@ -47,7 +49,14 @@ class PayrollController extends Controller
 
     public function update(UpdateRegularPayrollRequest $request, Company $company, Payroll $payroll): JsonResponse
     {
-        $payroll = $this->payrollService->update($payroll, $request);
-        return $this->sendResponse(new PayrollResource($payroll), 'Payroll updated successfully');
+        try {
+            $payroll = $this->payrollService->update($payroll, $request);
+            return $this->sendResponse(new PayrollResource($payroll), 'Payroll updated successfully.');
+        } catch (ValidationException $e) {
+            $errors = $e->errors();
+            return $this->sendError('Payroll update failed.', $errors['errors']);
+        } catch (Exception $e) {
+            return $this->sendError('Payroll update failed.', $e->getMessage());
+        }
     }
 }
