@@ -98,8 +98,8 @@ class GeneratePayrollService
                 $absents[] = [
                     'date' => $holiday->date,
                     'hours' => $hours,
-                    'amount' => $hoursAmount,
-                    'type' => 'absent'
+                    'amount' => $hoursAmount * -1,
+                    'type' => PayrollEnumerator::ABSENT
                 ];
             }
         }

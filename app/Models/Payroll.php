@@ -11,6 +11,7 @@ class Payroll extends Model
     use SoftDeletes;
 
     protected $casts = [
+        'attendance_earnings' => 'json',
         'holidays' => 'json',
         'leaves' => 'json',
         'taxable_earnings' => 'json',
@@ -60,19 +61,6 @@ class Payroll extends Model
     public function period(): BelongsTo
     {
         return $this->belongsTo(Period::class);
-    }
-
-    public function getHolidayPayAttribute(): float
-    {
-        return $this->regular_holiday_hours_worked_pay +
-            $this->special_holiday_hours_worked_pay +
-            $this->regular_holiday_hours_pay +
-            $this->special_holiday_hours_pay;
-    }
-
-    public function getLeavesAttribute($value): ?array
-    {
-        return json_decode($value, true);
     }
 
     public function getTotalContributionsAttribute(): float
@@ -141,45 +129,5 @@ class Payroll extends Model
         }
 
         return $totalNonTaxableEarnings;
-    }
-
-    public function getRegularHolidayHoursAttribute(): float
-    {
-        return optional(optional(optional($this->holidays))[Holiday::REGULAR_HOLIDAY])['hours'] ?? 0;
-    }
-
-    public function getRegularHolidayHoursPayAttribute(): float
-    {
-        return optional(optional($this->holidays)[Holiday::REGULAR_HOLIDAY])['hours_pay'] ?? 0;
-    }
-
-    public function getRegularHolidayHoursWorkedAttribute(): float
-    {
-        return optional(optional($this->holidays)[Holiday::REGULAR_HOLIDAY])['hours_worked'] ?? 0;
-    }
-
-    public function getRegularHolidayHoursWorkedPayAttribute(): float
-    {
-        return optional(optional($this->holidays)[Holiday::REGULAR_HOLIDAY])['hours_worked_pay'] ?? 0;
-    }
-
-    public function getSpecialHolidayHoursAttribute(): float
-    {
-        return optional(optional($this->holidays)[Holiday::SPECIAL_HOLIDAY])['hours'] ?? 0;
-    }
-
-    public function getSpecialHolidayHoursPayAttribute(): float
-    {
-        return optional(optional($this->holidays)[Holiday::SPECIAL_HOLIDAY])['hours_pay'] ?? 0;
-    }
-
-    public function getSpecialHolidayHoursWorkedAttribute(): float
-    {
-        return optional(optional($this->holidays)[Holiday::SPECIAL_HOLIDAY])['hours_worked'] ?? 0;
-    }
-
-    public function getSpecialHolidayHoursWorkedPayAttribute(): float
-    {
-        return optional(optional($this->holidays)[Holiday::SPECIAL_HOLIDAY])['hours_worked_pay'] ?? 0;
     }
 }

@@ -33,4 +33,9 @@ class PayrollEnumerator
     ];
     public const FORMAT_DEFAULT = 'default';
     public const FORMAT_DETAILS = 'details';
+
+    public const ATTENDANCE_EARNINGS_TYPES = [
+        self::ABSENT
+    ];
+    public const ABSENT = 'absent';
 }

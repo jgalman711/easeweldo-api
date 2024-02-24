@@ -28,7 +28,7 @@ class UpdateRegularPayrollRequest extends BaseRequest
             "withheld_tax" => self::NULLABLE_NUMERIC,
             "absents" => [new DeductionJsonRule()],
             "lates" => [new DeductionJsonRule()],
-            "undertime" => [new DeductionJsonRule()],
+            "undertimes" => [new DeductionJsonRule()],
         ];
     }
 }
