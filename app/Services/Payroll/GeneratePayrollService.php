@@ -45,6 +45,7 @@ class GeneratePayrollService
         self::init($company, $employee, $period);
         try {
             DB::beginTransaction();
+            $this->calculateBasicSalary();
             $this->calculateEarnings();
             $this->calculateHoliday();
             $this->calculateLeaves();
@@ -62,8 +63,18 @@ class GeneratePayrollService
     {
         $this->payroll->taxable_earnings = $this->salaryComputation->taxable_earnings;
         $this->payroll->non_taxable_earnings = $this->salaryComputation->non_taxable_earnings;
-        $this->payroll->basic_salary = $this->salaryComputation->basic_salary /
-            self::CYCLE_DIVISOR[$this->period->subtype];
+    }
+
+    protected function calculateBasicSalary(): void
+    {
+        if ($this->period->type == PayrollEnumerator::TYPE_REGULAR) {
+            $this->payroll->basic_salary = $this->salaryComputation->basic_salary
+                / self::CYCLE_DIVISOR[$this->period->subtype];
+        } elseif ($this->period->type == Period::TYPE_FINAL) {
+            // calculate final pay
+        } elseif ($this->period->type == Period::TYPE_NTH_MONTH_PAY) {
+            //calculate the earnings all year / 12
+        }
     }
 
     protected function calculateHoliday(): void
