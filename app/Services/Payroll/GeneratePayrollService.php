@@ -164,7 +164,7 @@ class GeneratePayrollService
         $this->employee = $employee;
         $this->period = $period;
 
-        throw_unless($this->period->type == Period::TYPE_REGULAR,
+        throw_if($this->period->type == Period::TYPE_SPECIAL,
             new Exception("Unable to auto-generate disbursement type {$this->period->type}")
         );
         $this->salaryComputation = $employee->salaryComputation;

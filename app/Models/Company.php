@@ -71,11 +71,6 @@ class Company extends Model
         return $this->HasMany(Employee::class);
     }
 
-    public function earnings(): HasOne
-    {
-        return $this->hasOne(Earning::class);
-    }
-
     public function payrolls(): HasManyThrough
     {
         return $this->hasManyThrough(Payroll::class, Employee::class);

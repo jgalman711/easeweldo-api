@@ -15,6 +15,11 @@ class PayrollService
         $this->updatePayrollService = $updatePayrollService;
     }
 
+    public function update(Payroll $payroll, UpdatePayrollRequest $request): Payroll
+    {
+        return $this->updatePayrollService->update($payroll, $request);
+    }
+
     public function download(Payroll $payroll): string
     {
         $pdf = Pdf::loadView('pdf.payslip', [
@@ -24,10 +29,5 @@ class PayrollService
             'company' => optional($payroll->employee)->company
         ]);
         return base64_encode($pdf->output());
-    }
-
-    public function update(Payroll $payroll, UpdatePayrollRequest $request): Payroll
-    {
-        return $this->updatePayrollService->update($payroll, $request);
     }
 }

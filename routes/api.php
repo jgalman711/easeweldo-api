@@ -9,6 +9,7 @@ use App\Http\Controllers\BiometricsController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanySubscriptionController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DisbursementController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeScheduleController;
 use App\Http\Controllers\HolidayController;
@@ -90,6 +91,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::get('/', [CompanyController::class, 'show']);
             Route::put('/', [CompanyController::class, 'update']);
             Route::apiResource('employees', EmployeeController::class);
+            Route::apiResource('disbursements', DisbursementController::class);
             Route::apiResource('periods', PeriodController::class)->except('store');
             Route::post('periods/{period}/generate-payroll', GeneratePayrollController::class);
             

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Traits\Cache;
+use App\Traits\CompanyEmployee;
 use App\Traits\Filter;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -10,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 
 class Controller
 {
-    use AuthorizesRequests, ValidatesRequests, Filter, Cache;
+    use AuthorizesRequests, ValidatesRequests, CompanyEmployee, Filter, Cache;
 
     public const ADMIN_CACHE_KEY = 'admin';
 
