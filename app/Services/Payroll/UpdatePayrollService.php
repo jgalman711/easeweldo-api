@@ -3,7 +3,7 @@
 namespace App\Services\Payroll;
 
 use App\Enumerators\PayrollEnumerator;
-use App\Http\Requests\Payroll\UpdateRegularPayrollRequest as PayrollRequest;
+use App\Http\Requests\Payroll\UpdatePayrollRequest as PayrollRequest;
 use App\Models\Holiday;
 use App\Models\Payroll;
 use Illuminate\Validation\ValidationException;

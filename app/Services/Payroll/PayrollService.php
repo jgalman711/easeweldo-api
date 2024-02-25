@@ -2,7 +2,7 @@
 
 namespace App\Services\Payroll;
 
-use App\Http\Requests\Payroll\UpdateRegularPayrollRequest;
+use App\Http\Requests\Payroll\UpdatePayrollRequest;
 use App\Models\Payroll;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -26,7 +26,7 @@ class PayrollService
         return base64_encode($pdf->output());
     }
 
-    public function update(Payroll $payroll, UpdateRegularPayrollRequest $request): Payroll
+    public function update(Payroll $payroll, UpdatePayrollRequest $request): Payroll
     {
         return $this->updatePayrollService->update($payroll, $request);
     }

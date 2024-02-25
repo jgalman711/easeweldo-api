@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Payroll;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Payroll\UpdateRegularPayrollRequest;
+use App\Http\Requests\Payroll\UpdatePayrollRequest;
 use App\Http\Resources\PayrollResource;
 use App\Models\Company;
 use App\Models\Payroll;
@@ -47,7 +47,7 @@ class PayrollController extends Controller
         return $this->sendResponse(new PayrollResource($payrollWithEmployee), 'Payroll retrieved successfully.');
     }
 
-    public function update(UpdateRegularPayrollRequest $request, Company $company, Payroll $payroll): JsonResponse
+    public function update(UpdatePayrollRequest $request, Company $company, Payroll $payroll): JsonResponse
     {
         try {
             $payroll = $this->payrollService->update($payroll, $request);
