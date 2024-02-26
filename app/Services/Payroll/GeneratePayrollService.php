@@ -59,6 +59,42 @@ class GeneratePayrollService
         }
     }
 
+    protected function init(Company $company, Employee $employee, Period $period): void
+    {
+        $this->company = $company;
+        $this->employee = $employee;
+        $this->period = $period;
+
+        throw_if($this->period->type == Period::TYPE_SPECIAL,
+            new Exception("Unable to auto-generate disbursement type {$this->period->type}")
+        );
+        $this->salaryComputation = $employee->salaryComputation;
+        $this->schedules = $employee->schedules;
+        $this->companySettings = $company->setting;
+
+        $this->payroll = Payroll::create([
+            'employee_id' => $employee->id,
+            'period_id' => $period->id,
+            'type' => PayrollEnumerator::TYPE_REGULAR,
+            'status' => PayrollEnumerator::STATUS_TO_PAY,
+            'description' => $period->description ?? "Payroll for {$period->salary_date}",
+            'pay_date' => $period->salary_date,
+            'period_cycle' => $period->type
+        ]);
+
+        $this->timesheet = $employee->timeRecords()->byRange([
+            'dateFrom' => $period->start_date,
+            'dateTo' => $period->end_date
+        ])->get();
+        $this->payroll->payroll_number = $this->generatePayrollNumber();
+
+        if (!$this->salaryComputation || !$this->companySettings) {
+            $this->payroll->status = PayrollEnumerator::STATUS_FAILED;
+            $this->payroll->save();
+            throw new Exception("Payroll {$this->payroll->id} generation encountered an error.");
+        }
+    }
+
     protected function calculateEarnings(): void
     {
         $this->payroll->taxable_earnings = $this->salaryComputation->taxable_earnings;
@@ -70,10 +106,6 @@ class GeneratePayrollService
         if ($this->period->type == PayrollEnumerator::TYPE_REGULAR) {
             $this->payroll->basic_salary = $this->salaryComputation->basic_salary
                 / self::CYCLE_DIVISOR[$this->period->subtype];
-        } elseif ($this->period->type == Period::TYPE_FINAL) {
-            // calculate final pay
-        } elseif ($this->period->type == Period::TYPE_NTH_MONTH_PAY) {
-            //calculate the earnings all year / 12
         }
     }
 
@@ -167,41 +199,5 @@ class GeneratePayrollService
         $periodId = str_pad($this->period->id, 5, '0', STR_PAD_LEFT);
         $lastNumber = str_pad($this->payroll->id, 7, '0', STR_PAD_LEFT);
         return $companyInitials . date('Ymd') . '-' . $periodId . $employeeId . '-' . $lastNumber;
-    }
-
-    private function init(Company $company, Employee $employee, Period $period): void
-    {
-        $this->company = $company;
-        $this->employee = $employee;
-        $this->period = $period;
-
-        throw_if($this->period->type == Period::TYPE_SPECIAL,
-            new Exception("Unable to auto-generate disbursement type {$this->period->type}")
-        );
-        $this->salaryComputation = $employee->salaryComputation;
-        $this->schedules = $employee->schedules;
-        $this->companySettings = $company->setting;
-
-        $this->payroll = Payroll::create([
-            'employee_id' => $employee->id,
-            'period_id' => $period->id,
-            'type' => PayrollEnumerator::TYPE_REGULAR,
-            'status' => PayrollEnumerator::STATUS_TO_PAY,
-            'description' => "Payroll for {$period->salary_date}",
-            'pay_date' => $period->salary_date,
-            'period_cycle' => $period->type
-        ]);
-
-        $this->timesheet = $employee->timeRecords()->byRange([
-            'dateFrom' => $period->start_date,
-            'dateTo' => $period->end_date
-        ])->get();
-        $this->payroll->payroll_number = $this->generatePayrollNumber();
-
-        if (!$this->salaryComputation || !$this->companySettings) {
-            $this->payroll->status = PayrollEnumerator::STATUS_FAILED;
-            $this->payroll->save();
-            throw new Exception("Payroll {$this->payroll->id} generation encountered an error.");
-        }
     }
 }

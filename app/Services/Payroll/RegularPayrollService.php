@@ -15,6 +15,9 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Collection;
 
+/**
+ * TODO: Delete this file
+ */
 class RegularPayrollService
 {
     public const FREQUENCY_SEMI_MONTHLY = 2;

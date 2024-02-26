@@ -2,16 +2,15 @@
 
 namespace App\Repositories;
 
-use App\Enumerators\DisbursementEnumerator;
 use App\Models\Period;
 
 class DisbursementRepository
 {
-    public function getLatestPaidDisbursement(string $type): Period
+    public function getLatestDisbursement(string $type, string $status): Period
     {
         return Period::where([
             ['type', $type],
-            ['status', DisbursementEnumerator::STATUS_COMPLETED]
+            ['status', $status]
         ])
         ->orderBy('salary_date', 'desc')
         ->first();

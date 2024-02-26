@@ -5,22 +5,14 @@ namespace App\Services\Payroll;
 use App\Enumerators\PayrollEnumerator;
 use App\Models\Payroll;
 use App\Models\Period;
-use App\Repositories\HolidayRepository;
-use App\Services\Contributions\ContributionsService;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
 class RegeneratePayrollService extends GeneratePayrollService
 {
-    public function __construct(ContributionsService $contributionsService, HolidayRepository $holidayRepository)
-    {
-        $this->contributionsService = $contributionsService;
-        $this->holidayRepository = $holidayRepository;
-    }
-
     public function regenerate(Payroll $payroll): Payroll
     {
-        self::init($payroll);
+        self::initByPayroll($payroll);
         try {
             DB::beginTransaction();
             $this->calculateEarnings();
@@ -37,7 +29,7 @@ class RegeneratePayrollService extends GeneratePayrollService
         }
     }
 
-    protected function init(Payroll $payroll): void
+    protected function initByPayroll(Payroll $payroll): void
     {
         $this->payroll = $payroll;
         $this->period = $payroll->period;

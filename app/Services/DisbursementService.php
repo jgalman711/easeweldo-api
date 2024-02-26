@@ -5,14 +5,12 @@ namespace App\Services;
 use App\Enumerators\DisbursementEnumerator;
 use App\Enumerators\PayrollEnumerator;
 use App\Models\Company;
-use App\Models\Employee;
 use App\Models\Payroll;
 use App\Models\Period;
 use App\Repositories\DisbursementRepository;
-use App\Services\Payroll\GeneratePayrollService;
+use App\Services\Payroll\GenerateExtraPayrollService as GeneratePayrollService;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Collection;
 
 class DisbursementService
 {
@@ -35,7 +33,10 @@ class DisbursementService
         $input['status'] = DisbursementEnumerator::STATUS_UNINITIALIZED;
         if ($input['type'] == DisbursementEnumerator::TYPE_FINAL) {
             $latestPaidDisbursement = $this->disbursementRepository
-                ->getLatestPaidDisbursement(DisbursementEnumerator::TYPE_REGULAR);
+                ->getLatestDisbursement(
+                    DisbursementEnumerator::TYPE_REGULAR,
+                    DisbursementEnumerator::STATUS_COMPLETED
+                );
             if ($latestPaidDisbursement) {
                 $endDate = Carbon::parse($latestPaidDisbursement->end_date);
                 $startDate = $endDate->addDay();
@@ -44,7 +45,7 @@ class DisbursementService
                 throw new Exception('No paid regular disbursement.');
             }
         }
-        
+
         $disbursement = Period::create($input);
         $payrolls = [];
         foreach ($employees as $employee) {
