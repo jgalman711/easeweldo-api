@@ -17,11 +17,11 @@ class SettingRequest extends BaseRequest
                 function ($attribute, $value, $fail) {
                     $periodCycle = $this->input('period_cycle');
 
-                    if ($periodCycle === Period::TYPE_SEMI_MONTHLY) {
+                    if ($periodCycle === Period::SUBTYPE_SEMI_MONTHLY) {
                         $this->validateSemiMonthly($value, $fail);
-                    } elseif ($periodCycle === Period::TYPE_MONTHLY) {
+                    } elseif ($periodCycle === Period::SUBTYPE_MONTHLY) {
                         $this->validateMonthly($value, $fail);
-                    } elseif ($periodCycle === Period::TYPE_WEEKLY) {
+                    } elseif ($periodCycle === Period::SUBTYPE_WEEKLY) {
                         $this->validateWeekly($value, $fail);
                     }
                 }

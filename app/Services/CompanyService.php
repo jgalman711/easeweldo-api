@@ -12,7 +12,7 @@ class CompanyService
     {
         Setting::create([
             'company_id' => $company->id,
-            'period_cycle' => Period::TYPE_SEMI_MONTHLY,
+            'period_cycle' => Period::SUBTYPE_SEMI_MONTHLY,
             'salary_day' => [15, 30],
             'grace_period' => 15,
             'minimum_overtime' => 60
