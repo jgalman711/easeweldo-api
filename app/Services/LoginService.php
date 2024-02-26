@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Company;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -24,10 +25,11 @@ class LoginService
                 'employee',
                 'roles'
             ]);
-
+            $company =  $user->companies->first();
+            throw_if($company->status == Company::STATUS_PENDING, new Exception(
+                'Your registration is currently pending review. You will receive an email notification once the review process is complete.'
+            ));
             $user->token = $user->createToken(env('APP_NAME'))->plainTextToken;
-            throw_if($this->isTemporaryPasswordExpired($user), new Exception('Your temporary password has expired.'));
-         
             return $user;
         } else {
             throw new Exception('Incorrect email or password.');

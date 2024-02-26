@@ -36,8 +36,10 @@ class RegistrationService
             $user = User::create($input);
             $company = Company::create([
                 'name' =>  $input['company_name'],
+                'legal_name' => $input['company_name'],
+                'contact_name' => $input['first_name'] . " " . $input['last_name'],
                 'slug' => strtolower(str_replace(' ', '-', $input['company_name'])),
-                'status' => Company::STATUS_TRIAL,
+                'status' => Company::STATUS_PENDING,
                 'email_address' => $user->email_address
             ]);
             $this->employeeService->create($company, [
@@ -47,22 +49,11 @@ class RegistrationService
 
             $role = Role::where('name', self::BUSINESS_ADMIN_ROLE)->first();
             $user->assignRole($role);
-
-            $freeTrialSubscription = Subscription::where('type', Company::STATUS_TRIAL)->first();
-
-            $data = [
-                'subscription_id' => $freeTrialSubscription->id,
-                'months' => self::DEFAULT_TRIAL_PERIOD,
-                'employee_count' => self::DEFAULT_TRIAL_EMPLOYEE_COUNT
-            ];
-
-            $subscription = $this->subscriptionService->subscribe($company, $data);
             DB::commit();
             return [
                 'token' => $user->createToken(env('APP_NAME'))->plainTextToken,
                 'user' => $user,
-                'company' => $company,
-                'subscription' => $subscription
+                'company' => $company
             ];
         } catch (Exception $e) {
             DB::rollBack();

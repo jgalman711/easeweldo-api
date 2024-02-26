@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CompanyRegistrationRequest;
-use App\Http\Resources\BaseResource;
+use App\Http\Resources\RegistrationResource;
 use App\Services\RegistrationService;
 
 class RegisterController extends Controller
@@ -27,6 +27,8 @@ class RegisterController extends Controller
      *             mediaType="application/json",
      *             @OA\Schema(
      *                 @OA\Property(property="company_name", type="string", description="Name of the company", maxLength=255),
+     *                 @OA\Property(property="first_name", type="string", description="First name of the company admin", maxLength=255),
+     *                 @OA\Property(property="last_name", type="string", description="Last name of the company admin", maxLength=255),
      *                 @OA\Property(property="email_address", type="string", format="email", description="User's email address", maxLength=255),
      *                 @OA\Property(property="password", type="string", format="password", description="User's password", minLength=6),
      *                 @OA\Property(property="password_confirmation", type="string", format="password", description="Confirm password"),
@@ -44,7 +46,7 @@ class RegisterController extends Controller
      *                 @OA\Property(
      *                      property="message",
      *                      type="string",
-     *                      example="User and company registered successfully."
+     *                      example="Company registration is pending. An email will be sent after review."
      *                 ),
      *                 @OA\Property(
      *                     property="data",
@@ -61,10 +63,13 @@ class RegisterController extends Controller
      *     @OA\Response(response="429", description="Too Many Requests - reCAPTCHA verification failed"),
      * )
      */
-    public function register(CompanyRegistrationRequest $request)
+    public function __invoke(CompanyRegistrationRequest $request)
     {
         $input = $request->validated();
         $result = $this->registrationService->register($input);
-        return $this->sendResponse(new BaseResource($result), 'Company registered successfully.');
+        return $this->sendResponse(
+            new RegistrationResource($result),
+            'Thank you for registering your company. Your registration is currently pending review. You will receive an email notification once the review process is complete.'
+        );
     }
 }

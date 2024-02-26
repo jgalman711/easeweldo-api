@@ -18,6 +18,8 @@ class CompanyRegistrationRequest extends BaseRequest
                     $query->whereNull('deleted_at');
                 }),
             ],
+            'first_name' => self::REQUIRED_STRING,
+            'last_name' => self::REQUIRED_STRING,
             'email_address' => [
                 'required',
                 'string',
@@ -27,7 +29,7 @@ class CompanyRegistrationRequest extends BaseRequest
                 }),
             ],
             'password' => 'required|confirmed|min:6',
-            'g-recaptcha-response' => ['required', new Recaptcha]
+            // 'g-recaptcha-response' => ['required', new Recaptcha]
         ];
     }
 }
