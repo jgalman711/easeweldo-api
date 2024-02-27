@@ -17,6 +17,19 @@ class CompanyResource extends JsonResource
             "slug" => $this->slug,
             "status" => $this->status,
             "email_address" => $this->email_address,
+            "details" => $this->details,
+            "logo" => $this->logo,
+            "address_line" => $this->address_line,
+            "barangay_town_city_province" => $this->barangay_town_city_province,
+            "mobile_number" => $this->mobile_number,
+            "landline_number" => $this->landline_number,
+            "bank_name" => $this->bank_name,
+            "bank_account_name" => $this->bank_account_name,
+            "bank_account_number" => $this->bank_account_number,
+            "tin" => $this->tin,
+            "sss_number" => $this->sss_number,
+            "philhealth_number" => $this->philhealth_number,
+            "pagibig_number" => $this->pagibig_number,
         ];
     }
 }
