@@ -6,7 +6,7 @@ use App\Http\Requests\DisbursementRequest;
 use App\Models\Company;
 use App\Services\DisbursementService;
 use Exception;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class DisbursementController extends Controller
 {
@@ -17,10 +17,9 @@ class DisbursementController extends Controller
         $this->disbursementService = $disbursementService;
     }
 
-    public function store(DisbursementRequest $request, Company $company)
+    public function store(DisbursementRequest $request, Company $company): JsonResponse
     {
         $input = $request->validated();
-
         if ($request->has('employee_id')) {
             throw_unless(
                 $this->isCompanyEmployees($company, $request->employee_id),

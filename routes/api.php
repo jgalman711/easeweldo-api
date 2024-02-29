@@ -13,6 +13,7 @@ use App\Http\Controllers\DisbursementController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeScheduleController;
 use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\ImportEmployeeController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\OvertimeRequestController;
 use App\Http\Controllers\PaymentMethodController;
@@ -25,7 +26,6 @@ use App\Http\Controllers\PersonalLoginController;
 use App\Http\Controllers\Qr\CompanyQrController;
 use App\Http\Controllers\Qr\EmployeeQrController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\SalaryComputationController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SubscriptionPricesController;
@@ -33,7 +33,6 @@ use App\Http\Controllers\SynchBiometricsController;
 use App\Http\Controllers\TimeCorrectionController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\TimesheetUploadController;
-use App\Http\Controllers\Upload\UploadEmployeeController;
 use App\Http\Controllers\User\UserChangePasswordController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserDashboardController;
@@ -41,6 +40,7 @@ use App\Http\Controllers\User\UserPayrollController;
 use App\Http\Controllers\User\UserTemporaryPasswordResetController;
 use App\Http\Controllers\VerifyTokenController;
 use App\Http\Controllers\WorkScheduleController;
+use App\Models\SalaryComputation;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -85,11 +85,11 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::apiResource('users', UserController::class);
         Route::get('employees', [EmployeeController::class, 'all']);
     });
-    Route::prefix('companies/{company}')->group(function () {
-        Route::group(['middleware' => ['role:super-admin|business-admin']], function () {
-            Route::get('/', [CompanyController::class, 'show']);
-            Route::put('/', [CompanyController::class, 'update']);
+    Route::group(['middleware' => ['role:super-admin|business-admin']], function () {
+        Route::apiResource('companies', CompanyController::class)->only('show', 'update');
+        Route::prefix('companies/{company}')->group(function () {
             Route::apiResource('employees', EmployeeController::class);
+            Route::post('employees/import', ImportEmployeeController::class);
             Route::apiResource('disbursements', DisbursementController::class);
             Route::apiResource('periods', PeriodController::class)->except('store');
             Route::post('periods/{period}/generate-payroll', GeneratePayrollController::class);
@@ -113,38 +113,41 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
                 Route::post('synch-biometrics/{module}/', [SynchBiometricsController::class, 'store']);
                 Route::apiResource('biometrics', BiometricsController::class);
             });
-            Route::post('upload/employees', [UploadEmployeeController::class, 'store']);
             Route::apiResource('overtime-requests', OvertimeRequestController::class);
             Route::get('qrcode', [CompanyQrController::class, 'index']);
             Route::get('dashboard', [DashboardController::class, 'index']);
         });
-
-        /**
-         * @TODO
-         *
-         * Should have the business-admin middleware as well.
-         * Employee of company middleware should also check if the logged in user is the employee.
-         */
-        Route::group(['prefix' => 'employees/{employee}', 'middleware' => ['employee-of-company']], function () {
-            Route::get('/', [EmployeeController::class, 'show']);
-            Route::get('dashboard', [UserDashboardController::class, 'index']);
-            Route::post('clock', [TimeRecordController::class, 'clock']);
-            Route::apiResource('leaves', LeaveController::class);
-            Route::apiResource('time-records', TimeRecordController::class);
-            Route::apiResource('time-corrections', TimeCorrectionController::class);
-            Route::apiResource('work-schedules', EmployeeScheduleController::class);
-            Route::apiResource('payrolls', UserPayrollController::class)->only('index', 'show');
-            Route::get('salary-computation', [SalaryComputationController::class, 'show']);
-            Route::post('salary-computation', [SalaryComputationController::class, 'store']);
-            Route::put('salary-computation', [SalaryComputationController::class, 'update']);
-            Route::delete('salary-computation', [SalaryComputationController::class, 'delete']);
-            Route::put('change-password', [UserChangePasswordController::class, 'update']);
-            Route::put('reset-temporary-password', [UserTemporaryPasswordResetController::class, 'update']);
-
-             // QR - START
-            Route::get('qrcode', [EmployeeQrController::class, 'index']);
-            Route::post('qrcode', [CompanyQrController::class, 'store']);
-            // END
+    });
+    /**
+     * @TODO
+     *
+     * Should have the business-admin middleware as well.
+     * Employee of company middleware should also check if the logged in user is the employee.
+     */
+    Route::group(['prefix' => 'companies/{company}/employees/{employee}', 'middleware' => ['employee-of-company']], function () {
+        Route::get('/', [EmployeeController::class, 'show']);
+        Route::get('dashboard', [UserDashboardController::class, 'index']);
+        Route::post('clock', [TimeRecordController::class, 'clock']);
+        Route::apiResource('leaves', LeaveController::class);
+        Route::apiResource('time-records', TimeRecordController::class);
+        Route::apiResource('time-corrections', TimeCorrectionController::class);
+        Route::apiResource('work-schedules', EmployeeScheduleController::class);
+        Route::apiResource('payrolls', UserPayrollController::class)->only('index', 'show');
+        // Needs refactor
+        Route::controller(SalaryComputation::class)->group(function () {
+            Route::get('salary-computation', 'show');
+            Route::post('salary-computation', 'store');
+            Route::put('salary-computation', 'update');
+            Route::delete('salary-computation', 'delete');
         });
+
+        // Needs deletion
+        Route::put('change-password', [UserChangePasswordController::class, 'update']);
+        Route::put('reset-temporary-password', [UserTemporaryPasswordResetController::class, 'update']);
+
+            // QR - START
+        Route::get('qrcode', [EmployeeQrController::class, 'index']);
+        Route::post('qrcode', [CompanyQrController::class, 'store']);
+        // END
     });
 });
