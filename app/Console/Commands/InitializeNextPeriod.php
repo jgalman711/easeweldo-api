@@ -13,17 +13,24 @@ use Illuminate\Console\Command;
 
 class InitializeNextPeriod extends Command
 {
-    protected $signature = 'app:initialize-next-period';
+    protected $signature = 'app:initialize-next-period {company-slug?}';
 
     protected $description = 'Initialize the next period based from previous period.';
 
     public function handle()
     {
-        $companies = Company::where('status', Company::STATUS_ACTIVE)->get();
+        $companySlug = $this->argument('company-slug');
+        $companiesQuery = Company::query();
+        if ($companySlug) {
+            $companiesQuery->where('slug', $companySlug);
+        } else {
+            $companiesQuery->where('status', Company::STATUS_ACTIVE);
+        }
+        $companies = $companiesQuery->get();
         $periodService = app()->make(PeriodService::class);
         foreach ($companies as $company) {
             try {
-                $period = $periodService->initializeFromPreviousPeriod($company);
+                $periodService->initializeFromPreviousPeriod($company);
                 $this->info("Next period initialized successfully for company {$company->name}.");
             } catch (Exception $e) {
                 $this->error("Unable to initialize next period for company {$company->name}. {$e->getMessage()}");
