@@ -98,7 +98,7 @@ class PeriodService
     public function initializeFromPreviousPeriod(Company $company): ?Period
     {
         $currentDate = Carbon::now()->toDateString();
-        $companyPreviousPeriod = $company->periods()->whereNotNull('type')->latest()->first();
+        $companyPreviousPeriod = $company->periods()->where('type', Period::TYPE_REGULAR)->latest()->first();
         if ($companyPreviousPeriod) {
             $salaryDate = Carbon::parse($companyPreviousPeriod->salary_date);
         } else {
@@ -111,16 +111,17 @@ class PeriodService
             $data['company_id'] = $company->id;
             $data['company_period_id'] = $companyPreviousPeriod->company_period_id + 1;
             $data['type'] = $companyPreviousPeriod->type;
+            $data['subtype'] = $companyPreviousPeriod->subtype;
             $data['status'] = Period::STATUS_PENDING;
-            if ($data['type'] == Period::SUBTYPE_SEMI_MONTHLY) {
+            if ($data['subtype'] == Period::SUBTYPE_SEMI_MONTHLY) {
                 $data['start_date'] = Carbon::parse($companyPreviousPeriod->end_date)->addDay();
                 $data['end_date'] = Carbon::parse($companyPreviousPeriod->start_date)->addMonth()->subDay();
                 $data['salary_date'] = $data['end_date']->copy()->addDays(self::PAYROLL_ALLOWANCE_DAY);
-            } elseif ($data['type'] == Period::SUBTYPE_MONTHLY) {
+            } elseif ($data['subtype'] == Period::SUBTYPE_MONTHLY) {
                 $data['start_date'] = $companyPreviousPeriod->start_date->addMonth();
                 $data['end_date'] = $companyPreviousPeriod->end_date->addMonth();
                 $data['salary_date'] = $companyPreviousPeriod->salary_date->addMonth();
-            } elseif ($data['type'] == Period::SUBTYPE_WEEKLY) {
+            } elseif ($data['subtype'] == Period::SUBTYPE_WEEKLY) {
                 $data['start_date'] = $companyPreviousPeriod->start_date->addDays(7);
                 $data['end_date'] = $companyPreviousPeriod->end_date->addDays(7);
                 $data['salary_date'] = $companyPreviousPeriod->salary_date->addDays(7);
@@ -174,29 +175,18 @@ class PeriodService
         }
     }
 
-    public function getBuilderPeriodsByType(Company $company, string $type = null): Builder
-    {
-        if ($type) {
-            $builder = $company->periods()->where('type', $type);
-        } else {
-            $builder = $company->periods()->whereIn('type', [
-                Period::SUBTYPE_WEEKLY,
-                Period::SUBTYPE_SEMI_MONTHLY,
-                Period::SUBTYPE_MONTHLY
-            ]);
-        }
-        return $builder;
-    }
-
     public function getLatestPeriod(Company $company, string $type = null): Period
     {
-        $periodBuilder = $this->getBuilderPeriodsByType($company, $type);
+        $periodBuilder = $company->periods()->where('type', $type);
         return $periodBuilder->orderBy('id', 'desc')->first();
     }
 
-    public function getCurrentPeriod(Company $company, string $type = null): ?Period
+    /**
+     * TODO: Move this to repository
+     */
+    public function getCurrentPeriod(Company $company): ?Period
     {
-        $periodBuilder = $this->getBuilderPeriodsByType($company, $type);
+        $periodBuilder = $company->periods()->where('type', Period::TYPE_REGULAR);
         $currentDate = now();
         $periodBuilder->where('start_date', '<=', $currentDate)
             ->where('salary_date', '>=', $currentDate);

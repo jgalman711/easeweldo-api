@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\BiometricsController as AdminBiometricsController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BiometricsController;
@@ -62,7 +62,8 @@ Route::get('artisan-migrate', function () {
 });
 
 Route::post('register', RegisterController::class, 'register');
-Route::post('login', [LoginController::class, 'login']);
+Route::post('login', [AuthController::class, 'login']);
+
 Route::post('personal/login', [PersonalLoginController::class, 'login']);
 Route::post('reset-password', [PasswordResetController::class, 'reset'])->name('password.reset');
 Route::get('reset-password', [PasswordResetController::class, 'index']);
@@ -73,7 +74,7 @@ Route::apiResource('/subscription-prices', SubscriptionPricesController::class)-
 Route::apiResource('/payment-methods', PaymentMethodController::class)->only('index');
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
-    Route::post('logout', [LoginController::class, 'logout']);
+    Route::post('logout', [AuthController::class, 'logout']);
     Route::post('verify', [VerifyTokenController::class, 'verify']);
     /**
      * Super Admin Only Route
@@ -85,7 +86,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::apiResource('users', UserController::class);
         Route::get('employees', [EmployeeController::class, 'all']);
     });
-    Route::group(['middleware' => ['role:super-admin|business-admin']], function () {
+    Route::group(['middleware' => ['role:super-admin|business-admin', 'employee-of-company']], function () {
         Route::apiResource('companies', CompanyController::class)->only('show', 'update');
         Route::prefix('companies/{company}')->group(function () {
             Route::apiResource('employees', EmployeeController::class);

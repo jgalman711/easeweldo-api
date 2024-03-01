@@ -23,7 +23,8 @@ class InitializeNextPeriod extends Command
         $periodService = app()->make(PeriodService::class);
         foreach ($companies as $company) {
             try {
-                $periodService->initializeFromPreviousPeriod($company);
+                $period = $periodService->initializeFromPreviousPeriod($company);
+                $this->info("Next period initialized successfully for company {$company->name}.");
             } catch (Exception $e) {
                 $this->error("Unable to initialize next period for company {$company->name}. {$e->getMessage()}");
             }

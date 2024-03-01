@@ -119,6 +119,6 @@ class EmployeeService
 
     private function calculateRetentionRate(int $active, int $terminated)
     {
-        return round((($active - $terminated) / $active) * 100, 2);
+        return $active ? round((($active - $terminated) / $active) * 100, 2) : null;
     }
 }

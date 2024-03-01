@@ -60,6 +60,7 @@ class Period extends Model
         'company_period_id',
         'description',
         'type',
+        'subtype',
         'start_date',
         'end_date',
         'salary_date',
