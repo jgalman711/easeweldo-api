@@ -22,14 +22,14 @@ class CompanyRegistrationRequest extends BaseRequest
             'last_name' => self::REQUIRED_STRING,
             'email_address' => [
                 'required',
-                'string',
+                'email',
                 'max:255',
                 Rule::unique('users', 'email_address')->where(function ($query) {
                     $query->whereNull('deleted_at');
                 }),
             ],
             'password' => 'required|confirmed|min:6',
-            // 'g-recaptcha-response' => ['required', new Recaptcha]
+            'g-recaptcha-response' => ['required', new Recaptcha]
         ];
     }
 }
