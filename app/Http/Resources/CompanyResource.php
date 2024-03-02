@@ -9,6 +9,8 @@ class CompanyResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $uploadsConfig = config('app.uploads');
+        $companyUploadPath = $uploadsConfig['url'] . "/" . $uploadsConfig['company_path'];
         return [
             "id" => $this->id,
             "name" => $this->name,
@@ -18,7 +20,7 @@ class CompanyResource extends JsonResource
             "status" => $this->status,
             "email_address" => $this->email_address,
             "details" => $this->details,
-            "logo" => $this->logo,
+            "logo" => $companyUploadPath . "/" . $this->logo,
             "address_line" => $this->address_line,
             "barangay_town_city_province" => $this->barangay_town_city_province,
             "mobile_number" => $this->mobile_number,

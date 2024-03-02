@@ -9,7 +9,7 @@ use App\Services\CompanyService;
 use App\Traits\Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class CompanyController extends Controller
 {
@@ -227,8 +227,10 @@ class CompanyController extends Controller
         $input['status'] = Company::STATUS_ACTIVE;
         if (isset($input['logo']) && $input['logo']) {
             $filename = time() . '.' . $request->logo->extension();
-            $request->logo->storeAs(Company::ABSOLUTE_STORAGE_PATH, $filename);
-            $input['logo'] = Company::STORAGE_PATH . $filename;
+            $request->logo->storeAs('uploads/companies/images', $filename);
+            $input['logo'] = $filename;
+        } else {
+            unset($input['logo']);
         }
         $company = Company::create($input);
         return $this->sendResponse(new CompanyResource($company), 'Company created successfully.');
@@ -446,11 +448,14 @@ class CompanyController extends Controller
         $input = $request->validated();
         if (isset($input['logo']) && $input['logo']) {
             if ($company->logo) {
-                Storage::delete(self::PUBLIC_PATH . $company->logo);
+                $filePath = public_path('uploads/companies/images/' . $company->logo);
+                if (File::exists($filePath)) {
+                    File::delete($filePath);
+                }
             }
             $filename = time() . '.' . $request->logo->extension();
-            $request->logo->storeAs(Company::ABSOLUTE_STORAGE_PATH, $filename);
-            $input['logo'] = Company::STORAGE_PATH . $filename;
+            $request->logo->storeAs('uploads/companies/images', $filename);
+            $input['logo'] = $filename;
         } else {
             unset($input['logo']);
         }

@@ -30,10 +30,6 @@ class Company extends Model
 
     public const STATUS_TRIAL = 'trial';
 
-    public const ABSOLUTE_STORAGE_PATH = 'public/companies/images';
-
-    public const STORAGE_PATH = 'companies/images/';
-
     protected $fillable = [
         'name',
         'slug',
