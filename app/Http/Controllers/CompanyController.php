@@ -445,16 +445,17 @@ class CompanyController extends Controller
      */
     public function update(CompanyRequest $request, Company $company): JsonResponse
     {
+        $companyUploadPath = config('app.uploads.company_path');
         $input = $request->validated();
         if (isset($input['logo']) && $input['logo']) {
             if ($company->logo) {
-                $filePath = public_path('uploads/companies/images/' . $company->logo);
+                $filePath = public_path("$companyUploadPath/$company->logo");
                 if (File::exists($filePath)) {
                     File::delete($filePath);
                 }
             }
             $filename = time() . '.' . $request->logo->extension();
-            $request->logo->storeAs('uploads/companies/images', $filename);
+            $request->logo->storeAs($companyUploadPath, $filename);
             $input['logo'] = $filename;
         } else {
             unset($input['logo']);

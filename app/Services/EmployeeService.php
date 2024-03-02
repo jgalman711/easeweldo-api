@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class EmployeeService
@@ -32,14 +33,18 @@ class EmployeeService
 
     public function update(Request $request, Company $company, Employee $employee): Employee
     {
+        $employeeUploadPath = config('app.uploads.employee_path');
         $input = $request->all();
         if (isset($input['profile_picture']) && $input['profile_picture']) {
             if ($employee->profile_picture) {
-                Storage::delete(self::PUBLIC_PATH . $employee->profile_picture);
+                $filePath = public_path("$employeeUploadPath/$employee->profile_picture");
+                if (File::exists($filePath)) {
+                    File::delete($filePath);
+                }
             }
             $filename = time() . '.' . $request->profile_picture->extension();
-            $request->profile_picture->storeAs(Employee::ABSOLUTE_STORAGE_PATH, $filename);
-            $input['profile_picture'] = Employee::STORAGE_PATH . $filename;
+            $request->profile_picture->storeAs($employeeUploadPath, $filename);
+            $input['profile_picture'] = $filename;
         } else {
             unset($input['profile_picture']);
         }

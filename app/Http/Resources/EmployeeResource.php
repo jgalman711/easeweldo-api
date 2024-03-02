@@ -9,6 +9,8 @@ class EmployeeResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $uploadsConfig = config('app.uploads');
+        $employeeUploadPath = $uploadsConfig['url'] . "/" . $uploadsConfig['employee_path'];
         $latestSchedule = $this->employeeSchedules()->latest('start_date')->first();
         return [
             "id" => $this->id,
@@ -31,7 +33,7 @@ class EmployeeResource extends JsonResource
             "full_name" => $this->full_name,
             "username" => optional($this->user)->username,
             "email_address" =>  optional($this->user)->email_address,
-            "profile_picture" => $this->profile_picture,
+            "profile_picture" => $employeeUploadPath . "/" . $this->profile_picture,
             "email" => optional($this->user)->email,
             "employment_type" => ucwords($this->employment_type),
             "employment_status" => ucwords($this->employment_status),
