@@ -9,7 +9,6 @@ use App\Models\Setting;
 use Carbon\Carbon;
 use DateTime;
 use Exception;
-use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -67,7 +66,8 @@ class PeriodService
     public function initializeFromSalaryDate(Company $company, DateTime $salaryDate, string $periodCycle): Period
     {
         $salaryDate = Carbon::parse($salaryDate);
-        $data['type'] = $periodCycle;
+        $data['type'] = Period::TYPE_REGULAR;
+        $data['subtype'] = $periodCycle;
         $data['salary_date'] = $salaryDate;
         $data['end_date'] = $salaryDate->copy()->subDays(self::PAYROLL_ALLOWANCE_DAY);
 
