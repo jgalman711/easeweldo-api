@@ -11,10 +11,10 @@ class EmploymentDetailsVerificationController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="/api/companies/{company-slug}/verify/personal-information",
+     *     path="/api/companies/{company-slug}/verify/employee-details",
      *     summary="Verify employee creation employee details",
      *     security={{"bearerAuth":{}}},
-     *     tags={"Companies"},
+     *     tags={"Employee Creation Verification"},
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
@@ -26,7 +26,7 @@ class EmploymentDetailsVerificationController extends Controller
      *         required=true,
      *         @OA\MediaType(
      *             mediaType="application/json",
-     *            @OA\Schema(
+     *              @OA\Schema(
      *                 type="object",
      *                 @OA\Property(property="department", type="string", description="Department of the employee", example="IT"),
      *                 @OA\Property(property="job_title", type="string", description="Job title of the employee", example="Developer"),
