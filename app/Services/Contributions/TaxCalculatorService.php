@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Contributions;
 
 use App\Models\Tax;
 
@@ -21,4 +21,3 @@ class TaxCalculatorService
         return 0;
     }
 }
-

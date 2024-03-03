@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Resources\LoginResource;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class PersonalLoginController extends LoginController
+class PersonalLoginController extends AuthController
 {
     public function login(Request $request): JsonResponse
     {

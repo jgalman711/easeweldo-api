@@ -2,8 +2,6 @@
 
 namespace App\Services\Contributions;
 
-use App\Services\TaxService;
-
 final class ContributionsService
 {
     public $pagIbigCalculatorService;
@@ -15,7 +13,7 @@ final class ContributionsService
         PagIbigCalculatorService $pagIbigCalculatorService,
         PhilHealthCalculatorService $philHealthCalculatorService,
         SSSCalculatorService $sssCalculatorService,
-        TaxService $taxCalculatorService
+        TaxCalculatorService $taxCalculatorService
     ) {
         $this->pagIbigCalculatorService = $pagIbigCalculatorService;
         $this->philHealthCalculatorService = $philHealthCalculatorService;
