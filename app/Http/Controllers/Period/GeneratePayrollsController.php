@@ -9,7 +9,7 @@ use App\Services\Payroll\GeneratePayrollService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 
-class GeneratePayrollController extends Controller
+class GeneratePayrollsController extends Controller
 {
     protected $generatePayrollService;
 

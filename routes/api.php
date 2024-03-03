@@ -21,10 +21,11 @@ use App\Http\Controllers\ImportEmployeeController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\OvertimeRequestController;
 use App\Http\Controllers\PaymentMethodController;
-use App\Http\Controllers\Payroll\GeneratePayrollController;
+use App\Http\Controllers\Payroll\GeneratePayrollsController;
 use App\Http\Controllers\Payroll\PayrollController;
 use App\Http\Controllers\Payroll\RegeneratePayrollController;
-use App\Http\Controllers\Period\PeriodActionController;
+use App\Http\Controllers\Period\CancelPeriodController;
+use App\Http\Controllers\Period\PayPeriodController;
 use App\Http\Controllers\Period\PeriodController;
 use App\Http\Controllers\PersonalLoginController;
 use App\Http\Controllers\Qr\CompanyQrController;
@@ -95,10 +96,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::prefix('companies/{company}')->group(function () {
             Route::apiResource('employees', EmployeeController::class);
             Route::post('employees/import', ImportEmployeeController::class);
-            Route::apiResource('disbursements', DisbursementController::class);
+            Route::apiResource('disbursements', DisbursementController::class)->only('store');
             Route::apiResource('periods', PeriodController::class)->except('store');
-            Route::post('periods/{period}/generate-payroll', GeneratePayrollController::class);
-            
+            Route::post('periods/{period}/generate-payroll', GeneratePayrollsController::class);
+            Route::post('periods/{period}/pay', PayPeriodController::class);
+            Route::post('periods/{period}/cancel', CancelPeriodController::class);
+
             // Payroll Routes
             // Route::get('payrolls/{payroll}/download', [ActionPayrollController::class, 'download']);
             // Route::post('payrolls/{payroll}/regenerate', [ActionPayrollController::class, 'regenerate']);
@@ -109,7 +112,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
             Route::apiResource('subscriptions', CompanySubscriptionController::class);
             Route::apiResource('work-schedules', WorkScheduleController::class);
-            Route::put('periods/{period}/{action}', [PeriodActionController::class, 'update']);
             
             Route::apiResource('reports', ReportController::class)->only('show');
             Route::apiResource('settings', SettingController::class)->only('index', 'store');
