@@ -11,7 +11,7 @@ class PersonalInformationVerificationController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="/api/companies/{company-slug}/verify/personal-information",
+     *     path="/api/companies/{company}/verify/personal-information",
      *     summary="Verify employee creation personal information",
      *     security={{"bearerAuth":{}}},
      *     tags={"Companies"},

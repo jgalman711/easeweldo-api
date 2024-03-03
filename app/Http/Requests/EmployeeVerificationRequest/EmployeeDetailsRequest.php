@@ -3,35 +3,38 @@
 namespace App\Http\Requests\EmployeeVerificationRequest;
 
 use App\Http\Requests\BaseRequest;
-use Illuminate\Validation\Rule;
+use App\Models\Employee;
 
 class EmployeeDetailsRequest extends BaseRequest
 {
     public function rules(): array
     {
         return [
-            'first_name' => self::REQUIRED_STRING,
-            'last_name' => self::REQUIRED_STRING,
-            'email_address' => [
+            'job_title' => self::REQUIRED_STRING,
+            'department' => self::REQUIRED_STRING,
+            'date_of_hire' => self::REQUIRED_DATE,
+            'employment_type' => 'nullable|string|in:' . implode(',', Employee::EMPLOYMENT_TYPE),
+            'employment_status' => 'nullable|string|in:' . implode(',', Employee::EMPLOYMENT_STATUS),
+            'working_days_per_week' => [
                 'nullable',
-                'email',
-                'sometimes',
-                Rule::unique('users', 'email_address')
-                    ->whereNull('deleted_at')
-                    ->ignore(optional($this->employee)->user),
+                'integer',
+                'min:1',
+                function ($attribute, $value, $fail) {
+                    if ($this->input('employment_type') == Employee::FULL_TIME && empty($value)) {
+                        $fail('The working days per week field is required for full-time employees.');
+                    }
+                },
             ],
-            'mobile_number' => [
+            'working_hours_per_day' => [
                 'nullable',
-                'sometimes',
-                Rule::unique('employees', 'mobile_number')
-                    ->whereNull('deleted_at')
-                    ->ignore($this->employee),
-                self::PH_MOBILE_NUMBER
+                'integer',
+                'min:1',
+                function ($attribute, $value, $fail) {
+                    if ($this->input('employment_type') == Employee::FULL_TIME && empty($value)) {
+                        $fail('The working hours per day field is required for full-time employees.');
+                    }
+                },
             ],
-            'date_of_birth' => self::REQUIRED_DATE,
-            'address_line' => self::REQUIRED_STRING,
-            'barangay_town_city_province' => self::REQUIRED_STRING,
-            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
     }
 }
