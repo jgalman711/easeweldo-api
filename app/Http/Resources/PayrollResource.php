@@ -60,7 +60,7 @@ class PayrollResource extends BaseResource
             'status' => ucwords(str_replace("-", " ", $this->status)),
             'pay_date' => $this->pay_date,
             'net_income' => number_format($this->net_income, 2),
-            'type' => optional($this->period)->type,
+            'type' => ucfirst(optional($this->period)->type),
             'period' => optional($this->period)->start_date . " to " . optional($this->period)->end_date,
             'total_deductions' => number_format($this->total_contributions, 2),
             'earnings' => $this->formatEarnings(),
