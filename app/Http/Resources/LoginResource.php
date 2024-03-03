@@ -17,8 +17,8 @@ class LoginResource extends BaseResource
             "email" => $this->email_address,
             "email_address" => $this->email_address,
             "email_verified_at" => $this->email_verified_at,
-            "companies" => $this->companies,
-            "employee" => $this->employee,
+            "companies" => CompanyResource::collection($this->companies),
+            "employee" => new EmployeeResource($this->employee),
             "roles" => $this->roles,
         ];
     }
