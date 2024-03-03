@@ -1,10 +1,10 @@
 <?php
 
-namespace App\StateMachine\Disbursement;
+namespace App\StateMachines\Disbursement;
 
 use App\Exceptions\InvalidStateTransitionException;
 use App\Models\Period as Disbursement;
-use App\StateMachine\Contracts\DisbursementStateContract;
+use App\StateMachines\Contracts\DisbursementStateContract;
 
 class BaseState implements DisbursementStateContract
 {

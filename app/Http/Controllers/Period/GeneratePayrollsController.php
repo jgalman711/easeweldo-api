@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Payroll;
+namespace App\Http\Controllers\Period;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;

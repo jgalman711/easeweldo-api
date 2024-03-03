@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use App\Enumerators\DisbursementEnumerator;
-use App\StateMachine\Contracts\DisbursementStateContract;
-use App\StateMachine\Disbursement\BaseState;
-use App\StateMachine\Disbursement\UninitializedState;
+use App\StateMachines\Contracts\DisbursementStateContract;
+use App\StateMachines\Disbursement\BaseState;
+use App\StateMachines\Disbursement\PendingState;
+use App\StateMachines\Disbursement\UninitializedState;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -84,7 +85,7 @@ class Period extends Model
     {
         return match ($this->status) {
             DisbursementEnumerator::STATUS_UNINITIALIZED => new UninitializedState($this),
-            DisbursementEnumerator::STATUS_PENDING => new UninitializedState($this),
+            DisbursementEnumerator::STATUS_PENDING => new PendingState($this),
             default => new BaseState($this)
         };
     }

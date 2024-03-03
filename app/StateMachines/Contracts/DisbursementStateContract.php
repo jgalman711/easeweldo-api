@@ -1,6 +1,6 @@
 <?php
 
-namespace App\StateMachine\Contracts;
+namespace App\StateMachines\Contracts;
 
 interface DisbursementStateContract
 {

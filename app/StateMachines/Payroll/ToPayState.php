@@ -1,6 +1,6 @@
 <?php
 
-namespace App\StateMachine\Payroll;
+namespace App\StateMachines\Payroll;
 
 use App\Enumerators\PayrollEnumerator;
 

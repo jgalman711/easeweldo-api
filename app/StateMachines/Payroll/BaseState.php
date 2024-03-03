@@ -1,10 +1,10 @@
 <?php
 
-namespace App\StateMachine\Payroll;
+namespace App\StateMachines\Payroll;
 
 use App\Exceptions\InvalidStateTransitionException;
 use App\Models\Payroll;
-use App\StateMachine\Contracts\PayrollStateContract;
+use App\StateMachines\Contracts\PayrollStateContract;
 
 class BaseState implements PayrollStateContract
 {

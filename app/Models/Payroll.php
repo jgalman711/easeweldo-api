@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use App\Enumerators\PayrollEnumerator;
-use App\StateMachine\Contracts\PayrollStateContract;
-use App\StateMachine\Payroll\BaseState;
-use App\StateMachine\Payroll\ToPayState;
+use App\StateMachines\Contracts\PayrollStateContract;
+use App\StateMachines\Payroll\BaseState;
+use App\StateMachines\Payroll\ToPayState;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
