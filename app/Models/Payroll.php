@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\Enumerators\PayrollEnumerator;
+use App\StateMachine\Contracts\PayrollStateContract;
+use App\StateMachine\Payroll\BaseState;
+use App\StateMachine\Payroll\ToPayState;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -54,6 +58,14 @@ class Payroll extends Model
         'net_taxable_income',
         'net_income'
     ];
+
+    public function state(): PayrollStateContract
+    {
+        return match ($this->status) {
+            PayrollEnumerator::STATUS_TO_PAY => new ToPayState($this),
+            default => new BaseState($this)
+        };
+    }
 
     public function employee(): BelongsTo
     {

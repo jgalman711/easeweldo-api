@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Enumerators\DisbursementEnumerator;
+use App\StateMachine\Contracts\DisbursementStateContract;
+use App\StateMachine\Disbursement\BaseState;
+use App\StateMachine\Disbursement\UninitializedState;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -76,6 +79,15 @@ class Period extends Model
         'total_contributions',
         'payroll_cost'
     ];
+
+    public function state(): DisbursementStateContract
+    {
+        return match ($this->status) {
+            DisbursementEnumerator::STATUS_UNINITIALIZED => new UninitializedState($this),
+            DisbursementEnumerator::STATUS_PENDING => new UninitializedState($this),
+            default => new BaseState($this)
+        };
+    }
 
     public function company(): BelongsTo
     {
