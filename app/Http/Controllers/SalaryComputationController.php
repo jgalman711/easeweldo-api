@@ -47,9 +47,10 @@ class SalaryComputationController extends Controller
         $input = $request->validated();
         $salaryComputation = $employee->salaryComputation;
         if (!$salaryComputation) {
-            return $this->sendError('Salary computation not found');
+            $salaryComputation = $this->salaryComputationService->initialize($employee, $input);
+        } else {
+            $salaryComputation->update($input);
         }
-        $salaryComputation->update($input);
         return $this->sendResponse(
             new BaseResource($salaryComputation),
             'Salary computation updated successfully.'

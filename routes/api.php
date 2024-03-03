@@ -31,6 +31,7 @@ use App\Http\Controllers\PersonalLoginController;
 use App\Http\Controllers\Qr\CompanyQrController;
 use App\Http\Controllers\Qr\EmployeeQrController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SalaryComputationController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SubscriptionPricesController;
@@ -45,7 +46,6 @@ use App\Http\Controllers\User\UserPayrollController;
 use App\Http\Controllers\User\UserTemporaryPasswordResetController;
 use App\Http\Controllers\VerifyTokenController;
 use App\Http\Controllers\WorkScheduleController;
-use App\Models\SalaryComputation;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -146,7 +146,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::apiResource('work-schedules', EmployeeScheduleController::class);
         Route::apiResource('payrolls', UserPayrollController::class)->only('index', 'show');
         // Needs refactor
-        Route::controller(SalaryComputation::class)->group(function () {
+        Route::controller(SalaryComputationController::class)->group(function () {
             Route::get('salary-computation', 'show');
             Route::post('salary-computation', 'store');
             Route::put('salary-computation', 'update');
