@@ -88,10 +88,18 @@ class GeneratePayrollService
         ])->get();
         $this->payroll->payroll_number = $this->generatePayrollNumber();
 
-        if (!$this->salaryComputation || !$this->companySettings) {
+        if (!$this->salaryComputation) {
             $this->payroll->status = PayrollEnumerator::STATUS_FAILED;
             $this->payroll->save();
-            throw new Exception("Payroll {$this->payroll->id} generation encountered an error.");
+            throw new Exception(
+                "Payroll {$this->payroll->id} generation encountered an error. No salary data found."
+            );
+        } elseif (!$this->companySettings) {
+            $this->payroll->status = PayrollEnumerator::STATUS_FAILED;
+            $this->payroll->save();
+            throw new Exception(
+                "Payroll {$this->payroll->id} generation encountered an error. No company settings found."
+            );
         }
     }
 

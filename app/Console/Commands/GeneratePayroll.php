@@ -4,11 +4,10 @@ namespace App\Console\Commands;
 
 use App\Models\Employee;
 use App\Models\Period;
-use App\Services\Payroll\PayrollService;
+use App\Services\Payroll\GeneratePayrollService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class GeneratePayroll extends Command
 {
@@ -31,25 +30,19 @@ class GeneratePayroll extends Command
              ->where('status', Period::STATUS_PENDING)
              ->get();
 
-        $payrollService = app()->make(PayrollService::class);
+        $payrollService = app()->make(GeneratePayrollService::class);
         foreach ($periods as $period) {
             $employees = $period->company->employees->where('status', Employee::ACTIVE);
             foreach ($employees as $employee) {
                 try {
-                    DB::beginTransaction();
-                    $payrollService->generate($period, $employee);
-                    $this->info("Processed payroll for employee {$employee->fullName}");
-                    DB::commit();
+                    $payrolls[] = $payrollService->generate($period->company, $period, $employee);
                 } catch (Exception $e) {
-                    $errors[] = [
-                        'employee_id' => $employee->id,
-                        'employee_full_name' => $employee->fullName,
-                        'error' => $e->getMessage()
-                    ];
+                    $period->status = Period::STATUS_FAILED;
+                    $payrolls[] = $e->getMessage();
                     $this->error($e->getMessage());
-                    DB::rollBack();
                 }
             }
+            $period->save();
         }
     }
 }
