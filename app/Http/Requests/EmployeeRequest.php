@@ -9,7 +9,6 @@ class EmployeeRequest extends BaseRequest
 {
     public function rules(): array
     {
-        $employee = Employee::find($this->employee);
         return [
             'user_id' => [
                 'nullable',
@@ -52,7 +51,7 @@ class EmployeeRequest extends BaseRequest
                 'sometimes',
                 Rule::unique('users', 'email_address')
                     ->whereNull('deleted_at')
-                    ->ignore(optional($employee)->user),
+                    ->ignore(optional($this->employee)->user),
             ],
             'mobile_number' => [
                 'nullable',

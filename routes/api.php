@@ -12,6 +12,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DisbursementController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeScheduleController;
+use App\Http\Controllers\EmployeeVerification\PersonalInformationVerificationController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\ImportEmployeeController;
 use App\Http\Controllers\LeaveController;
@@ -115,6 +116,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::apiResource('overtime-requests', OvertimeRequestController::class);
             Route::get('qrcode', [CompanyQrController::class, 'index']);
             Route::get('dashboard', [DashboardController::class, 'index']);
+
+            Route::prefix('verification')->group(function () {
+                Route::post('personal-information', PersonalInformationVerificationController::class);
+            });
         });
     });
     /**

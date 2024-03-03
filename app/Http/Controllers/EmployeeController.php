@@ -7,7 +7,6 @@ use App\Http\Resources\EmployeeResource;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Services\EmployeeService;
-use App\Services\UserEmployeeService;
 use App\Services\UserService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -20,16 +19,12 @@ class EmployeeController extends Controller
 
     protected $userService;
 
-    protected $userEmployeeService;
-
     public function __construct(
         EmployeeService $employeeService,
         UserService $userService,
-        UserEmployeeService $userEmployeeService
     ) {
         $this->employeeService = $employeeService;
         $this->userService = $userService;
-        $this->userEmployeeService = $userEmployeeService;
         $this->setCacheIdentifier('employees');
     }
     
@@ -164,9 +159,8 @@ class EmployeeController extends Controller
      */
     public function store(EmployeeRequest $request, Company $company): JsonResponse
     {
-        $input = $request->validated();
         try {
-            list($employee) = $this->userEmployeeService->create($company, $input);
+            $employee = $this->employeeService->create($request, $company);
             return $this->sendResponse(new EmployeeResource($employee), "Employee created successfully.");
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());

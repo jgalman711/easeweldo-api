@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Requests\EmployeeRequest;
 use App\Models\Company;
 use App\Models\Employee;
 use Carbon\Carbon;
@@ -15,14 +16,25 @@ class EmployeeService
 {
     protected const PUBLIC_PATH = 'public/';
 
-    public function create(Company $company, array $data): Employee
+    protected $employeeUploadPath;
+
+    public function __construct()
+    {
+        $this->employeeUploadPath = config('app.uploads.employee_path');
+    }
+
+    public function create(EmployeeRequest $request, Company $company): Employee
     {
         try {
             DB::beginTransaction();
-            $data['company_id'] = $company->id;
-            $data['company_employee_id'] = $this->generateCompanyEmployeeId($company);
-            $data['status'] = $company->isInSettlementPeriod() ? Employee::PENDING : Employee::ACTIVE;
-            $employee = Employee::create($data);
+            $input = $request->validated();
+            $input['company_id'] = $company->id;
+            $input['company_employee_id'] = $this->generateCompanyEmployeeId($company);
+            $input['status'] = $company->isInSettlementPeriod() ? Employee::PENDING : Employee::ACTIVE;
+            $filename = time() . '.' . $request->profile_picture->extension();
+            $input['profile_picture'] = $filename;
+            $request->profile_picture->storeAs($this->employeeUploadPath, $filename);
+            $employee = Employee::create($input);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
@@ -33,17 +45,16 @@ class EmployeeService
 
     public function update(Request $request, Company $company, Employee $employee): Employee
     {
-        $employeeUploadPath = config('app.uploads.employee_path');
         $input = $request->all();
         if (isset($input['profile_picture']) && $input['profile_picture']) {
             if ($employee->profile_picture) {
-                $filePath = public_path("$employeeUploadPath/$employee->profile_picture");
+                $filePath = public_path("$this->employeeUploadPath/$employee->profile_picture");
                 if (File::exists($filePath)) {
                     File::delete($filePath);
                 }
             }
             $filename = time() . '.' . $request->profile_picture->extension();
-            $request->profile_picture->storeAs($employeeUploadPath, $filename);
+            $request->profile_picture->storeAs($this->employeeUploadPath, $filename);
             $input['profile_picture'] = $filename;
         } else {
             unset($input['profile_picture']);
