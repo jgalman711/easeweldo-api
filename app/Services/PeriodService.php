@@ -206,7 +206,7 @@ class PeriodService
             );
         }
         return [
-            'payroll_cost' => $period->payrollCost,
+            'payroll_cost' => number_format($period->payrollCost, 2),
             'pay_date' => Carbon::parse($period->salary_date)->isoFormat('MMM D'),
             'period' => "Period $period->company_period_id: $formattedStartDate - $formattedEndDate",
             'status' => $period->status,

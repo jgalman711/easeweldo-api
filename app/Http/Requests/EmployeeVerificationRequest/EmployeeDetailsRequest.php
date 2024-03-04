@@ -13,8 +13,8 @@ class EmployeeDetailsRequest extends BaseRequest
             'job_title' => self::REQUIRED_STRING,
             'department' => self::REQUIRED_STRING,
             'date_of_hire' => self::REQUIRED_DATE,
-            'employment_type' => 'nullable|string|in:' . implode(',', Employee::EMPLOYMENT_TYPE),
-            'employment_status' => 'nullable|string|in:' . implode(',', Employee::EMPLOYMENT_STATUS),
+            'employment_type' => 'required|string|in:' . implode(',', Employee::EMPLOYMENT_TYPE),
+            'employment_status' => 'required|string|in:' . implode(',', Employee::EMPLOYMENT_STATUS),
             'working_days_per_week' => [
                 'nullable',
                 'integer',
