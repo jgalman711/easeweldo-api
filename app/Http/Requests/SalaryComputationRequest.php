@@ -9,8 +9,8 @@ class SalaryComputationRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'basic_salary' => 'filled|required_without_all:hourly_rate',
-            'hourly_rate' => 'filled|required_without_all:basic_salary',
+            'basic_salary' => !$this->filled('hourly_rate') ? self::REQUIRED_NUMERIC : '',
+            'hourly_rate' => !$this->filled('basic_salary') ? self::REQUIRED_NUMERIC : '',
             'daily_rate' => self::NUMERIC,
             'taxable_earnings' => [new EarningTypeJsonRule()],
             'non_taxable_earnings' => [new EarningTypeJsonRule()],
@@ -21,9 +21,7 @@ class SalaryComputationRequest extends BaseRequest
             'regular_holiday_rate' => self::REQUIRED_NUMERIC,
             'special_holiday_rate' => self::REQUIRED_NUMERIC,
             'total_sick_leave_hours' => self::REQUIRED_NUMERIC,
-            'total_vacation_leave_hours' => self::REQUIRED_NUMERIC,
-            'available_sick_leave_hours' => self::REQUIRED_NUMERIC,
-            'available_vacation_leave_hours' => self::REQUIRED_NUMERIC,
+            'total_vacation_leave_hours' => self::REQUIRED_NUMERIC
         ];
     }
 }
