@@ -46,6 +46,17 @@ class EmployeeService
         return $employee;
     }
 
+    public function quickCreate(Company $company, array $data): Employee
+    {
+        $data = [
+            ...$data,
+            'company_id' => $company->id,
+            'company_employee_id' => $this->generateCompanyEmployeeId($company),
+            'status' => $company->isInSettlementPeriod() ? Employee::PENDING : Employee::ACTIVE
+        ];
+        return Employee::create($data);
+    }
+
     public function update(Request $request, Company $company, Employee $employee): Employee
     {
         $input = $request->all();
