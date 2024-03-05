@@ -160,6 +160,8 @@ class EmployeeController extends Controller
     public function store(EmployeeRequest $request, Company $company): JsonResponse
     {
         try {
+            $data = $request->validated();
+            $user = $this->userService->create($company, $data);
             $employee = $this->employeeService->create($request, $company);
             return $this->sendResponse(new EmployeeResource($employee), "Employee created successfully.");
         } catch (Exception $e) {

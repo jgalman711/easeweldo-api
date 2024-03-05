@@ -3,10 +3,10 @@
 namespace App\Services;
 
 use App\Mail\UserRegistered;
+use App\Models\Company;
 use App\Models\User;
 use App\Traits\Password;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Models\Role;
@@ -17,9 +17,9 @@ class UserService
 
     private const BUSINESS_ADMIN_ROLE = 'business-admin';
 
-    public function create(Collection $companies, array $userData): User
+    public function create(Company $company, array $userData): User
     {
-        $username = $this->generateUniqueUsername($companies, $userData['first_name'], $userData['last_name']);
+        $username = $this->generateUniqueUsername($company, $userData['first_name'], $userData['last_name']);
         list($temporaryPassword, $temporaryPasswordExpiresAt) = $this->generateTemporaryPassword();
 
         $userData['username'] = $username;
@@ -39,13 +39,11 @@ class UserService
             $role = Role::where('name', self::BUSINESS_ADMIN_ROLE)->first();
             $user->assignRole($role);
         }
-        foreach ($companies as $company) {
-            $company->users()->attach($user->id);
-        }
+        $company->users()->attach($user->id);
         return $user;
     }
 
-    public function generateUniqueUsername(Collection $companies, string $firstName, string $lastName): string
+    public function generateUniqueUsername(Company $company, string $firstName, string $lastName): string
     {
         $firstNameParts = explode(' ', $firstName);
         $firstNameInitial = substr($firstNameParts[0], 0, 1);
@@ -53,17 +51,15 @@ class UserService
             $firstNameInitial .= substr($firstNameParts[1], 0, 1);
         }
         $username = strtolower($firstNameInitial . str_replace(' ', '', strtolower($lastName)));
-        foreach ($companies as $company) {
-            $usernameExistsInCompany = $company->users()->where('username', $username)->exists();
-            if ($usernameExistsInCompany) {
-                $i = 1;
-                $originalUsername = $username;
-                do {
-                    $username = $originalUsername . $i;
-                    $usernameExistsInCompany = $company->users()->where('username', $username)->exists();
-                    $i++;
-                } while ($usernameExistsInCompany);
-            }
+        $usernameExistsInCompany = $company->users()->where('username', $username)->exists();
+        if ($usernameExistsInCompany) {
+            $i = 1;
+            $originalUsername = $username;
+            do {
+                $username = $originalUsername . $i;
+                $usernameExistsInCompany = $company->users()->where('username', $username)->exists();
+                $i++;
+            } while ($usernameExistsInCompany);
         }
         return $username;
     }

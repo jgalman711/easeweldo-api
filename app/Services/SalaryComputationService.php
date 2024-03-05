@@ -19,6 +19,8 @@ class SalaryComputationService
                 * self::MONTHS_12
                 / SalaryComputation::FIVE_DAYS_PER_WEEK_WORK_DAYS;
             $data['hourly_rate'] = $data['daily_rate'] / Employee::EIGHT_HOURS_PER_DAY;
+            $data['available_sick_leave_hours'] = $data['available_sick_leave_hours'] ?? $data['total_sick_leave_hours'];
+            $data['available_vacation_leave_hours'] = $data['available_vacation_leave_hours'] ?? $data['total_vacation_leave_hours'];
         }
         return SalaryComputation::create($data);
     }

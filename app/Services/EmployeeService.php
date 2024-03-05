@@ -10,17 +10,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 
 class EmployeeService
 {
-    protected const PUBLIC_PATH = 'public/';
-
     protected $employeeUploadPath;
+    protected $userService;
 
     public function __construct()
     {
         $this->employeeUploadPath = config('app.uploads.employee_path');
+        $this->userService = app()->make(UserService::class);
     }
 
     public function create(EmployeeRequest $request, Company $company): Employee
@@ -28,12 +27,16 @@ class EmployeeService
         try {
             DB::beginTransaction();
             $input = $request->validated();
+            $user = $this->userService->create($company, $input);
             $input['company_id'] = $company->id;
             $input['company_employee_id'] = $this->generateCompanyEmployeeId($company);
-            $input['status'] = $company->isInSettlementPeriod() ? Employee::PENDING : Employee::ACTIVE;
-            $filename = time() . '.' . $request->profile_picture->extension();
-            $input['profile_picture'] = $filename;
-            $request->profile_picture->storeAs($this->employeeUploadPath, $filename);
+            $input['status'] = Employee::ACTIVE;
+            if (isset($input['profile_picture']) && $input['profile_picture']) {
+                $filename = time() . '.' . $request->profile_picture->extension();
+                $request->profile_picture->storeAs($this->employeeUploadPath, $filename);
+                $input['profile_picture'] = $filename;
+            }
+            $input['user_id'] = $user->id;
             $employee = Employee::create($input);
             DB::commit();
         } catch (\Exception $e) {
