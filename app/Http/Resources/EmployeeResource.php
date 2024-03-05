@@ -33,7 +33,7 @@ class EmployeeResource extends JsonResource
             "full_name" => $this->full_name,
             "username" => optional($this->user)->username,
             "email_address" =>  optional($this->user)->email_address,
-            "profile_picture" => $employeeUploadPath . "/" . $this->profile_picture,
+            "profile_picture" => $this->profile_picture ? $employeeUploadPath . "/" . $this->profile_picture : null,
             "email" => optional($this->user)->email,
             "employment_type" => ucwords($this->employment_type),
             "employment_status" => ucwords($this->employment_status),
