@@ -34,4 +34,14 @@ class PersonalInformationRequest extends BaseRequest
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'required' => 'This field is required.',
+            'date' => 'This date is invalid.',
+            'email_address.unique' => 'Email address already exists.',
+            'mobile_number.unique' => 'Mobile number already exists.',
+        ];
+    }
 }

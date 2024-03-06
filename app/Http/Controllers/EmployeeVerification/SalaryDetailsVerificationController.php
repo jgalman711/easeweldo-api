@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\EmployeeVerification;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\SalaryComputationRequest;
+use App\Http\Requests\EmployeeVerificationRequest\SalaryComputationRequest;
 use App\Models\Company;
 use Illuminate\Http\JsonResponse;
 

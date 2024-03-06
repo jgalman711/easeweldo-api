@@ -37,4 +37,12 @@ class EmployeeDetailsRequest extends BaseRequest
             ],
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'required' => 'This field is required.',
+            'date' => 'This date is invalid.'
+        ];
+    }
 }
