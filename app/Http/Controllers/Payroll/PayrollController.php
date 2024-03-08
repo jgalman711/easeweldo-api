@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Payroll;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\PayrollResource;
+use App\Http\Resources\Payroll\BasePayrollResource;
 use App\Models\Company;
 use App\Models\Payroll;
 use App\Traits\PayrollFilter;
@@ -26,7 +26,7 @@ class PayrollController extends Controller
             'employee.first_name',
             'employee.last_name'
         ]);
-        return $this->sendResponse(PayrollResource::collection($payrolls), 'Payrolls retrieved successfully.');
+        return $this->sendResponse(BasePayrollResource::collection($payrolls), 'Payrolls retrieved successfully.');
     }
 
     public function show(Company $company, Payroll $payroll): JsonResponse
@@ -37,6 +37,6 @@ class PayrollController extends Controller
             }
             return $payroll->load('employee');
         }, $payroll);
-        return $this->sendResponse(new PayrollResource($payrollWithEmployee), 'Payroll retrieved successfully.');
+        return $this->sendResponse(new BasePayrollResource($payrollWithEmployee), 'Payroll retrieved successfully.');
     }
 }
