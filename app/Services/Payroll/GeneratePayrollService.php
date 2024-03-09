@@ -136,21 +136,19 @@ class GeneratePayrollService
             if ($holidayTimesheet->isEmpty()) { continue; }
             $hours = $this->salaryComputation->working_hours_per_day;
             $hoursAmount = $this->salaryComputation->working_hours_per_day * $this->salaryComputation->hourly_rate;
-            $payrollHolidays[] = [
+            $payrollHolidays[$holiday->simplified_type][] = [
                 'date' => $holiday->date,
                 'hours' =>  $hours,
                 'amount' => $hoursAmount,
-                'type' => $holiday->simplified_type
             ];
 
             $daySchedule = $holidayTimesheet->first();
 
             if (!$daySchedule->clock_in) {
-                $absents[] = [
+                $absents[PayrollEnumerator::ABSENT][] = [
                     'date' => $holiday->date,
                     'hours' => $hours,
                     'amount' => $hoursAmount * -1,
-                    'type' => PayrollEnumerator::ABSENT
                 ];
             }
         }
@@ -171,8 +169,7 @@ class GeneratePayrollService
         if ($leaves->isNotEmpty()) {
             foreach ($leaves as $leave) {
                 $pay = $leave->hours * $this->salaryComputation->hourly_rate;
-                $transformedLeaves[] = [
-                    'type' => $leave->type,
+                $transformedLeaves[$leave->type][] = [
                     'date' => $leave->date,
                     'hours' => $leave->hours,
                     'pay' => $pay
