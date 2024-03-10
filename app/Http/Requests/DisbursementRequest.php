@@ -15,16 +15,15 @@ class DisbursementRequest extends BaseRequest
             'employee_id' => self::NULLABLE_ARRAY,
             'description' => self::REQUIRED_STRING,
             'remarks' => self::NULLABLE_STRING,
+            'salary_date' => 'required|date|after_or_equal:today'
         ];
         if ($type == DisbursementEnumerator::TYPE_NTH_MONTH_PAY) {
             $rules = [
                 ...$rules,
-                'salary_date' => 'required|date|after_or_equal:today'
             ];
         } elseif ($type == DisbursementEnumerator::TYPE_SPECIAL) {
             $rules = [
                 ...$rules,
-                'salary_date' => 'required|date|after_or_equal:today',
                 'pay_amount' => self::REQUIRED_NUMERIC
             ];
         }

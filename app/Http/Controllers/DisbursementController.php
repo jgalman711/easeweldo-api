@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\DisbursementRequest;
-use App\Http\Resources\Payroll\BasePayrollResource;
 use App\Models\Company;
-use App\Models\Payroll;
 use App\Services\DisbursementService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -29,6 +27,6 @@ class DisbursementController extends Controller
             );
         }
         $disbursement = $this->disbursementService->create($company, $input);
-        return $this->sendResponse(BasePayrollResource::collection($disbursement), 'Payrolls generated successfully.');
+        return $this->sendResponse($disbursement, 'Payrolls generated successfully.');
     }
 }

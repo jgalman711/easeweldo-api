@@ -7,7 +7,6 @@ use App\Models\Company;
 use App\Models\Employee;
 use App\Models\Leave;
 use App\Models\Payroll;
-use App\Models\PayrollAttendance;
 use App\Models\Period;
 use App\Repositories\HolidayRepository;
 use App\Services\Contributions\ContributionsService;

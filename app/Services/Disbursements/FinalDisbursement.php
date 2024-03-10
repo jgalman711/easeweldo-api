@@ -5,6 +5,7 @@ namespace App\Services\Disbursements;
 use App\Models\Employee;
 use App\Models\Payroll;
 use App\Models\Period;
+use App\Services\Payroll\GeneratePayrollService;
 use Carbon\Carbon;
 
 class FinalDisbursement extends BaseDisbursement
@@ -14,16 +15,17 @@ class FinalDisbursement extends BaseDisbursement
         $now = Carbon::now();
         $startOfYear = $now->copy()->startOfYear()->format('Y-m-d');
         $endOfYear = $now->copy()->endOfYear()->format('Y-m-d');
-        $input = [
+        $this->input = [
             ...$this->input,
             'start_date' => $startOfYear,
             'end_date' => $endOfYear
         ];
-        return Period::create($input);
+        return Period::create($this->input);
     }
 
-    public function generatePayroll(Period $period, Employee $employee): Payroll
+    public function generatePayroll(Period $disbursement, Employee $employee): Payroll
     {
-        dd($period);
+        $payrollService = app()->make(GeneratePayrollService::class);
+        return $payrollService->generate($employee->company, $disbursement, $employee);
     }
 }

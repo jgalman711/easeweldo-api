@@ -18,8 +18,6 @@ class EditPayrollResource extends BaseResource
             'description' => $this->description,
             'pay_date' => $this->pay_date,
             'basic_salary' => $this->basic_salary,
-            'id' => $this->id,
-            'id' => $this->id,
             'regularEarnings' => self::getRegularEarnings()
         ];
     }
@@ -28,7 +26,6 @@ class EditPayrollResource extends BaseResource
     {
         $regularEarnings = [];
         $regularEarnings['overtime'] = $this->attendance_earnings['overtime'] ?? null;
-        $regularEarnings['regularHoliday'] = $this->holidays['regular'] ?? null;
         $regularEarnings['regularHolidayWorked'] = $this->holidays['regularWorked'] ?? null;
         $regularEarnings['specialHoliday'] = $this->holidays['special'] ?? null;
         $regularEarnings['specialHolidayWorked'] = $this->holidays['specialWorked'] ?? null;
