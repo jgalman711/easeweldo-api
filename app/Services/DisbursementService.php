@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enumerators\DisbursementEnumerator;
+use App\Enumerators\PayrollEnumerator;
 use App\Models\Company;
 use App\Models\Period;
 use App\Services\Disbursements\DisbursementFactory;
@@ -23,7 +24,7 @@ class DisbursementService
         $input['company_id'] = $company->id;
         $input['status'] = DisbursementEnumerator::STATUS_UNINITIALIZED;
         $disbursementGenerator = $this->disbursementFactory->initialize($input);
-        $disbursement = $disbursementGenerator->create($input);
+        $disbursement = $disbursementGenerator->create();
         foreach ($employees as $employee) {
             try {
                 $payrolls[] = $disbursementGenerator->generatePayroll($disbursement, $employee);
