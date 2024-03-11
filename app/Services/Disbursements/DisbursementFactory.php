@@ -8,18 +8,11 @@ class DisbursementFactory
 {
     public function initialize(array $input)
     {
-        switch ($input['type']) {
-            case DisbursementEnumerator::TYPE_SPECIAL:
-                return new SpecialDisbursement($input);
-                break;
-            case DisbursementEnumerator::TYPE_NTH_MONTH_PAY:
-                return new AnnualExtraDisbursement($input);
-                break;
-            case DisbursementEnumerator::TYPE_FINAL:
-                return new FinalDisbursement($input);
-                break;
-            default:
-                throw new \Exception("Invalid period type");
-        }
+        return match ($input['type']) {
+            DisbursementEnumerator::TYPE_SPECIAL => new SpecialDisbursement($input),
+            DisbursementEnumerator::TYPE_NTH_MONTH_PAY => new AnnualExtraDisbursement($input),
+            DisbursementEnumerator::TYPE_FINAL => new FinalDisbursement($input),
+            default => throw new \Exception("Invalid period type")
+        };
     }
 }

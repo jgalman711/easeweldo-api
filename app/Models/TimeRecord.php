@@ -61,13 +61,6 @@ class TimeRecord extends Model
             $query->when($range['dateTo'], function ($dateToQuery) use ($end) {
                 $dateToQuery->where('expected_clock_out', '<=', $end);
             });
-        })->orWhere(function ($query) use ($range, $start, $end) {
-            $query->when($range['dateFrom'], function ($dateFromQuery) use ($start) {
-                $dateFromQuery->where('clock_in', '>=', $start);
-            });
-            $query->when($range['dateTo'], function ($dateToQuery) use ($end) {
-                $dateToQuery->where('clock_out', '<=', $end);
-            });
         });
         return $timeRecordsQuery;
     }

@@ -74,17 +74,13 @@ class GeneratePayrollService
         $this->payroll = Payroll::create([
             'employee_id' => $employee->id,
             'period_id' => $period->id,
-            'type' => PayrollEnumerator::TYPE_REGULAR,
+            'type' => $period->type,
             'status' => PayrollEnumerator::STATUS_TO_PAY,
             'description' => $period->description ?? "Payroll for {$period->salary_date}",
             'pay_date' => $period->salary_date,
             'period_cycle' => $period->type
         ]);
 
-        $this->timesheet = $employee->timeRecords()->byRange([
-            'dateFrom' => $period->start_date,
-            'dateTo' => $period->end_date
-        ])->get();
         $this->payroll->payroll_number = $this->generatePayrollNumber();
 
         if (!$this->salaryComputation) {
@@ -100,6 +96,14 @@ class GeneratePayrollService
                 "Payroll {$this->payroll->id} generation encountered an error. No company settings found."
             );
         }
+
+        $this->salaryComputation->is_clock_required = true;
+        if ($this->salaryComputation->is_clock_required) {
+            $this->timesheet = $employee->timeRecords()->byRange([
+                'dateFrom' => $period->start_date,
+                'dateTo' => $period->end_date
+            ])->get();
+        }
     }
 
     protected function calculateEarnings(): void
@@ -110,9 +114,18 @@ class GeneratePayrollService
 
     protected function calculateBasicSalary(): void
     {
-        if ($this->period->type == PayrollEnumerator::TYPE_REGULAR) {
-            $this->payroll->basic_salary = $this->salaryComputation->basic_salary
-                / self::CYCLE_DIVISOR[$this->period->subtype];
+        if ($this->period->type == PayrollEnumerator::TYPE_FINAL ||
+            $this->period->type == PayrollEnumerator::TYPE_REGULAR
+        ) {
+            if ($this->salaryComputation->is_clock_required) {
+                $daysCount = $this->timesheet->count();
+                dd($daysCount);
+            } else {
+                $this->payroll->basic_salary = $this->salaryComputation->basic_salary
+                    / self::CYCLE_DIVISOR[$this->period->subtype];
+            }
+        } else {
+            throw new Exception("Invalid payroll type. Please contact the Easeweldo administrator.");
         }
     }
 
