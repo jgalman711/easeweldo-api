@@ -67,6 +67,12 @@ class GeneratePayrollService
         $this->employee = $employee;
         $this->period = $period;
 
+        if (!$this->period->start_date) {
+            $this->period->start_date = $employee->date_of_hire
+                ? Carbon::parse($employee->date_of_hire)
+                : $employee->created_at;
+        }
+
         throw_if($this->period->type == Period::TYPE_SPECIAL,
             new InvalidPayrollGenerationException("Unable to auto-generate disbursement type {$this->period->type}")
         );
@@ -227,8 +233,8 @@ class GeneratePayrollService
     protected function calculateLeaves(): void
     {
         $leaves = $this->payroll->employee->leaves()->where([
-            ['date', '>=', $this->payroll->period->start_date],
-            ['date', '<=', $this->payroll->period->end_date],
+            ['date', '>=', $this->period->start_date],
+            ['date', '<=', $this->period->end_date],
             ['status', '=' , Leave::APPROVED]
         ])->get();
 

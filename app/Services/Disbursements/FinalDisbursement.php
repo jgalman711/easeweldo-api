@@ -2,9 +2,11 @@
 
 namespace App\Services\Disbursements;
 
+use App\Enumerators\PayrollEnumerator;
 use App\Models\Employee;
 use App\Models\Payroll;
 use App\Models\Period;
+use App\Repositories\DisbursementRepository;
 use App\Services\Payroll\GeneratePayrollService;
 use Carbon\Carbon;
 
@@ -12,13 +14,16 @@ class FinalDisbursement extends BaseDisbursement
 {
     public function create(): Period
     {
-        $now = Carbon::now();
-        $startOfYear = $now->copy()->startOfYear()->format('Y-m-d');
-        $endOfYear = $now->copy()->endOfYear()->format('Y-m-d');
+        $disbursementRepository = app()->make(DisbursementRepository::class);
+        $disbursement =$disbursementRepository->getLatestDisbursement(
+            PayrollEnumerator::TYPE_REGULAR,
+            PayrollEnumerator::STATUS_PAID
+        );
+        $startDate = $disbursement ? Carbon::parse($disbursement->end_date)->addDay() : null;
         $this->input = [
             ...$this->input,
-            'start_date' => $startOfYear,
-            'end_date' => $endOfYear
+            'start_date' => $startDate,
+            'end_date' => $this->input['salary_date']
         ];
         return Period::create($this->input);
     }

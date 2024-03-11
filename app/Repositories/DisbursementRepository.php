@@ -6,7 +6,7 @@ use App\Models\Period;
 
 class DisbursementRepository
 {
-    public function getLatestDisbursement(string $type, string $status): Period
+    public function getLatestDisbursement(string $type, string $status): ?Period
     {
         return Period::where([
             ['type', $type],
