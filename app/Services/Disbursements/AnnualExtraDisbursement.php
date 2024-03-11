@@ -28,11 +28,14 @@ class AnnualExtraDisbursement extends BaseDisbursement
     {
         $payrollRepository = app()->make(PayrollRepository::class);
         $payrolls = $payrollRepository->getEmployeePayrollsByDateRange($employee->id, [
-            'start_date' => $disbursement->start_date,
-            'end_date' => $disbursement->end_date
+            $disbursement->start_date,
+            $disbursement->end_date
         ]);
 
-        $totalAmount = $payrolls->sum('net_income');
+        $totalAmount = 0;
+        foreach($payrolls as $payroll) {
+            $totalAmount += $payroll->net_income;
+        }
         return Payroll::create([
             ...$this->input,
             'employee_id' => $employee->id,
