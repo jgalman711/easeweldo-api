@@ -23,10 +23,6 @@ class Payroll extends Model
         'non_taxable_earnings' => 'json'
     ];
 
-    protected $hidden = [
-        'holidays'
-    ];
-
     protected $fillable = [
         'payroll_number',
         'employee_id',
@@ -50,6 +46,8 @@ class Payroll extends Model
     ];
 
     protected $appends = [
+        'total_attendance_earnings',
+        'total_attendance_deductions',
         'total_non_taxable_earnings',
         'total_taxable_earnings',
         'total_contributions',
@@ -77,6 +75,35 @@ class Payroll extends Model
         return $this->belongsTo(Period::class);
     }
 
+    public function getTotalAttendanceDeductionsAttribute()
+    {
+        $totalDeductions = 0;
+        if ($this->attendance_earnings) {
+            foreach ($this->attendance_earnings as $type => $deductions) {
+                if ($type == PayrollEnumerator::OVERTIME) { continue; }
+                foreach ($deductions as $deduction) {
+                    $totalDeductions += $deduction['amount'];
+                }
+            }
+        }
+        return round($totalDeductions, 2);
+    }
+
+    public function getTotalAttendanceEarningsAttribute()
+    {
+        $totalEarnings = 0;
+        if ($this->attendance_earnings) {
+            foreach ($this->attendance_earnings as $type => $earnings) {
+                if ($type !== PayrollEnumerator::OVERTIME) { continue; }
+                foreach ($earnings as $earning) {
+                    $totalEarnings += $earning['amount'];
+                }
+            }
+        }
+        return round($totalEarnings, 2);
+    }
+
+
     public function getTotalContributionsAttribute(): float
     {
         return $this->sss_contributions + $this->philhealth_contributions + $this->pagibig_contributions;
@@ -97,18 +124,22 @@ class Payroll extends Model
 
     public function getTaxableIncomeAttribute(): float
     {
-        $taxableIncome = $this->gross_income - $this->total_contributions - $this->total_non_taxable_earnings;
-        return $taxableIncome >= 0 ? $taxableIncome : 0;
+        $taxableIncome = $this->gross_income -
+            $this->total_contributions -
+            $this->total_non_taxable_earnings +
+            $this->total_attendance_earnings +
+            $this->total_attendance_deductions;
+        return $taxableIncome >= 0 ? round($taxableIncome, 2) : 0;
     }
 
     public function getNetTaxableIncomeAttribute(): float
     {
-        return $this->taxable_income - $this->withheld_tax;
+        return round($this->taxable_income - $this->withheld_tax, 2);
     }
 
     public function getNetIncomeAttribute(): float
     {
-        return $this->net_taxable_income + $this->total_non_taxable_earnings;
+        return round($this->net_taxable_income + $this->total_non_taxable_earnings, 2);
     }
 
     public function getTotalTaxableEarningsAttribute(): float
