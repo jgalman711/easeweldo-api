@@ -11,7 +11,7 @@ class BasePayrollResource extends BaseResource
     {
         $resource = match($request->format)  {
             'edit' => new EditPayrollResource($this->resource),
-            'details' => new DetailsPayrollRequest($this->resource),
+            'details' => new DetailsPayrollResource($this->resource),
             default => new DefaultPayrollResource($this->resource)
         };
         return $resource->toArray($request);

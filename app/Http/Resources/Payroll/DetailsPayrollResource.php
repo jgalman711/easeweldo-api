@@ -2,18 +2,24 @@
 
 namespace App\Http\Resources\Payroll;
 
+use App\Enumerators\PayrollEnumerator;
 use App\Http\Resources\BaseResource;
 use Illuminate\Http\Request;
 
-class DetailsPayrollRequest extends BaseResource
+class DetailsPayrollResource extends BaseResource
 {
     public function toArray(Request $request): array
     {
+        if (optional($this->period)->type == PayrollEnumerator::TYPE_NTH_MONTH_PAY) {
+            $type = "Annual Extra";
+        } else {
+            $type = ucfirst(optional($this->period)->type);
+        }
         return [
             'status' => ucwords(str_replace("-", " ", $this->status)),
             'pay_date' => $this->pay_date,
             'net_income' => number_format($this->net_income, 2),
-            'type' => ucfirst(optional($this->period)->type),
+            'type' => $type,
             'period' => optional($this->period)->start_date . " to " . optional($this->period)->end_date,
             'total_deductions' => number_format($this->total_contributions, 2),
             'earnings' => $this->formatEarnings(),
@@ -118,8 +124,12 @@ class DetailsPayrollRequest extends BaseResource
 
         if ($this->non_taxable_earnings && !empty($this->non_taxable_earnings)) {
             foreach ($this->non_taxable_earnings as $nonTaxableEarnings) {
+                $label = ucwords($nonTaxableEarnings['name']);
+                if ($this->type == PayrollEnumerator::TYPE_REGULAR) {
+                    $label .= " (Non-taxable)";
+                }
                 array_push($earnings, [
-                    'label' => ucwords($nonTaxableEarnings['name']) . " (Non-taxable {$nonTaxableEarnings['type']})",
+                    'label' => $label,
                     'amount' => number_format($nonTaxableEarnings['pay'], 2)
                 ]);
             }

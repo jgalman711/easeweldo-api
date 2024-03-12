@@ -50,12 +50,16 @@ class AnnualExtraDisbursement extends BaseDisbursement
             'status' => PayrollEnumerator::STATUS_TO_PAY,
             'basic_salary' => $totalBasicSalary / self::TWELVE_MONTHS,
             'taxable_earnings' => [
-                'name' => 'Prorated Taxable Earnings',
-                'pay' => round($totalTaxableEarnings / self::TWELVE_MONTHS, 2)
+                [
+                    'name' => 'Prorated Taxable Earnings',
+                    'pay' => round($totalTaxableEarnings / self::TWELVE_MONTHS, 2)
+                ]
             ],
             'non_taxable_earnings' => [
-                'name' => 'Prorated Non-taxable Earnings',
-                'pay' => round($totalNonTaxableEarnings / self::TWELVE_MONTHS, 2)
+                [
+                    'name' => 'Prorated Non-taxable Earnings',
+                    'pay' => round($totalNonTaxableEarnings / self::TWELVE_MONTHS, 2)
+                ]
             ],
             'pay_date' => $this->input['salary_date']
         ]);
