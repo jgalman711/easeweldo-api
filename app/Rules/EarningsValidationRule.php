@@ -14,27 +14,27 @@ class EarningsValidationRule implements ValidationRule
         if (isset($value) && !empty($value)) {
             foreach ($value as $item) {
                 self::validateEarningName($fail, $item);
-                self::validateEarningAmount($fail, $item);
+                self::validateEarningPay($fail, $item);
             }
         }
     }
 
     public function validateEarningName(Closure $fail, array $item): void
     {
-        if ((isset($item['amount']) && $item['amount'])
+        if ((isset($item['pay']) && $item['pay'])
             && (!isset($item['name']) || !$item['name'])
         ) {
             $fail(self::ERROR_MESSAGE);
         }
     }
 
-    public function validateEarningAmount(Closure $fail, array $item): void
+    public function validateEarningPay(Closure $fail, array $item): void
     {
         if (isset($item['name']) && $item['name']) {
-            if (!isset($item['amount']) || !$item['amount']) {
+            if (!isset($item['pay']) || !$item['pay']) {
                 $fail(self::ERROR_MESSAGE);
-            } elseif ($item['amount'] < 0) {
-                $fail('Amount must be greater than zero.');
+            } elseif ($item['pay'] < 0) {
+                $fail('Pay must be greater than zero.');
             }
         }
     }

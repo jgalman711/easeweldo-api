@@ -11,6 +11,8 @@ use Carbon\Carbon;
 
 class AnnualExtraDisbursement extends BaseDisbursement
 {
+    protected const TWELVE_MONTHS = 12;
+
     public function create(): Period
     {
         $now = Carbon::now();
@@ -32,17 +34,39 @@ class AnnualExtraDisbursement extends BaseDisbursement
             $disbursement->end_date
         ]);
 
-        $totalAmount = 0;
+        $totalBasicSalary = 0;
+        $totalTaxableEarnings = 0;
+        $totalNonTaxableEarnings = 0;
         foreach($payrolls as $payroll) {
-            $totalAmount += $payroll->net_income;
+            $totalBasicSalary += $payroll->net_income;
+            $totalTaxableEarnings += $this->getEarningsTotal($payroll->taxable_earnings ?? []);
+            $totalNonTaxableEarnings += $this->getEarningsTotal($payroll->non_taxable_earnings ?? []);
         }
+
         return Payroll::create([
             ...$this->input,
             'employee_id' => $employee->id,
             'period_id' => $disbursement->id,
             'status' => PayrollEnumerator::STATUS_TO_PAY,
-            'basic_salary' => $totalAmount / 12,
+            'basic_salary' => $totalBasicSalary / self::TWELVE_MONTHS,
+            'taxable_earnings' => [
+                'name' => 'Prorated Taxable Earnings',
+                'pay' => round($totalTaxableEarnings / self::TWELVE_MONTHS, 2)
+            ],
+            'non_taxable_earnings' => [
+                'name' => 'Prorated Non-taxable Earnings',
+                'pay' => round($totalNonTaxableEarnings / self::TWELVE_MONTHS, 2)
+            ],
             'pay_date' => $this->input['salary_date']
         ]);
+    }
+
+    private function getEarningsTotal(array $earnings): float
+    {
+        $totalEarnings = 0;
+        foreach ($earnings as $earning) {
+            $totalEarnings += $earning['pay'] ?? 0;
+        }
+        return $totalEarnings;
     }
 }
