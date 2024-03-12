@@ -11,13 +11,13 @@ class EditPayrollResource extends BaseResource
     {
         return [
             'id' => $this->id,
-            'employee_id' => $this->employee_id,
-            'period_id' => $this->period_id,
+            'employeeId' => $this->employee_id,
+            'periodId' => $this->period_id,
             'type' => $this->type,
             'status' => $this->status,
             'description' => $this->description,
-            'pay_date' => $this->pay_date,
-            'basic_salary' => $this->basic_salary,
+            'payDate' => $this->pay_date,
+            'basicSalary' => $this->basic_salary,
             'regularEarnings' => self::getRegularEarnings(),
             'otherEarnings' => self::getOtherEarnings(),
             'taxesAndContributions' => self::getTaxesAndContributions(),

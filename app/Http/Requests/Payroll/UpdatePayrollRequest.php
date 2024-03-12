@@ -14,7 +14,9 @@ class UpdatePayrollRequest extends BaseRequest
     {
         return [
             "status" => 'required|in:' . implode(',', PayrollEnumerator::STATUSES),
-            "basic_salary" => self::REQUIRED_NUMERIC,
+            "description" => self::NULLABLE_STRING,
+            "payDate" => self::REQUIRED_DATE_AFTER_TODAY,
+            "basicSalary" => self::REQUIRED_NUMERIC,
             "regularEarnings.overtime" => [new RateHourJsonRule()],
             "regularEarnings.regularHoliday" => [new RateHourJsonRule()],
             "regularEarnings.regularHolidayWorked" => [new RateHourJsonRule()],
