@@ -3,6 +3,8 @@
 namespace App\Http\Resources\Payroll;
 
 use App\Http\Resources\BaseResource;
+use App\Models\Holiday;
+use App\Models\Leave;
 use Illuminate\Http\Request;
 
 class EditPayrollResource extends BaseResource
@@ -21,7 +23,8 @@ class EditPayrollResource extends BaseResource
             'regularEarnings' => self::getRegularEarnings(),
             'otherEarnings' => self::getOtherEarnings(),
             'taxesAndContributions' => self::getTaxesAndContributions(),
-            'deductions' => self::getDeductions()
+            'deductions' => self::getDeductions(),
+            'remarks' => $this->remarks
         ];
     }
 
@@ -29,11 +32,12 @@ class EditPayrollResource extends BaseResource
     {
         $regularEarnings = [];
         $regularEarnings['overtime'] = $this->attendance_earnings['overtime'] ?? null;
-        $regularEarnings['regularHolidayWorked'] = $this->holidays['regularWorked'] ?? null;
-        $regularEarnings['specialHoliday'] = $this->holidays['special'] ?? null;
-        $regularEarnings['specialHolidayWorked'] = $this->holidays['specialWorked'] ?? null;
-        $regularEarnings['sickLeave'] = $this->leaves['sick'] ?? null;
-        $regularEarnings['vacationLeave'] = $this->leaves['vacation'] ?? null;
+        $regularEarnings['regularHoliday'] = $this->holidays[Holiday::REGULAR_HOLIDAY] ?? null;
+        $regularEarnings['regularHolidayWorked'] = $this->holidays_worked[Holiday::REGULAR_HOLIDAY] ?? null;
+        $regularEarnings['specialHoliday'] = $this->holidays[Holiday::SPECIAL_HOLIDAY] ?? null;
+        $regularEarnings['specialHolidayWorked'] = $this->holidays_worked[Holiday::SPECIAL_HOLIDAY] ?? null;
+        $regularEarnings['sickLeave'] = $this->leaves[Leave::TYPE_SICK_LEAVE] ?? null;
+        $regularEarnings['vacationLeave'] = $this->leaves[Leave::TYPE_VACATION_LEAVE] ?? null;
         return $regularEarnings;
     }
 

@@ -7,7 +7,9 @@ use App\Http\Requests\Payroll\UpdatePayrollRequest;
 use App\Http\Resources\Payroll\BasePayrollResource;
 use App\Models\Company;
 use App\Models\Payroll;
+use App\Services\Payroll\PayrollService;
 use App\Traits\PayrollFilter;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -15,8 +17,11 @@ class PayrollController extends Controller
 {
     use PayrollFilter;
 
-    public function __construct()
+    protected $payrollService;
+
+    public function __construct(PayrollService $payrollService)
     {
+        $this->payrollService = $payrollService;
         $this->setCacheIdentifier('payrolls');
     }
 
@@ -43,6 +48,12 @@ class PayrollController extends Controller
 
     public function update(UpdatePayrollRequest $request, Company $company, Payroll $payroll)
     {
-        dd($request->all());
+        try {
+            $input = $request->validated();
+            $payroll = $this->payrollService->update($payroll, $input);
+            return $this->sendResponse(new BasePayrollResource($payroll), 'Payroll retrieved successfully.');
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
     }
 }

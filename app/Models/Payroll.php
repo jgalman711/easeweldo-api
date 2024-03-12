@@ -20,7 +20,8 @@ class Payroll extends Model
         'holidays_worked' => 'json',
         'leaves' => 'json',
         'taxable_earnings' => 'json',
-        'non_taxable_earnings' => 'json'
+        'non_taxable_earnings' => 'json',
+        'other_deductions' => 'json'
     ];
 
     protected $fillable = [
@@ -36,6 +37,7 @@ class Payroll extends Model
         'leaves',
         'taxable_earnings',
         'non_taxable_earnings',
+        'other_deductions',
         'holidays',
         'holidays_worked',
         'sss_contributions',

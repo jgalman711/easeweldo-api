@@ -18,14 +18,11 @@ class RegularEarningsRule implements ValidationRule
             $fail('The :attribute must be an array.');
         }
         
-        // Check if the array has valid keys and values
         foreach ($value as $type => $earnings) {
-            // Each earnings type should be either an array or null
             if (!is_array($earnings) && !is_null($earnings)) {
                 $fail('The :attribute must be an array.');
             }
             
-            // If the earnings type is an array, validate its structure
             if (is_array($earnings)) {
                 foreach ($earnings as $earning) {
                     if (!isset($item['date']) || !$item['date']) {

@@ -127,17 +127,17 @@ class GeneratePayrollService
         foreach($this->timesheet as $record) {
             $expectedClockIn = Carbon::parse($record->expected_clock_in);
             $expectedClockOut = Carbon::parse($record->expected_clock_out);
+            $date = $expectedClockIn->format('Y-m-d');
             if ($record->clock_in && $record->clock_out) {
                 $clockIn = Carbon::parse($record->clock_in);
                 $clockOut = Carbon::parse($record->clock_out);
-                $date = $expectedClockIn->format('Y-m-d');
                 if ($this->isLate($clockIn, $expectedClockIn)) {
                     $lateHours = round($clockIn->diffInMinutes($expectedClockIn) / 60, 2);
                     $earnings[PayrollEnumerator::LATE][] = [
                         'date' => $date,
                         'hours' => $lateHours,
                         'rate' => 1,
-                        'amount' => round($lateHours * $this->salaryComputation->hourly_rate, 2) * -1
+                        'pay' => round($lateHours * $this->salaryComputation->hourly_rate, 2) * -1
                     ];
                 }
                 if ($clockOut->lt($expectedClockOut)) {
@@ -146,7 +146,7 @@ class GeneratePayrollService
                         'date' => $date,
                         'hours' => $undertimeHours,
                         'rate' => 1,
-                        'amount' => round($undertimeHours * $this->salaryComputation->hourly_rate, 2) * -1
+                        'pay' => round($undertimeHours * $this->salaryComputation->hourly_rate, 2) * -1
                     ];
                 }
                 if ($this->isOvertime($clockOut, $expectedClockOut)) {
@@ -156,15 +156,16 @@ class GeneratePayrollService
                         'date' => $date,
                         'hours' => $overtimeHours,
                         'rate' => $rate,
-                        'amount' => round($overtimeHours * $rate * $this->salaryComputation->hourly_rate, 2)
+                        'pay' => round($overtimeHours * $rate * $this->salaryComputation->hourly_rate, 2)
                     ];
                 }
             } else {
                 $absentHours = $expectedClockIn->diffInHours($expectedClockOut);
                 $earnings[PayrollEnumerator::ABSENT][] = [
+                    'date' => $date,
                     'rate' => 1,
                     'hours' => $absentHours,
-                    'amount' => round($absentHours * $this->salaryComputation->hourly_rate, 2) * -1
+                    'pay' => round($absentHours * $this->salaryComputation->hourly_rate, 2) * -1
                 ];
             }
         }
@@ -212,7 +213,8 @@ class GeneratePayrollService
             $payrollHolidays[$holiday->simplified_type][] = [
                 'date' => $holiday->date,
                 'hours' =>  $hours,
-                'amount' => $hoursAmount,
+                'pay' => $hoursAmount,
+                'rate' => $this->salaryComputation->{$holiday->simplified_type} . "_holiday_rate"
             ];
 
             $daySchedule = $holidayTimesheet->first();
@@ -221,7 +223,7 @@ class GeneratePayrollService
                 $absents[PayrollEnumerator::ABSENT][] = [
                     'date' => $holiday->date,
                     'hours' => $hours,
-                    'amount' => $hoursAmount * -1,
+                    'pay' => $hoursAmount * -1,
                 ];
             }
         }
@@ -238,7 +240,6 @@ class GeneratePayrollService
             ['status', '=' , Leave::APPROVED]
         ])->get();
 
-        $leavePay = 0;
         if ($leaves->isNotEmpty()) {
             foreach ($leaves as $leave) {
                 $pay = $leave->hours * $this->salaryComputation->hourly_rate;
@@ -247,10 +248,8 @@ class GeneratePayrollService
                     'hours' => $leave->hours,
                     'pay' => $pay
                 ];
-                $leavePay += $pay;
             }
             $this->payroll->leaves = $transformedLeaves;
-            $this->payroll->leaves_pay = $leavePay;
         }
     }
 
