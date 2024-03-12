@@ -30,9 +30,9 @@ class DisbursementService
                 $payrolls[] = $disbursementGenerator->generatePayroll($disbursement, $employee);
             } catch (\Exception $e) {
                 $payrolls[] = $e->getMessage();
-                $disbursement->status = Period::STATUS_FAILED;
             }
         }
+        $disbursement->state()->initialize();
         return $payrolls;
     }
 }
