@@ -137,7 +137,7 @@ class GeneratePayrollService
                         'date' => $date,
                         'hours' => $lateHours,
                         'rate' => 1,
-                        'pay' => round($lateHours * $this->salaryComputation->hourly_rate, 2) * -1
+                        'amount' => round($lateHours * $this->salaryComputation->hourly_rate, 2) * -1
                     ];
                 }
                 if ($clockOut->lt($expectedClockOut)) {
@@ -146,7 +146,7 @@ class GeneratePayrollService
                         'date' => $date,
                         'hours' => $undertimeHours,
                         'rate' => 1,
-                        'pay' => round($undertimeHours * $this->salaryComputation->hourly_rate, 2) * -1
+                        'amount' => round($undertimeHours * $this->salaryComputation->hourly_rate, 2) * -1
                     ];
                 }
                 if ($this->isOvertime($clockOut, $expectedClockOut)) {
@@ -156,7 +156,7 @@ class GeneratePayrollService
                         'date' => $date,
                         'hours' => $overtimeHours,
                         'rate' => $rate,
-                        'pay' => round($overtimeHours * $rate * $this->salaryComputation->hourly_rate, 2)
+                        'amount' => round($overtimeHours * $rate * $this->salaryComputation->hourly_rate, 2)
                     ];
                 }
             } else {
@@ -165,7 +165,7 @@ class GeneratePayrollService
                     'date' => $date,
                     'rate' => 1,
                     'hours' => $absentHours,
-                    'pay' => round($absentHours * $this->salaryComputation->hourly_rate, 2) * -1
+                    'amount' => round($absentHours * $this->salaryComputation->hourly_rate, 2) * -1
                 ];
             }
         }
@@ -213,7 +213,7 @@ class GeneratePayrollService
             $payrollHolidays[$holiday->simplified_type][] = [
                 'date' => $holiday->date,
                 'hours' =>  $hours,
-                'pay' => $hoursAmount,
+                'amount' => $hoursAmount,
                 'rate' => $this->salaryComputation->{$holiday->simplified_type} . "_holiday_rate"
             ];
 
@@ -223,7 +223,7 @@ class GeneratePayrollService
                 $absents[PayrollEnumerator::ABSENT][] = [
                     'date' => $holiday->date,
                     'hours' => $hours,
-                    'pay' => $hoursAmount * -1,
+                    'amount' => $hoursAmount * -1,
                 ];
             }
         }
@@ -246,7 +246,7 @@ class GeneratePayrollService
                 $transformedLeaves[$leave->type][] = [
                     'date' => $leave->date,
                     'hours' => $leave->hours,
-                    'pay' => $pay
+                    'amount' => $pay
                 ];
             }
             $this->payroll->leaves = $transformedLeaves;

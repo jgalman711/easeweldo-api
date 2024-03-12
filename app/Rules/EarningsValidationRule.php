@@ -21,7 +21,7 @@ class EarningsValidationRule implements ValidationRule
 
     public function validateEarningName(Closure $fail, array $item): void
     {
-        if ((isset($item['pay']) && $item['pay'])
+        if ((isset($item['amount']) && $item['amount'])
             && (!isset($item['name']) || !$item['name'])
         ) {
             $fail(self::ERROR_MESSAGE);
@@ -31,9 +31,9 @@ class EarningsValidationRule implements ValidationRule
     public function validateEarningPay(Closure $fail, array $item): void
     {
         if (isset($item['name']) && $item['name']) {
-            if (!isset($item['pay']) || !$item['pay']) {
+            if (!isset($item['amount']) || !$item['amount']) {
                 $fail(self::ERROR_MESSAGE);
-            } elseif ($item['pay'] < 0) {
+            } elseif ($item['amount'] < 0) {
                 $fail('Pay must be greater than zero.');
             }
         }

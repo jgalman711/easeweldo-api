@@ -52,13 +52,13 @@ class AnnualExtraDisbursement extends BaseDisbursement
             'taxable_earnings' => [
                 [
                     'name' => 'Prorated Taxable Earnings',
-                    'pay' => round($totalTaxableEarnings / self::TWELVE_MONTHS, 2)
+                    'amount' => round($totalTaxableEarnings / self::TWELVE_MONTHS, 2)
                 ]
             ],
             'non_taxable_earnings' => [
                 [
                     'name' => 'Prorated Non-taxable Earnings',
-                    'pay' => round($totalNonTaxableEarnings / self::TWELVE_MONTHS, 2)
+                    'amount' => round($totalNonTaxableEarnings / self::TWELVE_MONTHS, 2)
                 ]
             ],
             'pay_date' => $this->input['salary_date']
@@ -69,7 +69,7 @@ class AnnualExtraDisbursement extends BaseDisbursement
     {
         $totalEarnings = 0;
         foreach ($earnings as $earning) {
-            $totalEarnings += $earning['pay'] ?? 0;
+            $totalEarnings += $earning['amount'] ?? 0;
         }
         return $totalEarnings;
     }

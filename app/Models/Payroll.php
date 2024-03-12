@@ -153,8 +153,8 @@ class Payroll extends Model
         $totalTaxableEarnings = 0;
 
         foreach ($taxableEarnings as $item) {
-            if (isset($item['pay']) && is_numeric($item['pay'])) {
-                $totalTaxableEarnings += $item['pay'];
+            if (isset($item['amount']) && is_numeric($item['amount'])) {
+                $totalTaxableEarnings += $item['amount'];
             }
         }
 
@@ -170,8 +170,8 @@ class Payroll extends Model
         $totalNonTaxableEarnings = 0;
 
         foreach ($nonTaxableEarnings as $item) {
-            if (isset($item['pay']) && is_numeric($item['pay'])) {
-                $totalNonTaxableEarnings += $item['pay'];
+            if (isset($item['amount']) && is_numeric($item['amount'])) {
+                $totalNonTaxableEarnings += $item['amount'];
             }
         }
 

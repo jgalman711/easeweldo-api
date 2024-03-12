@@ -90,7 +90,7 @@ class DetailsPayrollResource extends BaseResource
                     'label' => ucfirst($leave['type']) . " Leave ({$leave['date']})",
                     'rate' => 1.0,
                     'hours' => $leave['hours'],
-                    // 'amount' => number_format($leave['pay'], 2)
+                    // 'amount' => number_format($leave['amount'], 2)
                 ]);
             }
         }
@@ -99,7 +99,7 @@ class DetailsPayrollResource extends BaseResource
             foreach ($this->taxable_earnings as $taxableEarnings) {
                 array_push($earnings, [
                     'label' => ucwords($taxableEarnings['name']),
-                    'amount' => number_format($taxableEarnings['pay'], 2)
+                    'amount' => number_format($taxableEarnings['amount'], 2)
                 ]);
             }
         }
@@ -130,7 +130,7 @@ class DetailsPayrollResource extends BaseResource
                 }
                 array_push($earnings, [
                     'label' => $label,
-                    'amount' => number_format($nonTaxableEarnings['pay'], 2)
+                    'amount' => number_format($nonTaxableEarnings['amount'], 2)
                 ]);
             }
         }

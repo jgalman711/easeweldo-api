@@ -63,7 +63,7 @@ class PayrollService
     private function getAttendanceDeductions(array $input, $employeeHourlyRate): ?array
     {
         $keys = ['late', 'absent', 'undertime'];
-        $attendanceDeductions = null;
+        $attendanceDeductions = [];
         foreach ($keys as $key) {
             if (isset($input['deductions']) && isset($input['deductions'][$key])) {
                 $deductions = $input['deductions'][$key];
@@ -72,7 +72,7 @@ class PayrollService
                         'date' => $deduction['date'],
                         'rate' => $deduction['rate'],
                         'hours' => $deduction['hours'],
-                        'pay' => $deduction['rate'] * $deduction['hours'] * $employeeHourlyRate * -1
+                        'amount' => $deduction['rate'] * $deduction['hours'] * $employeeHourlyRate * -1
                     ];
                 }
             }
@@ -90,7 +90,7 @@ class PayrollService
                     'date' => $overtime['date'],
                     'rate' => $overtime['rate'],
                     'hours' => $overtime['hours'],
-                    'pay' => $overtime['rate'] * $overtime['hours'] * $employeeHourlyRate
+                    'amount' => $overtime['rate'] * $overtime['hours'] * $employeeHourlyRate
                 ];
             }
         }
@@ -107,7 +107,7 @@ class PayrollService
                     'date' => $leave['date'],
                     'rate' => $leave['rate'],
                     'hours' => $leave['hours'],
-                    'pay' => $leave['rate'] * $leave['hours'] * $employeeHourlyRate
+                    'amount' => $leave['rate'] * $leave['hours'] * $employeeHourlyRate
                 ];
             }
         }
@@ -119,7 +119,7 @@ class PayrollService
                     'date' => $leave['date'],
                     'rate' => $leave['rate'],
                     'hours' => $leave['hours'],
-                    'pay' => $leave['rate'] * $leave['hours'] * $employeeHourlyRate
+                    'amount' => $leave['rate'] * $leave['hours'] * $employeeHourlyRate
                 ];
             }
         }
@@ -154,7 +154,7 @@ class PayrollService
                 'date' => $holiday['date'],
                 'rate' => $holiday['rate'],
                 'hours' => $holiday['hours'],
-                'pay' => $holiday['rate'] * $holiday['hours'] * $employeeHourlyRate
+                'amount' => $holiday['rate'] * $holiday['hours'] * $employeeHourlyRate
             ];
         }
         return $holidayEarnings;
