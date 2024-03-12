@@ -82,7 +82,7 @@ class Payroll extends Model
             foreach ($this->attendance_earnings as $type => $deductions) {
                 if ($type == PayrollEnumerator::OVERTIME) { continue; }
                 foreach ($deductions as $deduction) {
-                    $totalDeductions += $deduction['amount'];
+                    $totalDeductions += $deduction['amount'] ?? 0;
                 }
             }
         }

@@ -72,8 +72,6 @@ class Period extends Model
     ];
 
     protected $appends = [
-        'next_period',
-        'previous_period',
         'employees_count',
         'employees_net_pay',
         'withheld_taxes',
@@ -123,22 +121,6 @@ class Period extends Model
     public function getPayrollCostAttribute(): float
     {
         return $this->employees_net_pay +  $this->withheld_taxes +  $this->total_contributions;
-    }
-
-    public function getNextPeriodAttribute()
-    {
-        $next = Period::where('start_date', '>', $this->end_date)
-            ->orderBy('start_date', 'asc')
-            ->first();
-        return optional($next)->id;
-    }
-
-    public function getPreviousPeriodAttribute()
-    {
-        $previous = Period::where('end_date', '<', $this->start_date)
-            ->orderBy('start_date', 'desc')
-            ->first();
-        return optional($previous)->id;
     }
 
     public function scopeByRange(Builder $periodsQuery, array $range): Builder
