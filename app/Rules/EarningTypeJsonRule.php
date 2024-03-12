@@ -14,10 +14,10 @@ class EarningTypeJsonRule implements ValidationRule
                 if (!isset($item['name']) || !$item['name']) {
                     $fail('The :attribute name is required.');
                 }
-                if (!isset($item['amount']) || !$item['amount']) {
+                if (!isset($item['pay']) || !$item['pay']) {
                     $fail('The :attribute pay is required.');
                 }
-                if (!isset($item['amount']) || $item['amount'] < 0) {
+                if (!isset($item['pay']) || $item['pay'] < 0) {
                     $fail('The :attribute pay must be greater than zero.');
                 }
             }

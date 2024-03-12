@@ -2,32 +2,36 @@
 
 namespace App\Http\Requests\Payroll;
 
+use App\Enumerators\PayrollEnumerator;
 use App\Http\Requests\BaseRequest;
-use App\Rules\AttendanceJsonRule;
 use App\Rules\EarningTypeJsonRule;
-use App\Rules\LeavesJsonRule;
+use App\Rules\RateHourJsonRule;
+use App\Rules\RegularEarningsRule;
 
 class UpdatePayrollRequest extends BaseRequest
 {
     public function rules(): array
     {
         return [
-            'type' => self::REQUIRED_STRING,
-            'status' => self::REQUIRED_STRING,
-            'description' => self::NULLABLE_STRING,
-            'pay_date' => self::REQUIRED_DATE,
-            'basic_salary' => self::REQUIRED_NUMERIC,
-            'attendance_earnings' => [new AttendanceJsonRule()],
-            'leaves' => [new LeavesJsonRule()],
-            'taxable_earnings' => [new EarningTypeJsonRule()],
-            'non_taxable_earnings' => [new EarningTypeJsonRule()],
-            'holidays' => self::NULLABLE_NUMERIC,
-            'holidays_worked' => self::NULLABLE_NUMERIC,
-            'sss_contributions' => self::NULLABLE_NUMERIC,
-            'philhealth_contributions' => self::NULLABLE_NUMERIC,
-            'pagibig_contributions' => self::NULLABLE_NUMERIC,
-            'withheld_tax' => self::NULLABLE_NUMERIC,
-            'remarks' => self::NULLABLE_STRING
+            "status" => 'required|in:' . implode(',', PayrollEnumerator::STATUSES),
+            "basic_salary" => self::REQUIRED_NUMERIC,
+            "regularEarnings.overtime" => [new RateHourJsonRule()],
+            "regularEarnings.regularHoliday" => [new RateHourJsonRule()],
+            "regularEarnings.regularHolidayWorked" => [new RateHourJsonRule()],
+            "regularEarnings.specialHoliday" => [new RateHourJsonRule()],
+            "regularEarnings.specialHolidayWorked" => [new RateHourJsonRule()],
+            "regularEarnings.sickLeave" => [new RateHourJsonRule()],
+            "regularEarnings.vacationLeave" => [new RateHourJsonRule()],
+            "otherEarnings.taxableEarnings" => [new EarningTypeJsonRule()],
+            "otherEarnings.nonTaxableEarnings" => [new EarningTypeJsonRule()],
+            "taxesAndContributions.sssContributions" => self::NULLABLE_NUMERIC,
+            "taxesAndContributions.philhealthContributions" => self::NULLABLE_NUMERIC,
+            "taxesAndContributions.pagibigContributions" => self::NULLABLE_NUMERIC,
+            "taxesAndContributions.withheldTax" => self::NULLABLE_NUMERIC,
+            "deductions.late" => [new RateHourJsonRule()],
+            "deductions.absent" => [new RateHourJsonRule()],
+            "deductions.undertime" => [new RateHourJsonRule()],
+            "otherDeductions" => [new EarningTypeJsonRule()],
         ];
     }
 }

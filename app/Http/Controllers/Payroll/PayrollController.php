@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Payroll;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Payroll\UpdatePayrollRequest;
 use App\Http\Resources\Payroll\BasePayrollResource;
 use App\Models\Company;
 use App\Models\Payroll;
@@ -38,5 +39,10 @@ class PayrollController extends Controller
             return $payroll->load('employee');
         }, $payroll);
         return $this->sendResponse(new BasePayrollResource($payrollWithEmployee), 'Payroll retrieved successfully.');
+    }
+
+    public function update(UpdatePayrollRequest $request, Company $company, Payroll $payroll)
+    {
+        dd($request->all());
     }
 }
