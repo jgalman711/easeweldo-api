@@ -43,7 +43,7 @@ class GeneratePayrollService
 
     public function generate(Company $company, Period $period, Employee $employee): Payroll
     {
-        self::init($company, $employee, $period);
+        $this->init($company, $employee, $period);
         try {
             DB::beginTransaction();
             $this->calculateBasicSalary();
