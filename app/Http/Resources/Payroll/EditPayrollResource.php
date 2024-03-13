@@ -24,6 +24,7 @@ class EditPayrollResource extends BaseResource
             'otherEarnings' => self::getOtherEarnings(),
             'taxesAndContributions' => self::getTaxesAndContributions(),
             'deductions' => self::getDeductions(),
+            'otherDeductions' => $this->other_deductions,
             'remarks' => $this->remarks
         ];
     }

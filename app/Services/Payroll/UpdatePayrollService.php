@@ -22,6 +22,7 @@ class UpdatePayrollService
         $this->calculateLeaves($input);
         $this->calculateTaxesAndContributions($input);
         $this->calculateAttendanceDeductions($input);
+        $this->calculateOtherDeductions($input);
         $payroll->save();
         return $payroll;
     }
@@ -99,6 +100,13 @@ class UpdatePayrollService
             }
         }
         $this->payroll->attendance_earnings = array_merge($this->payroll->attendance_earnings, $attendanceDeductions);
+    }
+
+    private function calculateOtherDeductions(array $input): void
+    {
+        if (isset($input['otherDeductions'])) {
+            $this->payroll->other_deductions = $input['otherDeductions'];
+        }
     }
 
     private function calculateOvertimeEarnings(array $input): void

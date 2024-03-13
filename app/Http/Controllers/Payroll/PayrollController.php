@@ -53,6 +53,7 @@ class PayrollController extends Controller
     {
         try {
             $input = $request->validated();
+            $request->merge(["format" => "edit"]);
             $payroll = $this->payrollService->update($payroll, $input);
             return $this->sendResponse(new BasePayrollResource($payroll), 'Payroll retrieved successfully.');
         } catch (Exception $e) {
