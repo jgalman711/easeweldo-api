@@ -4,6 +4,7 @@ namespace App\Http\Resources\Payroll;
 
 use App\Enumerators\PayrollEnumerator;
 use App\Http\Resources\BaseResource;
+use App\Models\Holiday;
 use Illuminate\Http\Request;
 
 class DetailsPayrollResource extends BaseResource
@@ -21,10 +22,10 @@ class DetailsPayrollResource extends BaseResource
             'net_income' => number_format($this->net_income, 2),
             'type' => $type,
             'period' => optional($this->period)->start_date . " to " . optional($this->period)->end_date,
-            'total_deductions' => number_format($this->total_contributions, 2),
+            'total_contributions' => number_format($this->total_contributions, 2),
+            'total_deductions' => number_format($this->total_deductions, 2),
             'earnings' => $this->formatEarnings(),
             'deductions' => $this->formatDeductions(),
-            'other_deductions' => $this->formatOtherDeductions(),
             'summary' => $this->formatSummary()
         ];
     }
@@ -34,64 +35,77 @@ class DetailsPayrollResource extends BaseResource
         $earnings = [
             [
                 'label' => 'Regular Pay',
-                'rate' => 1.0,
-                'hours' => $this->hours_worked,
                 'amount' => number_format($this->basic_salary, 2)
             ]
         ];
-        if ($this->overtime_minutes > 0) {
-            array_push($earnings, [
-                'label' => 'Overtime',
-                'rate' => 1.3,
-                'hours' => $this->overtime_minutes / 60,
-                'amount' => number_format($this->overtime_pay, 2)
-            ]);
+
+        if (isset($this->attendance_earnings['overtime'])) {
+            foreach ($this->attendance_earnings['overtime'] as $overtime) {
+                array_push($earnings, [
+                    'label' => "Overtime (" . $overtime['date'] . ")",
+                    'rate' => $overtime['rate'],
+                    'hours' => $overtime['hours'],
+                    'amount' => number_format($overtime['amount'], 2)
+                ]);
+            }
         }
 
-        if ($this->regular_holiday_hours > 0) {
-            array_push($earnings, [
-                'label' => 'Regular Holiday',
-                'rate' => 1.0,
-                'hours' => $this->regular_holiday_hours,
-                'amount' => number_format($this->regular_holiday_hours_pay, 2)
-            ]);
+        $attendanceDeductionTypes = [
+            'absent' => 'Absent',
+            'late' => 'Late',
+            'undertime', 'Undertime'
+        ];
+        foreach ($attendanceDeductionTypes as $type => $label) {
+            if (isset($this->attendance_earnings[$type])) {
+                foreach ($this->attendance_earnings[$type] as $deduction) {
+                    array_push($earnings, [
+                        'label' => "$label (" . $deduction['date'] . ")",
+                        'rate' => $deduction['rate'],
+                        'hours' => $deduction['hours'],
+                        'amount' => number_format($deduction['amount'] * -1, 2)
+                    ]);
+                }
+            }
         }
 
-        if ($this->regular_holiday_hours_worked > 0) {
-            array_push($earnings, [
-                'label' => 'Regular Holiday Worked',
-                'rate' => 1.0,
-                'hours' => $this->regular_holiday_hours_worked,
-                'amount' => number_format($this->regular_holiday_hours_worked_pay, 2)
-            ]);
+        foreach (Holiday::HOLIDAY_TYPES as $type) {
+            if (isset($this->holidays[$type])) {
+                $label = ucfirst($type) . " Holiday";
+                foreach ($this->holidays[$type] as $holiday) {
+                    array_push($earnings, [
+                        'label' => "$label (" . $holiday['date'] . ")",
+                        'rate' => $holiday['rate'],
+                        'hours' => $holiday['hours'],
+                        'amount' => $holiday['amount']
+                    ]);
+                }
+            }
         }
 
-        if ($this->special_holiday_hours > 0) {
-            array_push($earnings, [
-                'label' => 'Special Holiday',
-                'rate' => 1.0,
-                'hours' => $this->special_holiday_hours,
-                'amount' => number_format($this->special_holiday_hours_pay, 2)
-            ]);
-        }
-
-        if ($this->special_holiday_hours_worked > 0) {
-            array_push($earnings, [
-                'label' => 'Special Holiday Worked',
-                'rate' => 1.0,
-                'hours' => $this->special_holiday_hours_worked,
-                'amount' => number_format($this->special_holiday_hours_worked_pay, 2)
-            ]);
+        foreach (Holiday::HOLIDAY_TYPES as $type) {
+            if (isset($this->holidays_worked[$type])) {
+                $label = ucfirst($type) . " Holiday Worked";
+                foreach ($this->holidays_worked[$type] as $holiday) {
+                    array_push($earnings, [
+                        'label' => "$label (" . $holiday['date'] . ")",
+                        'rate' => $holiday['rate'],
+                        'hours' => $holiday['hours'],
+                        'amount' => $holiday['amount']
+                    ]);
+                }
+            }
         }
 
         if (!empty($this->leaves)) {
-            foreach ($this->leaves as $leave) {
-                array_push($earnings, [
-                    'label' => ucfirst($leave['type']) . " Leave ({$leave['date']})",
-                    'rate' => 1.0,
-                    'hours' => $leave['hours'],
-                    // 'amount' => number_format($leave['amount'], 2)
-                ]);
+            foreach ($this->leaves as $type => $typeLeaves) {
+                foreach ($typeLeaves as $leave) {
+                    array_push($earnings, [
+                        'label' => ucwords(str_replace('_', ' ', $type)) . " ({$leave['date']})",
+                        'rate' => $leave['rate'],
+                        'hours' => $leave['hours'],
+                        'amount' => number_format($leave['amount'], 2)
+                    ]);
+                }
             }
         }
 
@@ -104,33 +118,22 @@ class DetailsPayrollResource extends BaseResource
             }
         }
 
-        if ($this->absent_minutes > 0 && $this->absent_deductions > 0) {
-            array_push($earnings, [
-                'label' => 'Absent Deductions',
-                'rate' => 1.0,
-                'hours' => $this->absent_minutes / 60,
-                'amount' => "-" . number_format($this->absent_deductions, 2)
-            ]);
-        }
-
-        if ($this->late_minutes > 0 && $this->late_deductions > 0) {
-            array_push($earnings, [
-                'label' => 'Late Deductions',
-                'rate' => 1.0,
-                'hours' => $this->late_minutes / 60,
-                'amount' => "-" . number_format($this->late_deductions, 2)
-            ]);
-        }
-
         if ($this->non_taxable_earnings && !empty($this->non_taxable_earnings)) {
             foreach ($this->non_taxable_earnings as $nonTaxableEarnings) {
-                $label = ucwords($nonTaxableEarnings['name']);
-                if ($this->type == PayrollEnumerator::TYPE_REGULAR) {
-                    $label .= " (Non-taxable)";
-                }
+                $label = ucwords($nonTaxableEarnings['name']) . " (Non-taxable)";
                 array_push($earnings, [
                     'label' => $label,
                     'amount' => number_format($nonTaxableEarnings['amount'], 2)
+                ]);
+            }
+        }
+
+        if ($this->other_deductions && !empty($this->other_deductions)) {
+            foreach ($this->other_deductions as $otherDeductions) {
+                $label = ucwords($otherDeductions['name']);
+                array_push($earnings, [
+                    'label' => $label,
+                    'amount' => number_format($otherDeductions['amount'] * -1, 2)
                 ]);
             }
         }
@@ -165,20 +168,6 @@ class DetailsPayrollResource extends BaseResource
         ];
     }
 
-    private function formatOtherDeductions(): array
-    {
-        $otherDeductions = [];
-        if ($this->other_deductions && !empty($this->other_deductions)) {
-            foreach ($this->other_deductions as $deduction) {
-                array_push($otherDeductions, [
-                    'label' => ucwords($deduction['name']),
-                    'amount' => number_format($deduction['deduction'], 2)
-                ]);
-            }
-        }
-        return $otherDeductions;
-    }
-
     private function formatSummary(): array
     {
         return [
@@ -191,8 +180,8 @@ class DetailsPayrollResource extends BaseResource
                 'amount' => number_format($this->total_contributions, 2)
             ],
             [
-                'label' => "Other Deductions",
-                'amount' => number_format($this->total_other_deductions, 2)
+                'label' => "Total Deductions",
+                'amount' => number_format($this->total_deductions, 2)
             ],
             [
                 'label' => "Net Income",

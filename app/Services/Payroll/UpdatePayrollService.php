@@ -94,7 +94,7 @@ class UpdatePayrollService
                         'date' => $deduction['date'],
                         'rate' => $deduction['rate'],
                         'hours' => $deduction['hours'],
-                        'amount' => $deduction['rate'] * $deduction['hours'] * $this->employeeHourlyRate * -1
+                        'amount' => $deduction['rate'] * $deduction['hours'] * $this->employeeHourlyRate
                     ];
                 }
             }

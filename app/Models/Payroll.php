@@ -2,17 +2,19 @@
 
 namespace App\Models;
 
+use App\Enumerators\AttendanceEarningsEnumerator;
 use App\Enumerators\PayrollEnumerator;
 use App\StateMachines\Contracts\PayrollStateContract;
 use App\StateMachines\Payroll\BaseState;
 use App\StateMachines\Payroll\ToPayState;
+use App\Traits\PayrollJsonParser;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payroll extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, PayrollJsonParser;
 
     protected $casts = [
         'attendance_earnings' => 'json',
@@ -50,9 +52,14 @@ class Payroll extends Model
     protected $appends = [
         'total_attendance_earnings',
         'total_attendance_deductions',
+        'total_holidays_pay',
+        'total_holidays_worked_pay',
+        'total_leaves_pay',
+        'total_other_deductions',
         'total_non_taxable_earnings',
         'total_taxable_earnings',
         'total_contributions',
+        'total_deductions',
         'gross_income',
         'taxable_income',
         'net_taxable_income',
@@ -77,60 +84,81 @@ class Payroll extends Model
         return $this->belongsTo(Period::class);
     }
 
-    public function getTotalAttendanceDeductionsAttribute()
+    public function getTotalAttendanceEarningsAttribute(): ?float
     {
-        $totalDeductions = 0;
-        if ($this->attendance_earnings) {
-            foreach ($this->attendance_earnings as $type => $deductions) {
-                if ($type == PayrollEnumerator::OVERTIME) { continue; }
-                foreach ($deductions as $deduction) {
-                    $totalDeductions += $deduction['amount'] ?? 0;
-                }
-            }
+        if (isset($this->attendance_earnings['overtime'])) {
+           return $this->totalAmountParser($this->attendance_earnings['overtime'] ?? []);
         }
-        return round($totalDeductions, 2);
+        return null;
     }
 
-    public function getTotalAttendanceEarningsAttribute()
+    public function getTotalAttendanceDeductionsAttribute(): ?float
     {
-        $totalEarnings = 0;
-        if ($this->attendance_earnings) {
-            foreach ($this->attendance_earnings as $type => $earnings) {
-                if ($type !== PayrollEnumerator::OVERTIME) { continue; }
-                foreach ($earnings as $earning) {
-                    $totalEarnings += $earning['amount'];
-                }
-            }
+        foreach (AttendanceEarningsEnumerator::DEDUCTION_TYPES as $type) {
+            return $this->totalAmountParser($this->attendance_earnings[$type] ?? []);
         }
-        return round($totalEarnings, 2);
+        return null;
     }
 
+    public function getTotalHolidaysPayAttribute(): ?float
+    {
+        $holidayPay = 0;
+        foreach ($this->holidays as $holiday) {
+            $holidayPay += $this->totalAmountParser($holiday);
+        }
+        return $holidayPay;
+    }
+
+    public function getTotalHolidaysWorkedPayAttribute(): ?float
+    {
+        $holidayWorkedPay = 0;
+        foreach ($this->holidays_worked as $holidayWorked) {
+            $holidayWorkedPay += $this->totalAmountParser($holidayWorked);
+        }
+        return $holidayWorkedPay;
+    }
+
+    public function getTotalLeavesPayAttribute(): ?float
+    {
+        $leavesPay = 0;
+        foreach ($this->leaves as $leave) {
+            $leavesPay += $this->totalAmountParser($leave);
+        }
+        return $leavesPay;
+    }
+
+    public function getTotalOtherDeductionsAttribute(): float
+    {
+        return $this->totalAmountParser($this->other_deductions);
+    }
 
     public function getTotalContributionsAttribute(): float
     {
         return $this->sss_contributions + $this->philhealth_contributions + $this->pagibig_contributions;
     }
 
+    public function getTotalDeductionsAttribute(): float
+    {
+        return $this->total_other_deductions + $this->total_attendance_deductions;
+    }
+
     public function getGrossIncomeAttribute(): float
     {
         $grossIncome = $this->basic_salary +
-            $this->leaves_pay +
-            $this->regular_holiday_hours_worked_pay +
-            $this->regular_holiday_hours_pay +
-            $this->special_holiday_hours_worked_pay +
-            $this->special_holiday_hours_pay +
+            $this->total_leaves_pay +
+            $this->total_holidays_pay +
+            $this->total_holidays_worked_pay +
+            $this->total_attendance_earnings +
             $this->total_non_taxable_earnings +
-            $this->total_taxable_earnings;
+            $this->total_taxable_earnings -
+            $this->total_attendance_deductions -
+            $this->total_other_deductions;
         return max(0, $grossIncome);
     }
 
     public function getTaxableIncomeAttribute(): float
     {
-        $taxableIncome = $this->gross_income -
-            $this->total_contributions -
-            $this->total_non_taxable_earnings +
-            $this->total_attendance_earnings +
-            $this->total_attendance_deductions;
+        $taxableIncome = $this->gross_income - $this->total_contributions;
         return $taxableIncome >= 0 ? round($taxableIncome, 2) : 0;
     }
 
