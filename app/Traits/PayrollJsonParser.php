@@ -4,7 +4,7 @@ namespace App\Traits;
 
 trait PayrollJsonParser
 {
-    public function totalAmountParser(array $elements): float
+    public function totalAmountParser($elements): float
     {
         $totalAmount = 0;
         if ($elements) {
