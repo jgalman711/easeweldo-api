@@ -15,6 +15,7 @@ class EditPayrollResource extends BaseResource
             'id' => $this->id,
             'employeeId' => $this->employee_id,
             'periodId' => $this->period_id,
+            'employeeHourlyRate' => $this->employee->salaryComputation->hourly_rate,
             'type' => $this->type,
             'status' => $this->status,
             'description' => $this->description,
