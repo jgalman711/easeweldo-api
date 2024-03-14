@@ -21,6 +21,7 @@ use App\Http\Controllers\ImportEmployeeController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\OvertimeRequestController;
 use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\Payroll\PayPayrollController;
 use App\Http\Controllers\Payroll\PayrollController;
 use App\Http\Controllers\Payroll\RegeneratePayrollController;
 use App\Http\Controllers\Period\CancelPeriodController;
@@ -102,13 +103,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('periods/{period}/pay', PayPeriodController::class);
             Route::post('periods/{period}/cancel', CancelPeriodController::class);
 
-            // Payroll Routes
-            // Route::get('payrolls/{payroll}/download', [ActionPayrollController::class, 'download']);
-            // Route::post('payrolls/{payroll}/regenerate', [ActionPayrollController::class, 'regenerate']);
-            // Route::put('payrolls/{payroll}/{status}', [ActionPayrollController::class, 'update']);
             Route::apiResource('payrolls', PayrollController::class)->except('delete');
             Route::post('payrolls/{payroll}/regenerate', RegeneratePayrollController::class);
-            // End Payroll Routes
+            Route::post('payrolls/{payroll}/pay', PayPayrollController::class);
+            Route::post('payrolls/{payroll}/cancel', RegeneratePayrollController::class);
 
             Route::apiResource('subscriptions', CompanySubscriptionController::class);
             Route::apiResource('work-schedules', WorkScheduleController::class);
