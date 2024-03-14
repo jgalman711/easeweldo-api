@@ -76,7 +76,7 @@ class DetailsPayrollResource extends BaseResource
                         'label' => "$label (" . $holiday['date'] . ")",
                         'rate' => $holiday['rate'],
                         'hours' => $holiday['hours'],
-                        'amount' => $holiday['amount']
+                        'amount' => $holiday['amount'] ?? $holiday['pay'] ?? 0
                     ]);
                 }
             }
@@ -90,7 +90,7 @@ class DetailsPayrollResource extends BaseResource
                         'label' => "$label (" . $holiday['date'] . ")",
                         'rate' => $holiday['rate'],
                         'hours' => $holiday['hours'],
-                        'amount' => $holiday['amount']
+                        'amount' => $holiday['amount'] ?? $holiday['pay'] ?? 0
                     ]);
                 }
             }
@@ -103,7 +103,7 @@ class DetailsPayrollResource extends BaseResource
                         'label' => ucwords(str_replace('_', ' ', $type)) . " ({$leave['date']})",
                         'rate' => $leave['rate'],
                         'hours' => $leave['hours'],
-                        'amount' => number_format($leave['amount'], 2)
+                        'amount' => number_format($leave['amount'] ?? $leave['pay'] ?? 0, 2)
                     ]);
                 }
             }
