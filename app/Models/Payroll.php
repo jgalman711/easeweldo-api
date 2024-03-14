@@ -102,29 +102,17 @@ class Payroll extends Model
 
     public function getTotalHolidaysPayAttribute(): ?float
     {
-        $holidayPay = 0;
-        foreach ($this->holidays as $holiday) {
-            $holidayPay += $this->totalAmountParser($holiday);
-        }
-        return $holidayPay;
+        return $this->totalAmountParser($this->holidays);
     }
 
     public function getTotalHolidaysWorkedPayAttribute(): ?float
     {
-        $holidayWorkedPay = 0;
-        foreach ($this->holidays_worked as $holidayWorked) {
-            $holidayWorkedPay += $this->totalAmountParser($holidayWorked);
-        }
-        return $holidayWorkedPay;
+        return $this->totalAmountParser($this->holidays_worked);
     }
 
     public function getTotalLeavesPayAttribute(): ?float
     {
-        $leavesPay = 0;
-        foreach ($this->leaves as $leave) {
-            $leavesPay += $this->totalAmountParser($leave);
-        }
-        return $leavesPay;
+        return $this->totalAmountParser($this->leaves);
     }
 
     public function getTotalOtherDeductionsAttribute(): float
