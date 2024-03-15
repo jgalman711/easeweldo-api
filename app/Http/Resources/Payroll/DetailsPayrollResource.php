@@ -18,6 +18,7 @@ class DetailsPayrollResource extends BaseResource
         }
         return [
             'status' => ucwords(str_replace("-", " ", $this->status)),
+            'employee_id' => $this->employee_id,
             'pay_date' => $this->pay_date,
             'net_income' => number_format($this->net_income, 2),
             'type' => $type,
