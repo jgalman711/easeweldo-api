@@ -52,7 +52,7 @@ class PeriodController extends Controller
 
     public function destroy(Company $company, int $periodId): JsonResponse
     {
-        $period = $company->getPeriodById($periodId);
+        $period = $company->period->find($periodId);
         if ($period->status != Period::STATUS_PENDING) {
             return $this->sendError('This period cannot be edited as it is already ' . $period->status);
         }

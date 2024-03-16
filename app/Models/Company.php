@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use App\Enumerators\SubscriptionEnumerator;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -55,6 +53,11 @@ class Company extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    public function banks()
+    {
+        return $this->hasMany(Bank::class);
     }
 
     public function biometrics(): HasMany
@@ -138,24 +141,6 @@ class Company extends Model
         return $employee;
     }
 
-    public function getPeriodById(int $periodId): ?Period
-    {
-        $period =  $this->periods->where('id', $periodId)->first();
-        if (!$period) {
-            throw new \Exception('Period not found');
-        }
-        return $period;
-    }
-
-    public function currentPeriod(): ?Period
-    {
-        $now = Carbon::now();
-        return $this->periods()
-            ->where('start_date', '<=', $now)
-            ->where('end_date', '>=', $now)
-            ->first();
-    }
-
     public function isInSettlementPeriod(): bool
     {
         $now = Carbon::now();
@@ -174,48 +159,8 @@ class Company extends Model
         return $workSchedule;
     }
 
-    public function getHasCoreSubscriptionAttribute()
-    {
-        $subscriptions = Subscription::whereIn('name', SubscriptionEnumerator::NAMES)->pluck('id');
-        foreach ($this->companySubscriptions as $companySubscription) {
-            if (in_array($companySubscription->subscription_id, $subscriptions->toArray())
-                && $companySubscription->status == SubscriptionEnumerator::PAID_STATUS
-                && Carbon::now()->lte($companySubscription->end_date)
-            ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public function getHasTimeAndAttendanceSubscriptionAttribute(): bool
-    {
-        $subscription = Subscription::where('name', SubscriptionEnumerator::CORE_TIME)
-            ->orWhere('name', SubscriptionEnumerator::CORE_TIME_DISBURSE)
-            ->first();
-
-        foreach ($this->companySubscriptions as $companySubscription) {
-            if ($companySubscription->subscription_id == $subscription->id
-                && $companySubscription->status == SubscriptionEnumerator::PAID_STATUS
-                && Carbon::now()->lte($subscription->end_date)
-            ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public function getFullAddressAttribute(): string
     {
         return trim($this->address_line . " " . $this->barangay_town_city_province);
-    }
-
-    public function periodsForYear(int $year): Collection
-    {
-        return $this->periods()
-            ->whereNotNull('company_period_id')
-            ->whereYear('start_date', $year)
-            ->whereYear('end_date', $year)
-            ->get();
     }
 }
