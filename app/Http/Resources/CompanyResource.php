@@ -32,6 +32,13 @@ class CompanyResource extends JsonResource
             "sss_number" => $this->sss_number,
             "philhealth_number" => $this->philhealth_number,
             "pagibig_number" => $this->pagibig_number,
+            "is_ot_auto_approve" => optional($this->setting)->is_ot_auto_approve,
+            "overtime_rate" => optional($this->setting)->overtime_rate,
+            'auto_send_email_to_bank' => optional($this->setting)->auto_send_email_to_bank,
+            'auto_pay_disbursement' => optional($this->setting)->auto_pay_disbursement,
+            'clock_action_required' => optional($this->setting)->clock_action_required,
+            'disbursement_method' => optional($this->setting)->disbursement_method,
+            'leaves_convertible' => optional($this->setting)->leaves_convertible
         ];
     }
 }
