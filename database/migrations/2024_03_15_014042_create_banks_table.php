@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('email')->nullable();
             $table->string('contact_name')->nullable();
             $table->string('contact_number')->nullable();
-            $table->boolean('auto_send_email_to_bank')->default(false)->after('is_ot_auto_approve');
             $table->timestamps();
             $table->softDeletes();
         });

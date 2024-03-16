@@ -9,6 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('settings', function (Blueprint $table) {
+            $table->boolean('auto_send_email_to_bank')->default(false)->after('is_ot_auto_approve');
             $table->boolean('auto_pay_disbursement')->default(false)->after('auto_send_email_to_bank');
             $table->boolean('clock_action_required')->default(false)->after('auto_pay_disbursement');
             $table->string('disbursement_method')->nullable()->after('clock_action_required');
