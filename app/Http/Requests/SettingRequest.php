@@ -10,9 +10,9 @@ class SettingRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'period_cycle' => 'required|in:weekly,semi-monthly,monthly',
+            'period_cycle' => 'nullable|in:weekly,semi-monthly,monthly',
             'salary_day' => [
-                'required',
+                'nullable',
                 function ($attribute, $value, $fail) {
                     $periodCycle = $this->input('period_cycle');
 
@@ -28,7 +28,12 @@ class SettingRequest extends BaseRequest
             'disbursement_method' => self::NULLABLE_STRING,
             'grace_period' => 'nullable|integer|min:0',
             'minimum_overtime' => 'nullable|integer|min:0',
-            'overtime_rate' => 'nullable|min:0'
+            'overtime_rate' => 'nullable|min:0',
+            'auto_send_email_to_bank' => self::NULLABLE_BOOLEAN,
+            'auto_pay_disbursement' => self::NULLABLE_BOOLEAN,
+            'clock_action_required' => self::NULLABLE_BOOLEAN,
+            'leaves_convertible' => self::NULLABLE_BOOLEAN,
+            'is_ot_auto_approve' => self::NULLABLE_BOOLEAN
         ];
     }
 
