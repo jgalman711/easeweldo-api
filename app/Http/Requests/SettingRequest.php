@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use App\Models\Period;
-use Carbon\Carbon;
 use Closure;
 
 class SettingRequest extends BaseRequest
@@ -26,8 +25,10 @@ class SettingRequest extends BaseRequest
                     }
                 }
             ],
-            'grace_period' => 'required|integer|min:0',
-            'minimum_overtime' => 'required|integer|min:0'
+            'disbursement_method' => self::NULLABLE_STRING,
+            'grace_period' => 'nullable|integer|min:0',
+            'minimum_overtime' => 'nullable|integer|min:0',
+            'overtime_rate' => 'nullable|min:0'
         ];
     }
 
@@ -36,12 +37,9 @@ class SettingRequest extends BaseRequest
         if (count($value) !== 2) {
             $fail("The salary day must contain 2 days for semi-monthly period cycle.");
         }
-
         sort($value);
-        $day1 = Carbon::createFromFormat('d', $value[0]);
-        $day2 = Carbon::createFromFormat('d', $value[1]);
-        if ($day1->diffInDays($day2) !== 15) {
-            $fail("The salary days for semi-monthly period cycle must be 15 days apart.");
+        if ((int)$value[1] - (int)$value[0] < 15) {
+            $fail("The salary days for semi-monthly period cycle must be at least 15 days apart.");
         }
     }
 
