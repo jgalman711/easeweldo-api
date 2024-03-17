@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SettingRequest;
 use App\Http\Resources\BaseResource;
+use App\Http\Resources\SettingsResource;
 use App\Models\Company;
 use App\Models\Setting;
 use App\Services\PeriodService;
@@ -20,7 +21,7 @@ class SettingController extends Controller
 
     public function index(Company $company): JsonResponse
     {
-        return $this->sendResponse(new BaseResource($company->setting), 'Company settings retrieved successfully.');
+        return $this->sendResponse(new SettingsResource($company->setting), 'Company settings retrieved successfully.');
     }
 
     public function store(SettingRequest $request, Company $company): JsonResponse
