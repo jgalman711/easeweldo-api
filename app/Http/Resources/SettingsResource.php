@@ -35,31 +35,34 @@ class SettingsResource extends BaseResource
     {
         if ($this->period_cycle == DisbursementEnumerator::SUBTYPE_WEEKLY) {
             $salaryDay = ucfirst($this->salary_day);
-            $suffix = "of the week";
         } else {
             $salaryDay = $this->getOrdinal($this->salary_day[0]);
             if (isset($this->salary_day[1])) {
                 $salaryDay .= " and " . $this->getOrdinal($this->salary_day[1]);
             }
-            $suffix = "of the month";
         }
-        return "Every $salaryDay $suffix";
+        return "Every $salaryDay";
     }
 
     private function getOrdinal(int $number): string {
-        if (in_array(($number % 100), [11, 12, 13])) {
+        if (in_array((($number) % 100), [11, 12, 13])) {
             return $number.'th';
         }
         $lastDigit = $number % 10;
+
         switch ($lastDigit) {
             case 1:
                 $ordinal = $number.'st';
+                break;
             case 2:
                 $ordinal = $number.'nd';
+                break;
             case 3:
                 $ordinal = $number.'rd';
+                break;
             default:
                 $ordinal = $number.'th';
+                break;
         }
         return $ordinal;
     }
