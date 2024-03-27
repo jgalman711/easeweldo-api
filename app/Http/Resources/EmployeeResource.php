@@ -55,7 +55,19 @@ class EmployeeResource extends JsonResource
                 "temporary_password" => $this->user->temporary_password
             ] : null,
             "work_schedule_start_date" => optional($latestSchedule)->start_date,
-            "work_schedule_name" => optional(optional($latestSchedule)->workSchedule)->name
+            "work_schedule_name" => optional(optional($latestSchedule)->workSchedule)->name,
+            "salary_package" => $this->getSalaryPackage()
         ];
+    }
+
+    private function getSalaryPackage()
+    {
+        $salaryComputation = $this->salaryComputation;
+        if ($salaryComputation && $salaryComputation->basic_salary) {
+            return "₱" . number_format($salaryComputation->basic_salary, 2) . " / month";
+        } elseif ($salaryComputation && $salaryComputation->hourly_rate) {
+            return "₱" . number_format($salaryComputation->hourly_rate, 2) . " / hour";
+        }
+        return null;
     }
 }
