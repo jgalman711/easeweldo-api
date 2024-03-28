@@ -31,6 +31,7 @@ trait Cache
             $key = $key->slug;
         }
         $cacheKey = $this->makeCacheKey($key, $unique);
+
         return FacadesCache::remember($cacheKey, $this->cacheDuration, function () use ($closure) {
             return $closure();
         });
@@ -38,7 +39,7 @@ trait Cache
 
     public function forget($key, $unique = null): void
     {
-        if (!$this->identifier) {
+        if (! $this->identifier) {
             return;
         }
         if ($key instanceof Company) {
@@ -56,8 +57,9 @@ trait Cache
     {
         if ($unique) {
             $unique = $unique instanceof Request ? $unique->all() : $unique;
-            $unique = "-" . md5(serialize($unique));
+            $unique = '-'.md5(serialize($unique));
         }
+
         return "{$key}:{$this->identifier}{$unique}";
     }
 }

@@ -15,6 +15,7 @@ class WorkScheduleRequest extends BaseRequest
             $rules["{$day}_clock_in_time"] = self::NULLABLE_TIME_FORMAT;
             $rules["{$day}_clock_out_time"] = self::NULLABLE_TIME_FORMAT;
         }
+
         return [
             ...$rules,
             'name' => [
@@ -24,10 +25,10 @@ class WorkScheduleRequest extends BaseRequest
                 Rule::unique('work_schedules', 'name')
                     ->where(function ($query) use ($companyId) {
                         $query->where('company_id', $companyId)
-                              ->whereNull('deleted_at');
+                            ->whereNull('deleted_at');
                     })
                     ->ignore($this->work_schedule->id ?? null),
-            ]
+            ],
         ];
     }
 }

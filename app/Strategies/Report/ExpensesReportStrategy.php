@@ -41,6 +41,7 @@ class ExpensesReportStrategy implements ReportStrategy
                 return $monthlyPayrolls->sum($category);
             });
         }
+
         return $payrollTotals;
     }
 }

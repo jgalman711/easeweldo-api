@@ -9,15 +9,15 @@ class EarningTypeJsonRule implements ValidationRule
 {
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (isset($value) && !empty($value)) {
+        if (isset($value) && ! empty($value)) {
             foreach ($value as $item) {
-                if (!isset($item['name']) || !$item['name']) {
+                if (! isset($item['name']) || ! $item['name']) {
                     $fail('The :attribute name is required.');
                 }
-                if (!isset($item['amount']) || !$item['amount']) {
+                if (! isset($item['amount']) || ! $item['amount']) {
                     $fail('The :attribute amount is required.');
                 }
-                if (!isset($item['amount']) || $item['amount'] < 0) {
+                if (! isset($item['amount']) || $item['amount'] < 0) {
                     $fail('The :attribute amount must be greater than zero.');
                 }
             }

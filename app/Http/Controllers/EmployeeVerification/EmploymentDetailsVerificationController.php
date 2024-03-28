@@ -15,19 +15,25 @@ class EmploymentDetailsVerificationController extends Controller
      *     summary="Verify employee creation employee details",
      *     security={{"bearerAuth":{}}},
      *     tags={"Employee Creation Verification"},
+     *
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
      *         required=true,
      *         description="Slug of the company",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *              @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(property="department", type="string", description="Department of the employee", example="IT"),
      *                 @OA\Property(property="job_title", type="string", description="Job title of the employee", example="Developer"),
      *                 @OA\Property(property="date_of_hire", type="string", format="date", description="Date of hire", example="2024-01-15"),
@@ -38,12 +44,13 @@ class EmploymentDetailsVerificationController extends Controller
      *             ),
      *         ),
      *     ),
+     *
      *     @OA\Response(response="201", description="Employee details are validated successfully"),
      *     @OA\Response(response="422", description="Validation errors")
      * )
      */
     public function __invoke(EmployeeDetailsRequest $request, Company $company): JsonResponse
     {
-        return $this->sendResponse(["data" => $request->validated()], "Employee details are validated successfully");
+        return $this->sendResponse(['data' => $request->validated()], 'Employee details are validated successfully');
     }
 }

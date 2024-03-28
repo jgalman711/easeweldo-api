@@ -17,7 +17,7 @@ class Company extends Model
     public const STATUSES = [
         self::STATUS_ACTIVE,
         self::STATUS_INACTIVE,
-        self::STATUS_PENDING
+        self::STATUS_PENDING,
     ];
 
     public const STATUS_ACTIVE = 'active';
@@ -47,7 +47,7 @@ class Company extends Model
         'tin',
         'sss_number',
         'philhealth_number',
-        'pagibig_number'
+        'pagibig_number',
     ];
 
     public function getRouteKeyName(): string
@@ -135,15 +135,17 @@ class Company extends Model
     public function getEmployeeById(int $employeeId): ?Employee
     {
         $employee = $this->employees()->with('user')->where('id', $employeeId)->first();
-        if (!$employee) {
+        if (! $employee) {
             throw new \Exception('Employee not found');
         }
+
         return $employee;
     }
 
     public function isInSettlementPeriod(): bool
     {
         $now = Carbon::now();
+
         return $this->periods()
             ->where('end_date', '<=', $now)
             ->where('salary_date', '>=', $now)
@@ -153,14 +155,15 @@ class Company extends Model
     public function getWorkScheduleById(int $workScheduleId): ?WorkSchedule
     {
         $workSchedule = $this->workSchedules->where('id', $workScheduleId)->first();
-        if (!$workSchedule) {
+        if (! $workSchedule) {
             throw new \Exception('Work schedule not found');
         }
+
         return $workSchedule;
     }
 
     public function getFullAddressAttribute(): string
     {
-        return trim($this->address_line . " " . $this->barangay_town_city_province);
+        return trim($this->address_line.' '.$this->barangay_town_city_province);
     }
 }

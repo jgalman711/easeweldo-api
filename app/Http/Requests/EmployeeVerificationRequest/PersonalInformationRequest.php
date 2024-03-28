@@ -26,7 +26,7 @@ class PersonalInformationRequest extends BaseRequest
                 Rule::unique('employees', 'mobile_number')
                     ->whereNull('deleted_at')
                     ->ignore($this->employee),
-                self::PH_MOBILE_NUMBER
+                self::PH_MOBILE_NUMBER,
             ],
             'date_of_birth' => self::REQUIRED_DATE,
             'address_line' => self::REQUIRED_STRING,

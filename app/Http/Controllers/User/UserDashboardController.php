@@ -23,7 +23,7 @@ class UserDashboardController extends Controller
         $workSchedule = $employee->schedules->first();
         $data = [
             'timeRecord' => $timeRecord,
-            'workSchedule' => $workSchedule
+            'workSchedule' => $workSchedule,
         ];
 
         return $this->sendResponse(new DashboardResource($data), 'Dashboard data successfully retrieved.');

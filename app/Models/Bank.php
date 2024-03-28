@@ -14,7 +14,7 @@ class Bank extends Model
         'account_number',
         'email',
         'contact_name',
-        'contact_number'
+        'contact_number',
     ];
 
     public function company()

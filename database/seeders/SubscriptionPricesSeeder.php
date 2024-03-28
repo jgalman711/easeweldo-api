@@ -15,7 +15,7 @@ class SubscriptionPricesSeeder extends Seeder
             1 => 200,
             12 => 190,
             24 => 175,
-            36 => 150
+            36 => 150,
         ];
         $subscriptions = Subscription::all();
         foreach ($subscriptions as $subscription) {
@@ -23,7 +23,7 @@ class SubscriptionPricesSeeder extends Seeder
                 SubscriptionPrices::create([
                     'subscription_id' => $subscription->id,
                     'months' => $month,
-                    'price_per_employee' => $amount + $priceMarkup
+                    'price_per_employee' => $amount + $priceMarkup,
                 ]);
             }
             $priceMarkup += 50;

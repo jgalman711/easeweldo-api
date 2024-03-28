@@ -11,7 +11,7 @@ class RegistrationResource extends BaseResource
         return [
             'token' => $this['token'],
             'user' => new UserResource($this['user']),
-            'company' => new CompanyResource($this['company'])
+            'company' => new CompanyResource($this['company']),
         ];
     }
 }

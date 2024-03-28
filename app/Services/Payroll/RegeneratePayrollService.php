@@ -22,6 +22,7 @@ class RegeneratePayrollService extends GeneratePayrollService
             $this->payroll->status = PayrollEnumerator::STATUS_TO_PAY;
             $this->payroll->save();
             DB::commit();
+
             return $this->payroll;
         } catch (Exception $e) {
             DB::rollBack();
@@ -45,10 +46,10 @@ class RegeneratePayrollService extends GeneratePayrollService
 
         $this->timesheet = $this->employee->timeRecords()->byRange([
             'dateFrom' => $this->period->start_date,
-            'dateTo' => $this->period->end_date
+            'dateTo' => $this->period->end_date,
         ])->get();
 
-        if (!$this->salaryComputation || !$this->companySettings) {
+        if (! $this->salaryComputation || ! $this->companySettings) {
             $this->payroll->status = PayrollEnumerator::STATUS_FAILED;
             $this->payroll->save();
             throw new Exception("Payroll {$this->payroll->id} generation encountered an error.");

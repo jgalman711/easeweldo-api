@@ -16,7 +16,8 @@ class UserSubscribed extends Mailable
 
     public function __construct(
         protected CompanySubscription $companySubscription,
-    ){}
+    ) {
+    }
 
     public function envelope(): Envelope
     {
@@ -33,7 +34,7 @@ class UserSubscribed extends Mailable
                 'company' => $this->companySubscription->company,
                 'subscription' => $this->companySubscription->subscription,
                 'company_subscription' => $this->companySubscription,
-                'payment_methods' => PaymentMethod::where('status', PaymentMethod::STATUS_ACTIVE)->get()
+                'payment_methods' => PaymentMethod::where('status', PaymentMethod::STATUS_ACTIVE)->get(),
             ]
         );
     }

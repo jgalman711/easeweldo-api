@@ -21,11 +21,15 @@ class RegisterController extends Controller
      *     path="/api/register",
      *     summary="Register a new user and company",
      *     tags={"Authentication"},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
+     *
      *                 @OA\Property(property="company_name", type="string", description="Name of the company", maxLength=255),
      *                 @OA\Property(property="first_name", type="string", description="First name of the company admin", maxLength=255),
      *                 @OA\Property(property="last_name", type="string", description="Last name of the company admin", maxLength=255),
@@ -36,12 +40,16 @@ class RegisterController extends Controller
      *             ),
      *         ),
      *     ),
+     *
      *     @OA\Response(
      *         response="201",
      *         description="User and company registered successfully",
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
+     *
      *                 @OA\Property(property="success", type="boolean", example=true),
      *                 @OA\Property(
      *                      property="message",
@@ -59,6 +67,7 @@ class RegisterController extends Controller
      *             ),
      *         ),
      *     ),
+     *
      *     @OA\Response(response="422", description="Validation errors"),
      *     @OA\Response(response="429", description="Too Many Requests - reCAPTCHA verification failed"),
      * )
@@ -67,6 +76,7 @@ class RegisterController extends Controller
     {
         $input = $request->validated();
         $result = $this->registrationService->register($input);
+
         return $this->sendResponse(
             new RegistrationResource($result),
             'Thank you for registering your company. Your registration is currently pending review. You will receive an email notification once the review process is complete.'

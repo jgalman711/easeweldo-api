@@ -20,14 +20,14 @@ class TimeRecordService
 
     protected const CLOCK_IN = 'clock_in';
 
-    protected const CLOCK_OUT= 'clock_out';
+    protected const CLOCK_OUT = 'clock_out';
 
     public function create(
         Employee $employee,
-        string $clockInDate = null,
-        string $clockOutDate = null
+        ?string $clockInDate = null,
+        ?string $clockOutDate = null
     ): ?TimeRecord {
-        list($expectedClockIn, $expectedClockOut) = $this->getExpectedScheduleOf(
+        [$expectedClockIn, $expectedClockOut] = $this->getExpectedScheduleOf(
             $employee,
             $clockInDate,
             $clockOutDate
@@ -35,23 +35,24 @@ class TimeRecordService
 
         if ($expectedClockIn && $expectedClockOut) {
             $expectedClockIn = Carbon::parse($clockInDate)->format('Y-m-d')
-                . ' ' . Carbon::parse($expectedClockIn)->format('H:i:s');
+                .' '.Carbon::parse($expectedClockIn)->format('H:i:s');
             $expectedClockOut = Carbon::parse($clockOutDate)->format('Y-m-d')
-                . ' ' . Carbon::parse($expectedClockOut)->format('H:i:s');
+                .' '.Carbon::parse($expectedClockOut)->format('H:i:s');
 
             return TimeRecord::create([
                 'employee_id' => $employee->id,
                 'expected_clock_in' => $expectedClockIn,
-                'expected_clock_out' => $expectedClockOut
+                'expected_clock_out' => $expectedClockOut,
             ]);
         }
+
         return null;
     }
 
     public function getExpectedScheduleOf(
         Employee $employee,
-        string $clockInDate = null,
-        string $clockOutDate = null
+        ?string $clockInDate = null,
+        ?string $clockOutDate = null
     ): array {
         $clockInDate = is_null($clockInDate) ? Carbon::now() : Carbon::parse($clockInDate);
         $clockOutDate = is_null($clockOutDate) ? Carbon::now() : Carbon::parse($clockOutDate);
@@ -62,19 +63,19 @@ class TimeRecordService
 
         throw_unless($workSchedule, new Exception('No available work schedule'));
 
-        $dayClockInProperty = strtolower($clockInDate->dayName) . self::CLOCK_IN_TIME_SUFFIX;
-        $dayClockOutProperty = strtolower($clockOutDate->dayName) . self::CLOCK_OUT_TIME_SUFFIX;
+        $dayClockInProperty = strtolower($clockInDate->dayName).self::CLOCK_IN_TIME_SUFFIX;
+        $dayClockOutProperty = strtolower($clockOutDate->dayName).self::CLOCK_OUT_TIME_SUFFIX;
 
         return [
             'expected_clock_in' => $workSchedule->$dayClockInProperty,
-            'expected_clock_out' => $workSchedule->$dayClockOutProperty
+            'expected_clock_out' => $workSchedule->$dayClockOutProperty,
         ];
     }
 
     public function getTimeRecordsByDateRange(
         Relation $timeRecordsQuery,
-        string $dateFrom = null,
-        string $dateTo = null
+        ?string $dateFrom = null,
+        ?string $dateTo = null
     ): Relation {
         return $timeRecordsQuery
             ->where(function ($query) {
@@ -82,17 +83,17 @@ class TimeRecordService
                     ->orWhereNotNull('clock_out')
                     ->orWhereNotNull('expected_clock_in')
                     ->orWhereNotNull('expected_clock_out');
-        })->when($dateFrom, function ($query) use ($dateFrom) {
-            $query->where(function ($innerQuery) use ($dateFrom) {
-                $innerQuery->whereDate('expected_clock_in', '>=', $dateFrom)
-                    ->orWhereDate('clock_in', '>=', $dateFrom);
+            })->when($dateFrom, function ($query) use ($dateFrom) {
+                $query->where(function ($innerQuery) use ($dateFrom) {
+                    $innerQuery->whereDate('expected_clock_in', '>=', $dateFrom)
+                        ->orWhereDate('clock_in', '>=', $dateFrom);
+                });
+            })->when($dateTo, function ($query) use ($dateTo) {
+                $query->where(function ($innerQuery) use ($dateTo) {
+                    $innerQuery->whereDate('expected_clock_in', '<=', $dateTo)
+                        ->orWhereDate('clock_in', '<=', $dateTo);
+                });
             });
-        })->when($dateTo, function ($query) use ($dateTo) {
-            $query->where(function ($innerQuery) use ($dateTo) {
-                $innerQuery->whereDate('expected_clock_in', '<=', $dateTo)
-                    ->orWhereDate('clock_in', '<=', $dateTo);
-            });
-        });
     }
 
     public function getTimeRecordToday(Employee $employee): ?TimeRecord
@@ -104,7 +105,7 @@ class TimeRecordService
         )->first();
     }
 
-    public function setExpectedScheduleOf(Employee $employee, Carbon $day = null): TimeRecord
+    public function setExpectedScheduleOf(Employee $employee, ?Carbon $day = null): TimeRecord
     {
         $day = $day ?? now();
         $expectedSchedule = $this->getExpectedScheduleOf($employee);
@@ -116,11 +117,13 @@ class TimeRecordService
         $timeRecord = TimeRecord::whereDate('clock_in', $expectedSchedule['expected_clock_in'])->first();
         if ($timeRecord) {
             $timeRecord->update($expectedSchedule);
+
             return $timeRecord;
         }
+
         return TimeRecord::updateOrCreate($expectedSchedule, [
             'company_id' => $employee->company_id,
-            'employee_id' => $employee->id
+            'employee_id' => $employee->id,
         ]);
     }
 
@@ -135,7 +138,6 @@ class TimeRecordService
         }
     }
 
-
     public function synchFromBiometrics(array $attendance, Company $company)
     {
         foreach ($attendance as $record) {
@@ -148,24 +150,24 @@ class TimeRecordService
                 $clock = self::CLOCK_OUT;
                 $timeRecord = TimeRecord::where([
                     'company_id' => $company->id,
-                    'employee_id' => $employee->id
+                    'employee_id' => $employee->id,
                 ])->where(function ($query) use ($clock, $record) {
                     $query->where("original_{$clock}", $record['timestamp'])
                         ->orWhere($clock, $record['timestamp']);
                 })->first();
 
-                if (!$timeRecord) {
+                if (! $timeRecord) {
                     $latestTimeRecord = TimeRecord::where([
                         'company_id' => $company->id,
-                        'employee_id' => $employee->id
+                        'employee_id' => $employee->id,
                     ])
-                    ->whereNull(self::CLOCK_OUT)
-                    ->latest('id')
-                    ->first();
+                        ->whereNull(self::CLOCK_OUT)
+                        ->latest('id')
+                        ->first();
 
-                    if ($latestTimeRecord && $latestTimeRecord->clock_in && !$latestTimeRecord->clock_out) {
+                    if ($latestTimeRecord && $latestTimeRecord->clock_in && ! $latestTimeRecord->clock_out) {
                         $latestTimeRecord->update([
-                            'clock_out' => $record['timestamp']
+                            'clock_out' => $record['timestamp'],
                         ]);
                     } else {
                         self::timeRecordFirstOrCreate($company, $employee, $record, $clock);
@@ -183,19 +185,20 @@ class TimeRecordService
     ): TimeRecord {
         $timeRecord = TimeRecord::where([
             'company_id' => $company->id,
-            'employee_id' => $employee->id
+            'employee_id' => $employee->id,
         ])->where(function ($query) use ($clock, $record) {
             $query->where("original_{$clock}", $record['timestamp'])
                 ->orWhere($clock, $record['timestamp']);
         })->first();
 
-        if (!$timeRecord) {
+        if (! $timeRecord) {
             $timeRecord = TimeRecord::create([
                 'company_id' => $company->id,
                 'employee_id' => $employee->id,
-                $clock => $record['timestamp']
+                $clock => $record['timestamp'],
             ]);
         }
+
         return $timeRecord;
     }
 

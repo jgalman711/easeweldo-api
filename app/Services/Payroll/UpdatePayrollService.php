@@ -10,7 +10,9 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class UpdatePayrollService
 {
     protected $payroll;
+
     protected $employee;
+
     protected $employeeHourlyRate;
 
     public function update(Payroll $payroll, array $input): Payroll
@@ -24,6 +26,7 @@ class UpdatePayrollService
         $this->calculateAttendanceDeductions($input);
         $this->calculateOtherDeductions($input);
         $payroll->save();
+
         return $payroll;
     }
 
@@ -33,8 +36,9 @@ class UpdatePayrollService
             'payroll' => $payroll,
             'period' => $payroll->period,
             'employee' => $payroll->employee,
-            'company' => optional($payroll->employee)->company
+            'company' => optional($payroll->employee)->company,
         ]);
+
         return base64_encode($pdf->output());
     }
 
@@ -94,7 +98,7 @@ class UpdatePayrollService
                         'date' => $deduction['date'],
                         'rate' => $deduction['rate'],
                         'hours' => $deduction['hours'],
-                        'amount' => $deduction['rate'] * $deduction['hours'] * $this->employeeHourlyRate
+                        'amount' => $deduction['rate'] * $deduction['hours'] * $this->employeeHourlyRate,
                     ];
                 }
             }
@@ -119,7 +123,7 @@ class UpdatePayrollService
                     'date' => $overtime['date'],
                     'rate' => $overtime['rate'],
                     'hours' => $overtime['hours'],
-                    'amount' => $overtime['rate'] * $overtime['hours'] * $this->employeeHourlyRate
+                    'amount' => $overtime['rate'] * $overtime['hours'] * $this->employeeHourlyRate,
                 ];
             }
         }
@@ -136,7 +140,7 @@ class UpdatePayrollService
                     'date' => $leave['date'],
                     'rate' => $leave['rate'],
                     'hours' => $leave['hours'],
-                    'amount' => $leave['rate'] * $leave['hours'] * $this->employeeHourlyRate
+                    'amount' => $leave['rate'] * $leave['hours'] * $this->employeeHourlyRate,
                 ];
             }
         }
@@ -148,10 +152,11 @@ class UpdatePayrollService
                     'date' => $leave['date'],
                     'rate' => $leave['rate'],
                     'hours' => $leave['hours'],
-                    'amount' => $leave['rate'] * $leave['hours'] * $this->employeeHourlyRate
+                    'amount' => $leave['rate'] * $leave['hours'] * $this->employeeHourlyRate,
                 ];
             }
         }
+
         return $this->payroll->leaves = $leaveEarnings;
     }
 
@@ -184,9 +189,10 @@ class UpdatePayrollService
                 'date' => $holiday['date'],
                 'rate' => $holiday['rate'],
                 'hours' => $holiday['hours'],
-                'amount' => $holiday['rate'] * $holiday['hours'] * $this->employeeHourlyRate
+                'amount' => $holiday['rate'] * $holiday['hours'] * $this->employeeHourlyRate,
             ];
         }
+
         return $holidayEarnings;
     }
 }

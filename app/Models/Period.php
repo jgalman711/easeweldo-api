@@ -15,16 +15,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * This will act as the disbursements.
- *
  */
 class Period extends Model
 {
     use SoftDeletes;
 
     public const STATUS_UNINITIALIZED = 'uninitialized';
+
     public const STATUS_CANCELLED = 'cancelled';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_FAILED = 'failed';
 
     public const STATUSES = [
@@ -32,14 +35,14 @@ class Period extends Model
         self::STATUS_FAILED,
         self::STATUS_PENDING,
         self::STATUS_COMPLETED,
-        self::STATUS_CANCELLED
+        self::STATUS_CANCELLED,
     ];
 
     public const TYPES = [
         self::TYPE_REGULAR,
         self::TYPE_SPECIAL,
         self::TYPE_NTH_MONTH_PAY,
-        self::TYPE_FINAL
+        self::TYPE_FINAL,
     ];
 
     public const SUBTYPES = [
@@ -49,12 +52,17 @@ class Period extends Model
     ];
 
     public const SUBTYPE_MONTHLY = 'monthly';
+
     public const SUBTYPE_SEMI_MONTHLY = 'semi-monthly';
+
     public const SUBTYPE_WEEKLY = 'weekly';
 
     public const TYPE_REGULAR = 'regular';
+
     public const TYPE_SPECIAL = 'special';
+
     public const TYPE_NTH_MONTH_PAY = 'nth_month_pay';
+
     public const TYPE_FINAL = 'final';
 
     public const ALLOWED_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -68,7 +76,7 @@ class Period extends Model
         'start_date',
         'end_date',
         'salary_date',
-        'status'
+        'status',
     ];
 
     protected $appends = [
@@ -76,7 +84,7 @@ class Period extends Model
         'employees_net_pay',
         'withheld_taxes',
         'total_contributions',
-        'payroll_cost'
+        'payroll_cost',
     ];
 
     public function state(): DisbursementStateContract
@@ -120,7 +128,7 @@ class Period extends Model
 
     public function getPayrollCostAttribute(): float
     {
-        return $this->employees_net_pay +  $this->withheld_taxes +  $this->total_contributions;
+        return $this->employees_net_pay + $this->withheld_taxes + $this->total_contributions;
     }
 
     public function scopeByRange(Builder $periodsQuery, array $range): Builder

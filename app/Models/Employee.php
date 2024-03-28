@@ -20,32 +20,39 @@ class Employee extends Model
     public const EMPLOYMENT_TYPE = [
         self::FULL_TIME,
         self::PART_TIME,
-        self::CONTRACT
+        self::CONTRACT,
     ];
 
     public const FULL_TIME = 'full-time';
+
     public const PART_TIME = 'part-time';
+
     public const CONTRACT = 'contract';
 
     public const EMPLOYMENT_STATUS = [
         self::REGULAR,
         self::PROBATIONARY,
         self::TERMINATED,
-        self::RESIGNED
+        self::RESIGNED,
     ];
 
     public const REGULAR = 'regular';
+
     public const PROBATIONARY = 'probationary';
+
     public const RESIGNED = 'resigned';
+
     public const TERMINATED = 'terminated';
 
     public const FULL_TIME_WORKING_DAYS_PER_WEEK = [
         self::FIVE_DAYS_PER_WEEK,
-        self::SIX_DAYS_PER_WEEK
+        self::SIX_DAYS_PER_WEEK,
     ];
 
     public const FIVE_DAYS_PER_WEEK = 5;
+
     public const SIX_DAYS_PER_WEEK = 6;
+
     public const AS_NEEDED = 0;
 
     public const EIGHT_HOURS_PER_DAY = 8;
@@ -53,11 +60,13 @@ class Employee extends Model
     public const STATUS = [
         self::INACTIVE,
         self::ACTIVE,
-        self::PENDING
+        self::PENDING,
     ];
 
     public const ACTIVE = 'active';
+
     public const INACTIVE = 'inactive';
+
     public const PENDING = 'pending';
 
     protected $fillable = [
@@ -83,13 +92,13 @@ class Employee extends Model
         'bank_name',
         'bank_account_name',
         'bank_account_number',
-        'profile_picture'
+        'profile_picture',
     ];
 
     protected $appends = [
         'first_name',
         'last_name',
-        'full_name'
+        'full_name',
     ];
 
     public function company(): BelongsTo
@@ -154,7 +163,7 @@ class Employee extends Model
 
     public function getFullNameAttribute(): ?string
     {
-        return ucfirst(optional($this->user)->first_name) . " " . ucfirst(optional($this->user)->last_name);
+        return ucfirst(optional($this->user)->first_name).' '.ucfirst(optional($this->user)->last_name);
     }
 
     public function getLeaveById(int $leaveId): Leave
@@ -174,7 +183,7 @@ class Employee extends Model
 
     public function getFullAddressAttribute(): string
     {
-        return trim($this->address_line . " " . $this->barangay_town_city_province);
+        return trim($this->address_line.' '.$this->barangay_town_city_province);
     }
 
     public function getEmailAddressAttribute(): ?string

@@ -13,10 +13,13 @@ class TimeCorrection extends Model
     public const STATUSES = [
         self::STATUS_APPROVED,
         self::STATUS_PENDING,
-        self::STATUS_REJECTED
+        self::STATUS_REJECTED,
     ];
+
     public const STATUS_APPROVED = 'approved';
+
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_REJECTED = 'rejected';
 
     protected $fillable = [

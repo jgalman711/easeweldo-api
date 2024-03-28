@@ -7,6 +7,7 @@ use App\Models\Pagibig;
 class PagIbigCalculatorService
 {
     protected $employeeShare;
+
     protected $employerShare;
 
     public function compute(float $salary): float
@@ -14,7 +15,7 @@ class PagIbigCalculatorService
         $pagibig = Pagibig::where([
             ['min_compensation', '<=', $salary],
             ['max_compensation', '>=', $salary],
-            ['status', Pagibig::ACTIVE]
+            ['status', Pagibig::ACTIVE],
         ])->first();
 
         if ($pagibig) {
@@ -25,8 +26,10 @@ class PagIbigCalculatorService
                 $this->employeeShare = $salary * $pagibig->employee_contribution_rate;
                 $this->employerShare = $salary * $pagibig->employer_contribution_rate;
             }
+
             return $this->employeeShare;
         }
+
         return 0;
     }
 

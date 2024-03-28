@@ -10,7 +10,7 @@ class CompanyQrRequest extends BaseRequest
     {
         return [
             'action' => 'required|in:clock',
-            'geolocation' => 'string'
+            'geolocation' => 'string',
         ];
     }
 }

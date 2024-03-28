@@ -11,7 +11,6 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class LeaveService
 {
@@ -22,7 +21,7 @@ class LeaveService
         $this->timeRecordService = $timeRecordService;
     }
 
-    public function getLeaveByDateRange(Employee $employee, Carbon $dateFrom = null, Carbon $dateTo = null): Collection
+    public function getLeaveByDateRange(Employee $employee, ?Carbon $dateFrom = null, ?Carbon $dateTo = null): Collection
     {
         return $employee->leaves()
             ->where(function ($query) use ($dateFrom, $dateTo) {
@@ -62,8 +61,10 @@ class LeaveService
         }
         if ($request->has('per_page')) {
             $perPage = $request->input('per_page', 10);
+
             return $query->paginate($perPage);
         }
+
         return $query->get();
     }
 
@@ -93,39 +94,42 @@ class LeaveService
                 'date' => $fromDate,
                 'submitted_date' => Carbon::now()->toDateString(),
                 'remarks' => $leaveRequest->remarks,
-                'status' => Leave::PENDING
+                'status' => Leave::PENDING,
             ]);
             array_push($leaves, $leave);
             $fromDate->addDay();
         }
+
         return $leaves;
     }
 
     public function createLeave(Employee $employee, array $data): Leave
     {
-        throw_if($data['hours'] <= 0, new Exception("Insufficient leave balance."));
+        throw_if($data['hours'] <= 0, new Exception('Insufficient leave balance.'));
+
         return Leave::create([
             'company_id' => $data['company_id'],
             'employee_id' => $employee->id,
             'created_by' => Auth::id(),
-            'type' => $data['type'] . '_leave',
+            'type' => $data['type'].'_leave',
             'description' => $data['description'],
             'hours' => $data['hours'],
             'date' => Carbon::parse($data['date'])->toDateString(),
             'submitted_date' => Carbon::now()->toDateString(),
             'remarks' => $data['remarks'] ?? null,
-            'status' => Leave::PENDING
+            'status' => Leave::PENDING,
         ]);
 
     }
 
-    public function approve(Leave $leave, string $remarks = null): Leave
+    public function approve(Leave $leave, ?string $remarks = null): Leave
     {
         $leave->status = Leave::APPROVED;
         $leave->approved_by = Auth::id();
         $leave->approved_date = Carbon::now()->toDateString();
         $leave->remarks = $remarks;
         $leave->save();
+
         return $leave;
     }
 
@@ -140,6 +144,7 @@ class LeaveService
         $groupedLeaves = $leaves->groupBy(function ($item) {
             return Carbon::parse($item->date)->format('Y-m-d');
         });
+
         return $groupedLeaves->sortBy(function ($item) {
             return $item;
         });

@@ -13,14 +13,15 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes;
 
     public const ACTIVE = 'active';
+
     public const INACTIVE = 'inactive';
 
     public const STATUSES = [
         self::ACTIVE,
-        self::INACTIVE
+        self::INACTIVE,
     ];
 
     protected $fillable = [
@@ -31,7 +32,7 @@ class User extends Authenticatable
         'status',
         'password',
         'temporary_password',
-        'temporary_password_expires_at'
+        'temporary_password_expires_at',
     ];
 
     protected $appends = ['email'];
@@ -45,7 +46,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'temporary_password_expires_at' => 'datetime'
+        'temporary_password_expires_at' => 'datetime',
     ];
 
     public function companies()

@@ -10,9 +10,9 @@ class DisbursementRepository
     {
         return Period::where([
             ['type', $type],
-            ['status', $status]
+            ['status', $status],
         ])
-        ->orderBy('salary_date', 'desc')
-        ->first();
+            ->orderBy('salary_date', 'desc')
+            ->first();
     }
 }

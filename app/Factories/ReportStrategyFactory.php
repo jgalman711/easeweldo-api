@@ -16,8 +16,9 @@ class ReportStrategyFactory
         } elseif ($type == ReportEnumerator::MONTHLY_SUMMARY) {
             $strategy = new MonthlyReportStrategy;
         } else {
-            throw new Exception("Invalid report type");
+            throw new Exception('Invalid report type');
         }
+
         return $strategy;
     }
 }

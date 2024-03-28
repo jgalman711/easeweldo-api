@@ -23,6 +23,7 @@ class PeriodController extends Controller
     public function index(Request $request, Company $company): JsonResponse
     {
         $periods = $this->applyFilters($request, $company->periods()->with('payrolls'));
+
         return $this->sendResponse(
             PeriodResource::collection($periods),
             'Payroll periods retrieved successfully.'
@@ -32,6 +33,7 @@ class PeriodController extends Controller
     public function show(Company $company, int|string $periodId): JsonResponse
     {
         $period = $this->periodService->getCompanyPeriod($company, $periodId);
+
         return $this->sendResponse(new PeriodResource($period), 'Payroll period retrieved successfully.');
     }
 
@@ -40,13 +42,14 @@ class PeriodController extends Controller
         $period = $company->periods()->findOrFail($periodId);
         $input = $request->validated();
         if ($period->status != Period::STATUS_PENDING) {
-            return $this->sendError('This period cannot be edited as it is already ' . $period->status);
+            return $this->sendError('This period cannot be edited as it is already '.$period->status);
         }
         $companyPreviousPeriod = $company->periods()->latest()->first();
         if ($companyPreviousPeriod && $input['start_date'] <= $companyPreviousPeriod->end_date) {
             return $this->sendError('This period overlaps the previous period. Please adjust');
         }
         $period->update($input);
+
         return $this->sendResponse(new PeriodResource($period), 'Payroll period updated successfully.');
     }
 
@@ -54,9 +57,10 @@ class PeriodController extends Controller
     {
         $period = $company->period->find($periodId);
         if ($period->status != Period::STATUS_PENDING) {
-            return $this->sendError('This period cannot be edited as it is already ' . $period->status);
+            return $this->sendError('This period cannot be edited as it is already '.$period->status);
         }
         $period->delete();
+
         return $this->sendResponse(new PeriodResource($period), 'Payroll period deleted successfully.');
     }
 }

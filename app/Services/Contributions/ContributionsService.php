@@ -5,8 +5,11 @@ namespace App\Services\Contributions;
 final class ContributionsService
 {
     public $pagIbigCalculatorService;
+
     public $philHealthCalculatorService;
+
     public $sssCalculatorService;
+
     public $taxCalculatorService;
 
     public function __construct(

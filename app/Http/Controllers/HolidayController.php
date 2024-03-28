@@ -15,6 +15,7 @@ class HolidayController extends Controller
         $holidays = Cache::remember('holidays', 3660, function () {
             return Holiday::all();
         });
+
         return $this->sendResponse(BaseResource::collection($holidays), 'Holidays retrieved successfully.');
     }
 
@@ -22,6 +23,7 @@ class HolidayController extends Controller
     {
         $data = $request->validated();
         $holiday = Holiday::create($data);
+
         return $this->sendResponse(new BaseResource($holiday), 'Holiday created successfully.');
     }
 
@@ -34,12 +36,14 @@ class HolidayController extends Controller
     {
         $data = $request->validated();
         $holiday->update($data);
+
         return $this->sendResponse(new BaseResource($holiday), 'Holiday updated successfully.');
     }
 
     public function destroy(Holiday $holiday): JsonResponse
     {
         $holiday->delete();
+
         return $this->sendResponse(new BaseResource($holiday), 'Holiday updated successfully.');
     }
 }

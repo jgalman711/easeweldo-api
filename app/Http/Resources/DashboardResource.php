@@ -17,6 +17,7 @@ class DashboardResource extends BaseResource
     {
         $timeRecord = $this['timeRecord'];
         $workSchedule = $this['workSchedule'];
+
         return [
             'schedule' => $this->parseWorkSchedule($workSchedule),
             'work_today' => $this->parseWorkToday($timeRecord),
@@ -48,7 +49,7 @@ class DashboardResource extends BaseResource
             'expected_clock_in' => $formattedExpectedIn,
             'expected_clock_out' => $formattedExpectedOut,
             'attendance_status' => optional($timeRecord)->attendance_status,
-            'next_action' => optional($timeRecord)->next_action ?? "Clock In"
+            'next_action' => optional($timeRecord)->next_action ?? 'Clock In',
         ];
     }
 
@@ -78,6 +79,7 @@ class DashboardResource extends BaseResource
                 'is_today' => $isToday,
             ];
         }
+
         return $result;
     }
 }

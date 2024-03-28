@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class PermissionSeeder extends Seeder
 {
@@ -31,7 +31,7 @@ class PermissionSeeder extends Seeder
             'edit employee',
             'delete employee',
             'view employee',
-            'view employees'
+            'view employees',
         ]);
 
         $superAdmin = Role::firstOrCreate(['name' => 'super-admin']);

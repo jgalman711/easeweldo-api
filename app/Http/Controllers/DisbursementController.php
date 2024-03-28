@@ -24,10 +24,11 @@ class DisbursementController extends Controller
         if ($request->has('employee_id')) {
             throw_unless(
                 $this->isCompanyEmployees($company, $request->employee_id),
-                new Exception("Employee IDs must belong to the company.")
+                new Exception('Employee IDs must belong to the company.')
             );
         }
         $disbursement = $this->disbursementService->create($company, $input);
+
         return $this->sendResponse(BasePayrollResource::collection($disbursement), 'Payrolls generated successfully.');
     }
 }

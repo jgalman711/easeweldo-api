@@ -21,8 +21,8 @@ class ImportEmployeeController extends Controller
             $file = $request->file('csv_file');
             $path = $file->getRealPath();
             $employeesData = array_map('str_getcsv', file($path));
-            list($employees, $errors) = $this->userEmployeeService->bulk($company, $employeesData);
+            [$employees, $errors] = $this->userEmployeeService->bulk($company, $employeesData);
         }
-        
+
     }
 }

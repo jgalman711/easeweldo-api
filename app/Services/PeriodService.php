@@ -15,8 +15,11 @@ use Illuminate\Support\Facades\DB;
 class PeriodService
 {
     private const PAYROLL_ALLOWANCE_DAY = 5;
+
     private const SEMI_MONTHLY_DAYS = 15;
+
     private const MINIMUM_LAST_DAY = 28;
+
     private const LATEST = 'latest';
 
     protected $today;
@@ -39,11 +42,11 @@ class PeriodService
     {
         DB::transaction(function () use ($period, $action) {
             switch ($action) {
-                case "pay":
+                case 'pay':
                     $payrollStatus = PayrollEnumerator::STATUS_PAID;
                     $periodStatus = Period::STATUS_COMPLETED;
                     break;
-                case "cancel":
+                case 'cancel':
                     $payrollStatus = PayrollEnumerator::STATUS_CANCELLED;
                     $periodStatus = Period::STATUS_CANCELLED;
                     break;
@@ -60,6 +63,7 @@ class PeriodService
             $period->status = $periodStatus;
             $period->save();
         });
+
         return $period->payrolls;
     }
 
@@ -79,8 +83,8 @@ class PeriodService
         } elseif ($periodCycle == Period::SUBTYPE_SEMI_MONTHLY) {
             $data['start_date'] = $data['end_date']->copy()->subDays(self::SEMI_MONTHLY_DAYS)->addDay();
         } elseif ($periodCycle == Period::SUBTYPE_WEEKLY) {
-            $data['end_date'] =  $salaryDate->copy()->subDays(7);
-            $data['start_date'] =  $data['end_date']->copy()->subDays(6);
+            $data['end_date'] = $salaryDate->copy()->subDays(7);
+            $data['start_date'] = $data['end_date']->copy()->subDays(6);
         }
         $companyPreviousPeriod = $company->periods()->latest()->first();
         if ($companyPreviousPeriod && $data['start_date'] <= $companyPreviousPeriod->end_date) {
@@ -92,6 +96,7 @@ class PeriodService
         $data['company_period_id'] = $companyPreviousPeriod
             ? $companyPreviousPeriod->company_period_id + 1
             : 1;
+
         return Period::create($data);
     }
 
@@ -105,6 +110,7 @@ class PeriodService
             $settings = Setting::where('company_id', $company->id)->first();
             throw_unless($settings, new Exception("No settings found for {$company->name}"));
             $salaryDate = $this->convertSalaryDayToDate($settings->salary_day, $settings->period_cycle);
+
             return $this->initializeFromSalaryDate($company, $salaryDate, $settings->period_cycle);
         }
         if ($companyPreviousPeriod && $salaryDate->copy()->subDays(2) <= $currentDate) {
@@ -126,10 +132,12 @@ class PeriodService
                 $data['end_date'] = $companyPreviousPeriod->end_date->addDays(7);
                 $data['salary_date'] = $companyPreviousPeriod->salary_date->addDays(7);
             } else {
-                throw new Exception('Invalid period type ' . $data['type']);
+                throw new Exception('Invalid period type '.$data['type']);
             }
+
             return Period::create($data);
         }
+
         return null;
     }
 
@@ -137,14 +145,15 @@ class PeriodService
     {
         $now = Carbon::now();
         $targetDate = $now->copy()->addDays(2);
-        $period = $company->periods()->whereDate('salary_date', "<=", $targetDate->toDateString())->first();
+        $period = $company->periods()->whereDate('salary_date', '<=', $targetDate->toDateString())->first();
         $payrolls = $company->payrolls->where('period_id', $period->id);
+
         return [
-            "period" => $period,
-            "employees_net_salary" => $payrolls->sum('net_salary'),
-            "number_of_employees" => $payrolls->count(),
-            "days_before_salary" => $period->salary_date->diffInDays($now),
-            "salary_date" => $period->salary_date
+            'period' => $period,
+            'employees_net_salary' => $payrolls->sum('net_salary'),
+            'number_of_employees' => $payrolls->count(),
+            'days_before_salary' => $period->salary_date->diffInDays($now),
+            'salary_date' => $period->salary_date,
         ];
     }
 
@@ -160,6 +169,7 @@ class PeriodService
         if ($this->salaryDate) {
             return $this->salaryDate;
         }
+
         return null;
     }
 
@@ -175,9 +185,10 @@ class PeriodService
         }
     }
 
-    public function getLatestPeriod(Company $company, string $type = null): Period
+    public function getLatestPeriod(Company $company, ?string $type = null): Period
     {
         $periodBuilder = $company->periods()->where('type', $type);
+
         return $periodBuilder->orderBy('id', 'desc')->first();
     }
 
@@ -190,6 +201,7 @@ class PeriodService
         $currentDate = now();
         $periodBuilder->where('start_date', '<=', $currentDate)
             ->where('salary_date', '>=', $currentDate);
+
         return $periodBuilder->orderBy('id', 'desc')->first();
     }
 
@@ -205,12 +217,13 @@ class PeriodService
                 ($period->payrollCost - $previousPeriod->payrollCost) / $previousPeriod->payrollCost * 100, 2
             );
         }
+
         return [
             'payroll_cost' => number_format($period->payrollCost, 2),
             'pay_date' => Carbon::parse($period->salary_date)->isoFormat('MMM D'),
             'period' => "Period $period->company_period_id: $formattedStartDate - $formattedEndDate",
             'status' => $period->status,
-            'difference' => $diff ?? 0
+            'difference' => $diff ?? 0,
         ];
     }
 
@@ -224,28 +237,30 @@ class PeriodService
                 $this->currentYear += 1;
             }
         }
-        return new DateTime($this->currentYear . '-' . $this->currentMonth . '-' . $salaryDay);
+
+        return new DateTime($this->currentYear.'-'.$this->currentMonth.'-'.$salaryDay);
     }
 
     private function salaryDaySemiMonthly(array $salaryDay): DateTime
     {
         foreach ($salaryDay as $day) {
             if ($this->today->format('j') <= $day - self::PAYROLL_ALLOWANCE_DAY) {
-                $salaryDate = new DateTime($this->currentYear . '-' . $this->currentMonth . '-' . $day);
+                $salaryDate = new DateTime($this->currentYear.'-'.$this->currentMonth.'-'.$day);
                 break;
             }
         }
 
-        if (!isset($salaryDate)) {
+        if (! isset($salaryDate)) {
             $this->currentMonth += 1;
             if ($this->currentMonth > 12) {
                 $this->currentMonth = 1;
                 $this->currentYear += 1;
             }
-            $nextMonth = new DateTime($this->currentYear . '-' . $this->currentMonth . '-1');
+            $nextMonth = new DateTime($this->currentYear.'-'.$this->currentMonth.'-1');
             $salaryDay = reset($salaryDay);
-            $salaryDate = new DateTime($nextMonth->format('Y-m') . '-' . $salaryDay);
+            $salaryDate = new DateTime($nextMonth->format('Y-m').'-'.$salaryDay);
         }
+
         return $salaryDate;
     }
 
@@ -253,7 +268,7 @@ class PeriodService
     {
         $salaryDay = strtolower($salaryDay);
         throw_unless(in_array($salaryDay, Period::ALLOWED_DAYS),
-            new Exception("Invalid day.")
+            new Exception('Invalid day.')
         );
         $todayDayOfWeek = $this->today->format('N');
         $dayIndex = array_search($salaryDay, Period::ALLOWED_DAYS);
@@ -262,7 +277,8 @@ class PeriodService
             $daysToAdd += 7;
         }
         $salaryDate = clone $this->today;
-        $salaryDate->modify('+' . $daysToAdd . ' day');
+        $salaryDate->modify('+'.$daysToAdd.' day');
+
         return $salaryDate;
     }
 }

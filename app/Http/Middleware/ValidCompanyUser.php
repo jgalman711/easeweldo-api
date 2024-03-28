@@ -19,13 +19,15 @@ class ValidCompanyUser
         $user = Auth::user();
         $companyIdFromRequest = $request->company->id;
         $belongsToCompany = $user->companies()->where('company_id', $companyIdFromRequest)->exists();
-        if (!$belongsToCompany) {
+        if (! $belongsToCompany) {
             $response = [
                 'success' => false,
                 'message' => 'Unauthorized',
             ];
+
             return response()->json($response, 403);
         }
+
         return $next($request);
     }
 }

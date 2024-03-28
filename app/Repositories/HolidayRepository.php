@@ -9,7 +9,8 @@ class HolidayRepository
 {
     public function getHolidaysForPeriod($startDate, $endDate)
     {
-        $key = 'holidays_' . $startDate . '_' . $endDate;
+        $key = 'holidays_'.$startDate.'_'.$endDate;
+
         return Cache::remember($key, $this->calculateCacheDuration(), function () use ($startDate, $endDate) {
             return Holiday::whereBetween('date', [$startDate, $endDate])->get();
         });

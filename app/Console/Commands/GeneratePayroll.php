@@ -17,7 +17,7 @@ class GeneratePayroll extends Command
 
     public function handle()
     {
-        $this->info("Processing payroll of company");
+        $this->info('Processing payroll of company');
 
         $searchDate = $this->option('searchDate');
         $searchDate = $searchDate ? Carbon::parse($searchDate) : Carbon::now();
@@ -26,9 +26,9 @@ class GeneratePayroll extends Command
         $searchDate = $searchDate->format('Y-m-d');
 
         $periods = Period::where('end_date', '>=', $minDate)
-             ->where('end_date', '<=', $searchDate)
-             ->where('status', Period::STATUS_PENDING)
-             ->get();
+            ->where('end_date', '<=', $searchDate)
+            ->where('status', Period::STATUS_PENDING)
+            ->get();
 
         $payrollService = app()->make(GeneratePayrollService::class);
         foreach ($periods as $period) {

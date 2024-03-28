@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payroll extends Model
 {
-    use SoftDeletes, PayrollJsonParser;
+    use PayrollJsonParser, SoftDeletes;
 
     protected $casts = [
         'attendance_earnings' => 'json',
@@ -23,7 +23,7 @@ class Payroll extends Model
         'leaves' => 'json',
         'taxable_earnings' => 'json',
         'non_taxable_earnings' => 'json',
-        'other_deductions' => 'json'
+        'other_deductions' => 'json',
     ];
 
     protected $fillable = [
@@ -46,7 +46,7 @@ class Payroll extends Model
         'philhealth_contributions',
         'pagibig_contributions',
         'withheld_tax',
-        'remarks'
+        'remarks',
     ];
 
     protected $appends = [
@@ -63,7 +63,7 @@ class Payroll extends Model
         'gross_income',
         'taxable_income',
         'net_taxable_income',
-        'net_income'
+        'net_income',
     ];
 
     public function state(): PayrollStateContract
@@ -87,8 +87,9 @@ class Payroll extends Model
     public function getTotalAttendanceEarningsAttribute(): ?float
     {
         if (isset($this->attendance_earnings['overtime'])) {
-           return $this->totalAmountParser($this->attendance_earnings['overtime'] ?? []);
+            return $this->totalAmountParser($this->attendance_earnings['overtime'] ?? []);
         }
+
         return null;
     }
 
@@ -97,6 +98,7 @@ class Payroll extends Model
         foreach (AttendanceEarningsEnumerator::DEDUCTION_TYPES as $type) {
             return $this->totalAmountParser($this->attendance_earnings[$type] ?? []);
         }
+
         return null;
     }
 
@@ -141,12 +143,14 @@ class Payroll extends Model
             $this->total_taxable_earnings -
             $this->total_attendance_deductions -
             $this->total_other_deductions;
+
         return max(0, $grossIncome);
     }
 
     public function getTaxableIncomeAttribute(): float
     {
         $taxableIncome = $this->gross_income - $this->total_contributions;
+
         return $taxableIncome >= 0 ? round($taxableIncome, 2) : 0;
     }
 

@@ -11,6 +11,7 @@ class PhilHealth extends Model
     use HasFactory, SoftDeletes;
 
     public const ACTIVE = 'active';
+
     public const INACTIVE = 'inactive';
 
     protected $table = 'philhealth';
@@ -19,6 +20,6 @@ class PhilHealth extends Model
         'min_contribution',
         'max_contribution',
         'contribution_rate',
-        'status'
+        'status',
     ];
 }

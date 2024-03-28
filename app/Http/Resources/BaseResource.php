@@ -18,12 +18,12 @@ class BaseResource extends JsonResource
         return parent::toArray($request);
     }
 
-    protected function formatDate(string $date = null): ?string
+    protected function formatDate(?string $date = null): ?string
     {
         return $date ? Carbon::createFromFormat('Y-m-d', $date)->format('M d, Y') : null;
     }
 
-    protected function formatCompactDate(string $date = null): ?string
+    protected function formatCompactDate(?string $date = null): ?string
     {
         return $date ? Carbon::createFromFormat('Y-m-d', $date)->format('M d') : null;
     }

@@ -7,9 +7,13 @@ use Carbon\Carbon;
 class AttendanceService
 {
     protected $absentMinutes = 0;
+
     protected $lateMinutes = 0;
+
     protected $underMinutes = 0;
+
     protected $overtimeMinutes = 0;
+
     protected $minutesWorked = 0;
 
     protected const SIXTY_MINUTES = 60;

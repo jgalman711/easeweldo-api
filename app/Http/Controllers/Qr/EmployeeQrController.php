@@ -32,8 +32,9 @@ class EmployeeQrController extends Controller
         $employee = $company->employees()->find($employeeId);
         $qr = $this->qrService->generate([
             'action' => 'clock',
-            'employee_id' => $employee->id
+            'employee_id' => $employee->id,
         ]);
+
         return response($qr)->header('Content-type', 'image/png');
     }
 
@@ -44,7 +45,8 @@ class EmployeeQrController extends Controller
     {
         try {
             $employee = $company->getEmployeeById($employeeQrRequest->employee_id);
-            list($timeRecord, $message) = $this->clockService->clockAction($employee);
+            [$timeRecord, $message] = $this->clockService->clockAction($employee);
+
             return $this->sendResponse(new BaseResource($timeRecord), $message);
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());

@@ -12,13 +12,14 @@ class SalaryComputationRequest extends BaseSalaryComputationRequest
         $rules = parent::rules();
         $rules['taxable_earnings'] = [new EarningsValidationRule()];
         $rules['non_taxable_earnings'] = [new EarningsValidationRule()];
+
         return $rules;
     }
 
     public function messages()
     {
         return [
-            'required' => 'This field is required.'
+            'required' => 'This field is required.',
         ];
     }
 }

@@ -12,16 +12,17 @@ class Holiday extends Model
 
     public const HOLIDAY_TYPES = [
         self::REGULAR_HOLIDAY,
-        self::SPECIAL_HOLIDAY
+        self::SPECIAL_HOLIDAY,
     ];
-    public const REGULAR_HOLIDAY = "regular";
 
-    public const SPECIAL_HOLIDAY = "special";
+    public const REGULAR_HOLIDAY = 'regular';
+
+    public const SPECIAL_HOLIDAY = 'special';
 
     protected $fillable = [
-        "name",
-        "type",
-        "date"
+        'name',
+        'type',
+        'date',
     ];
 
     public function getSimplifiedTypeAttribute()

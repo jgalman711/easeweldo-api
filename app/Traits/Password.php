@@ -10,8 +10,7 @@ trait Password
     {
         return [
             Str::random(6),
-            now()->addMinutes(60)
+            now()->addMinutes(60),
         ];
     }
-
 }

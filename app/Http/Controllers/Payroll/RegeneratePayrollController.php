@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Payroll;
 use App\Enumerators\PayrollEnumerator;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Payroll\BasePayrollResource;
-use App\Http\Resources\PayrollResource;
 use App\Models\Company;
 use App\Models\Payroll;
 use App\Services\Payroll\RegeneratePayrollService;
@@ -26,6 +25,7 @@ class RegeneratePayrollController extends Controller
         try {
             if ($payroll->status !== PayrollEnumerator::STATUS_PAID) {
                 $payroll = $this->regeneratePayrollService->regenerate($payroll);
+
                 return $this->sendResponse(new BasePayrollResource($payroll), 'Payroll regenerated successfully.');
             } else {
                 return $this->sendError('Payroll regeneration failed. Payroll is already paid.');
@@ -33,6 +33,7 @@ class RegeneratePayrollController extends Controller
         } catch (Exception $e) {
             $payroll->status = PayrollEnumerator::STATUS_FAILED;
             $payroll->save();
+
             return $this->sendError('Payroll regeneration failed.', $e->getMessage());
         }
     }

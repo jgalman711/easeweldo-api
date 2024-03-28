@@ -29,14 +29,16 @@ class UserController extends Controller
             'last_name',
             'companies.name',
             'companies.legal_name',
-            'companies.status'
+            'companies.status',
         ]);
+
         return $this->sendResponse(UserResource::collection($users), 'Users retrieved successfully.');
     }
 
     public function show(User $user): JsonResponse
     {
         $user->load('companies');
+
         return $this->sendResponse(new UserResource($user), 'User retrieved successfully.');
     }
 
@@ -46,6 +48,7 @@ class UserController extends Controller
         $companies = Company::whereIn('id', $input['company_id'])->get();
         $user = $this->userService->create($companies, $input);
         $user->load('companies');
+
         return $this->sendResponse(
             new UserResource($user),
             "User created successfully. This is the user's temporary password: {$user->temporary_password}. It expires after an hour. Please change it upon login."
@@ -57,13 +60,15 @@ class UserController extends Controller
         $input = $userRequest->validated();
         $user->update($input);
         $user->load('companies');
-        return $this->sendResponse(new UserResource($user), "User updated successfully.");
+
+        return $this->sendResponse(new UserResource($user), 'User updated successfully.');
     }
 
     public function destroy(User $user): JsonResponse
     {
         $user->delete();
         $user->load('companies');
-        return $this->sendResponse(new UserResource($user), "User deleted successfully.");
+
+        return $this->sendResponse(new UserResource($user), 'User deleted successfully.');
     }
 }

@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\Company;
 use App\Models\Employee;
 use App\Services\TimeRecordService;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
 
@@ -21,7 +20,7 @@ class InitializeExpectedSchedule extends Command
         $employees = Employee::whereHas('company', function ($query) {
             $query->whereIn('status', [
                 Company::STATUS_ACTIVE,
-                Company::STATUS_TRIAL
+                Company::STATUS_TRIAL,
             ]);
         })->get();
 
@@ -30,7 +29,7 @@ class InitializeExpectedSchedule extends Command
                 $timeRecordService->setExpectedScheduleOf($employee);
             } catch (Exception $e) {
                 $this->error(
-                    "Failed creating expected schedule for employee {$employee->fullName}: " . $e->getMessage()
+                    "Failed creating expected schedule for employee {$employee->fullName}: ".$e->getMessage()
                 );
             }
         }

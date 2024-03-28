@@ -21,6 +21,7 @@ class UserTemporaryPasswordResetController extends Controller
     {
         $employee = $company->employees()->findOrFail($employeeId);
         $user = $this->authService->temporaryPasswordReset($employee->user);
+
         return $this->sendResponse(
             new EmployeeResource($employee),
             "User's temporary password: {$user->temporary_password}. It expires after an hour. Please change it upon login."

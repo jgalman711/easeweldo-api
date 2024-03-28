@@ -21,18 +21,18 @@ class MonthlyReportStrategy implements ReportStrategy
                 $query->where('employee_id', $data['employee_id']);
             }
         })
-        ->whereNotNull('pay_date')
-        ->orderBy('pay_date', 'asc')
-        ->get();
+            ->whereNotNull('pay_date')
+            ->orderBy('pay_date', 'asc')
+            ->get();
 
         $payrollsByMonth = $payrolls->groupBy(function ($payroll) {
             return Carbon::parse($payroll->pay_date)->format('Y F');
         });
-        
+
         $report = [];
 
         foreach ($payrollsByMonth as $month => $payrolls) {
-            $date = explode(" ", $month);
+            $date = explode(' ', $month);
             array_push($report, [
                 'year' => $date[0],
                 'month' => $date[1],
@@ -46,6 +46,7 @@ class MonthlyReportStrategy implements ReportStrategy
                 'net_income' => $payrolls->sum('net_income'),
             ]);
         }
+
         return $report;
     }
 }

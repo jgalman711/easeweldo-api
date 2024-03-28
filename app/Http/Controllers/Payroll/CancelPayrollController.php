@@ -13,6 +13,7 @@ class CancelPayrollController extends Controller
     {
         try {
             $payroll->state()->cancel();
+
             return $this->sendResponse(new BasePayrollResource($payroll), 'Payroll cancelled successfully.');
         } catch (\Exception $e) {
             return $this->sendError($e->getMessage());

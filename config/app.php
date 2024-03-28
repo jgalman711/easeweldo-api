@@ -191,6 +191,6 @@ return [
     'uploads' => [
         'url' => env('UPLOAD_HOST_DOMAIN', 'localhost'),
         'company_path' => env('COMPANY_UPLOAD_PATH', 'uploads/companies/images'),
-        'employee_path' => env('EMPLOYEE_UPLOAD_PATH', 'uploads/employees/images')
-    ]
+        'employee_path' => env('EMPLOYEE_UPLOAD_PATH', 'uploads/employees/images'),
+    ],
 ];

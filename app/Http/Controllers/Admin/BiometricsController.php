@@ -31,14 +31,16 @@ class BiometricsController extends Controller
             'model',
             'product_number',
             'status',
-            'company.name'
+            'company.name',
         ]);
+
         return $this->sendResponse(BaseResource::collection($biometrics), 'Biometrics data retrieved successfully.');
     }
 
     public function show(int $biometricsId): JsonResponse
     {
         $biometrics = Biometrics::find($biometricsId);
+
         return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data retrieved successfully.');
     }
 
@@ -52,6 +54,7 @@ class BiometricsController extends Controller
         try {
             $this->biometricsService->initialize($biometrics);
             $biometrics->status = Biometrics::STATUS_ACTIVE;
+
             return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data saved successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
@@ -66,10 +69,12 @@ class BiometricsController extends Controller
             if ($biometrics->status == Biometrics::STATUS_ACTIVE) {
                 $this->biometricsService->initialize($biometrics);
             }
+
             return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data updated successfully.');
         } catch (Exception $e) {
             $biometrics->status = Biometrics::STATUS_INACTIVE;
             $biometrics->save();
+
             return $this->sendError($e->getMessage());
         }
     }
@@ -78,6 +83,7 @@ class BiometricsController extends Controller
     {
         $biometrics = Biometrics::find($biometricsId);
         $biometrics->delete();
+
         return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data deleted successfully.');
     }
 }

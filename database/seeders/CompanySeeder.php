@@ -14,7 +14,7 @@ class CompanySeeder extends Seeder
     {
         $company = Company::firstOrCreate([
             'name' => 'Easeweldo',
-            'slug' => 'easeweldo'
+            'slug' => 'easeweldo',
         ], [
             'status' => 'active',
             'legal_name' => 'Easeweldo Inc.',
@@ -30,7 +30,7 @@ class CompanySeeder extends Seeder
             'tin' => '123-456-789-000',
             'sss_number' => '34-5678901-2',
             'philhealth_number' => '12-345678901-2',
-            'pagibig_number' => '10001111000011100'
+            'pagibig_number' => '10001111000011100',
         ]);
         $subscription = Subscription::find(1);
         CompanySubscription::create([
@@ -38,7 +38,7 @@ class CompanySeeder extends Seeder
             'subscription_id' => $subscription->id,
             'start_date' => Carbon::now(),
             'end_date' => Carbon::now()->addYear(),
-            'employee_count' => 0
+            'employee_count' => 0,
         ]);
     }
 }

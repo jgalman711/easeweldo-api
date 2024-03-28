@@ -19,7 +19,7 @@ class UserRequest extends BaseRequest
                     ->whereNull('deleted_at')
                     ->ignore($this->user),
             ],
-            'status' => 'nullable|string|in:' . implode(',', User::STATUSES),
+            'status' => 'nullable|string|in:'.implode(',', User::STATUSES),
             'company_id' => [
                 'required',
                 'array',

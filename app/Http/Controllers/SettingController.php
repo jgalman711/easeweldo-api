@@ -32,6 +32,7 @@ class SettingController extends Controller
             $input
         );
         $this->periodService->convertSalaryDayToDate($settings->salary_day, $settings->period_cycle);
+
         return $this->sendResponse(new BaseResource($settings), 'Company settings updated successfully.');
     }
 }

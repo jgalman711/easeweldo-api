@@ -15,19 +15,25 @@ class PersonalInformationVerificationController extends Controller
      *     summary="Verify employee creation personal information",
      *     security={{"bearerAuth":{}}},
      *     tags={"Employee Creation Verification"},
+     *
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
      *         required=true,
      *         description="Slug of the company",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(property="first_name", type="string", description="First name of the employee", example="John"),
      *                 @OA\Property(property="last_name", type="string", description="Last name of the employee", example="Doe"),
      *                 @OA\Property(property="date_of_birth", type="string", format="date", description="Date of birth", example="1990-01-15"),
@@ -39,12 +45,13 @@ class PersonalInformationVerificationController extends Controller
      *             ),
      *         ),
      *     ),
+     *
      *     @OA\Response(response="201", description="Personal Information is validated successfully"),
      *     @OA\Response(response="422", description="Validation errors")
      * )
      */
     public function __invoke(PersonalInformationRequest $request, Company $company): JsonResponse
     {
-        return $this->sendResponse(["data" => $request->validated()], "Personal Information is validated successfully");
+        return $this->sendResponse(['data' => $request->validated()], 'Personal Information is validated successfully');
     }
 }

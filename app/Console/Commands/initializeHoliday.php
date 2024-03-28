@@ -8,9 +8,9 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
-class InitializeHoliday extends Command{
-
-    protected $signature =  'app:initialize-holiday {year?}';
+class InitializeHoliday extends Command
+{
+    protected $signature = 'app:initialize-holiday {year?}';
 
     protected $description = 'Fetches Philippine holidays from Calendarific API';
 

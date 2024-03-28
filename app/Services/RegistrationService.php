@@ -26,11 +26,11 @@ class RegistrationService
             DB::beginTransaction();
             $input['password'] = bcrypt($input['password']);
             $company = Company::create([
-                'name' =>  $input['company_name'],
+                'name' => $input['company_name'],
                 'legal_name' => $input['company_name'],
-                'contact_name' => $input['first_name'] . " " . $input['last_name'],
+                'contact_name' => $input['first_name'].' '.$input['last_name'],
                 'slug' => strtolower(str_replace(' ', '-', $input['company_name'])),
-                'status' => Company::STATUS_PENDING
+                'status' => Company::STATUS_PENDING,
             ]);
             $user = User::create($input);
             $company->users()->attach($user->id);
@@ -38,10 +38,11 @@ class RegistrationService
             $user->assignRole($role);
             $this->employeeService->quickCreate($company, $input);
             DB::commit();
+
             return [
                 'token' => $user->createToken(env('APP_NAME'))->plainTextToken,
                 'user' => $user,
-                'company' => $company
+                'company' => $company,
             ];
         } catch (Exception $e) {
             DB::rollBack();

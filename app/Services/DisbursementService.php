@@ -3,9 +3,7 @@
 namespace App\Services;
 
 use App\Enumerators\DisbursementEnumerator;
-use App\Enumerators\PayrollEnumerator;
 use App\Models\Company;
-use App\Models\Period;
 use App\Services\Disbursements\DisbursementFactory;
 
 class DisbursementService
@@ -33,6 +31,7 @@ class DisbursementService
             }
         }
         $disbursement->state()->initialize();
+
         return $payrolls;
     }
 }

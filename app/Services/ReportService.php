@@ -40,6 +40,7 @@ class ReportService
                 return $monthlyPayrolls->sum($category);
             });
         }
+
         return $payrollTotals;
     }
 }

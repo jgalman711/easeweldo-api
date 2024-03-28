@@ -9,7 +9,7 @@ class PasswordResetRequest extends BaseRequest
         return [
             'token' => 'required',
             'email_address' => 'required|email',
-            'password' => 'required|min:6|confirmed'
+            'password' => 'required|min:6|confirmed',
         ];
     }
 }

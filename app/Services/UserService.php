@@ -20,7 +20,7 @@ class UserService
     public function create(Company $company, array $userData): User
     {
         $username = $this->generateUniqueUsername($company, $userData['first_name'], $userData['last_name']);
-        list($temporaryPassword, $temporaryPasswordExpiresAt) = $this->generateTemporaryPassword();
+        [$temporaryPassword, $temporaryPasswordExpiresAt] = $this->generateTemporaryPassword();
 
         $userData['username'] = $username;
         $userData['password'] = bcrypt($temporaryPassword);
@@ -40,6 +40,7 @@ class UserService
             $user->assignRole($role);
         }
         $company->users()->attach($user->id);
+
         return $user;
     }
 
@@ -50,17 +51,18 @@ class UserService
         if (count($firstNameParts) > 1) {
             $firstNameInitial .= substr($firstNameParts[1], 0, 1);
         }
-        $username = strtolower($firstNameInitial . str_replace(' ', '', strtolower($lastName)));
+        $username = strtolower($firstNameInitial.str_replace(' ', '', strtolower($lastName)));
         $usernameExistsInCompany = $company->users()->where('username', $username)->exists();
         if ($usernameExistsInCompany) {
             $i = 1;
             $originalUsername = $username;
             do {
-                $username = $originalUsername . $i;
+                $username = $originalUsername.$i;
                 $usernameExistsInCompany = $company->users()->where('username', $username)->exists();
                 $i++;
             } while ($usernameExistsInCompany);
         }
+
         return $username;
     }
 
@@ -68,6 +70,7 @@ class UserService
     {
         $user = User::find($userId);
         throw_if($user->employee, new Exception('User is already linked to employee'));
+
         return $user;
     }
 

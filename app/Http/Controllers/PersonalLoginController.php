@@ -16,6 +16,7 @@ class PersonalLoginController extends AuthController
         try {
             $user = $this->loginService->login($credentials, $this->loginService::TYPE_PERSONAL);
             $message = $this->loginService->getSuccessMessage($user);
+
             return $this->sendResponse(new LoginResource($user), $message);
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());

@@ -2,9 +2,7 @@
 
 namespace Database\Seeders;
 
-use Exception;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,7 +18,7 @@ class DatabaseSeeder extends Seeder
             SubscriptionSeeder::class,
             CompanySeeder::class,
             WorkScheduleSeeder::class,
-            UserSeeder::class
+            UserSeeder::class,
         ]);
     }
 }

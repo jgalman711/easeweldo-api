@@ -14,6 +14,7 @@ class PayPeriodController extends Controller
     {
         try {
             $period->state()->pay();
+
             return $this->sendResponse(new PeriodResource($period), 'Period paid successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());

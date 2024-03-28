@@ -20,6 +20,7 @@ class SalaryComputationController extends Controller
     public function show(Company $company, int $employeeId): JsonResponse
     {
         $employee = $company->getEmployeeById($employeeId);
+
         return $this->sendResponse(
             new BaseResource($employee->salaryComputation),
             'Salary computation retrieved successfully.'
@@ -30,11 +31,12 @@ class SalaryComputationController extends Controller
     {
         $employee = $company->getEmployeeById($employeeId);
         if ($employee->salaryComputation) {
-            return $this->sendError("Salary computation for employee already exists.");
+            return $this->sendError('Salary computation for employee already exists.');
         }
         $input = $request->validated();
         $input['employee_id'] = $employeeId;
         $salaryComputation = $this->salaryComputationService->initialize($employee, $input);
+
         return $this->sendResponse(
             new BaseResource($salaryComputation),
             'Salary computation created successfully.'
@@ -46,11 +48,12 @@ class SalaryComputationController extends Controller
         $employee = $company->getEmployeeById($employeeId);
         $input = $request->validated();
         $salaryComputation = $employee->salaryComputation;
-        if (!$salaryComputation) {
+        if (! $salaryComputation) {
             $salaryComputation = $this->salaryComputationService->initialize($employee, $input);
         } else {
             $salaryComputation->update($input);
         }
+
         return $this->sendResponse(
             new BaseResource($salaryComputation),
             'Salary computation updated successfully.'
@@ -61,10 +64,11 @@ class SalaryComputationController extends Controller
     {
         $employee = $company->getEmployeeById($employeeId);
         $salaryComputation = $employee->salaryComputation;
-        if (!$salaryComputation) {
+        if (! $salaryComputation) {
             return $this->sendError('Salary computation not found');
         }
         $salaryComputation->delete();
+
         return $this->sendResponse(
             new BaseResource($employee->salaryComputation),
             'Salary computation deleted successfully.'

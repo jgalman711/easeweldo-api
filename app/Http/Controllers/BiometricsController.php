@@ -24,6 +24,7 @@ class BiometricsController extends Controller
     public function index(Request $request, Company $company): JsonResponse
     {
         $biometrics = $this->applyFilters($request, $company->biometrics());
+
         return $this->sendResponse(BaseResource::collection($biometrics), 'Biometrics data retrieved successfully.');
     }
 
@@ -32,6 +33,7 @@ class BiometricsController extends Controller
         $biometrics = $this->remember($company, function () use ($company, $biometricsId) {
             return $company->biometrics()->find($biometricsId);
         }, $biometricsId);
+
         return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data retrieved successfully.');
     }
 
@@ -45,7 +47,7 @@ class BiometricsController extends Controller
             'provider' => $request->provider,
             'model' => $request->model,
             'product_number' => $request->product_number,
-            'status' => Biometrics::STATUS_INACTIVE
+            'status' => Biometrics::STATUS_INACTIVE,
         ]);
         try {
             $this->biometricsService->initialize($biometrics);
@@ -55,6 +57,7 @@ class BiometricsController extends Controller
         } catch (Exception) {
             $message = 'Biometrics data saved successfully but was not able to connect to the device.';
         }
+
         return $this->sendResponse(new BaseResource($biometrics), $message);
     }
 
@@ -68,10 +71,12 @@ class BiometricsController extends Controller
             if ($biometrics->status == Biometrics::STATUS_ACTIVE) {
                 $this->biometricsService->initialize($biometrics);
             }
+
             return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data updated successfully.');
         } catch (Exception $e) {
             $biometrics->status = Biometrics::STATUS_INACTIVE;
             $biometrics->save();
+
             return $this->sendError($e->getMessage());
         }
     }
@@ -81,6 +86,7 @@ class BiometricsController extends Controller
         $biometrics = $company->biometrics()->find($biometricsId);
         $biometrics->delete();
         $this->forget($company, $biometricsId);
+
         return $this->sendResponse(new BaseResource($biometrics), 'Biometrics data deleted successfully.');
     }
 }

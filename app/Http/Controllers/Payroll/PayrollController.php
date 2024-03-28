@@ -33,19 +33,22 @@ class PayrollController extends Controller
             'employee.last_name',
             'description',
             'status',
-            'type'
+            'type',
         ]);
+
         return $this->sendResponse(BasePayrollResource::collection($payrolls), 'Payrolls retrieved successfully.');
     }
 
     public function show(Company $company, Payroll $payroll): JsonResponse
     {
         $payrollWithEmployee = $this->remember($company, function () use ($payroll, $company) {
-            if (!$company->payrolls->contains($payroll)) {
+            if (! $company->payrolls->contains($payroll)) {
                 return $this->sendError('Payroll not found.');
             }
+
             return $payroll->load('employee');
         }, $payroll);
+
         return $this->sendResponse(new BasePayrollResource($payrollWithEmployee), 'Payroll retrieved successfully.');
     }
 
@@ -53,8 +56,9 @@ class PayrollController extends Controller
     {
         try {
             $input = $request->validated();
-            $request->merge(["format" => "edit"]);
+            $request->merge(['format' => 'edit']);
             $payroll = $this->payrollService->update($payroll, $input);
+
             return $this->sendResponse(new BasePayrollResource($payroll), 'Payroll retrieved successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());

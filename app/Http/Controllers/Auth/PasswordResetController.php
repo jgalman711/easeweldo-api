@@ -26,6 +26,7 @@ class PasswordResetController extends Controller
         if ($token) {
             return $this->sendResponse($token, 'Reset password token retrieved successfullly.');
         }
+
         return $this->sendError(self::INVALID_TOKEN_MESSAGE);
     }
 
@@ -34,11 +35,15 @@ class PasswordResetController extends Controller
      *     path="/api/reset-password",
      *     summary="Reset user's password",
      *     tags={"Authentication"},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
+     *
      *                 @OA\Property(property="token", type="string", description="Password reset token"),
      *                 @OA\Property(property="email_address", type="string", format="email", description="User's email address", maxLength=255),
      *                 @OA\Property(property="password", type="string", format="password", description="New password", minLength=6),
@@ -46,17 +51,22 @@ class PasswordResetController extends Controller
      *             ),
      *         ),
      *     ),
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Password reset successfully",
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
+     *
      *                 @OA\Property(property="success", type="boolean", example=true),
      *                 @OA\Property(property="message", type="string", example="Password reset successfully."),
      *             ),
      *         ),
      *     ),
+     *
      *     @OA\Response(response="422", description="Validation errors"),
      *     @OA\Response(response="404", description="Token or user not found"),
      * )
@@ -67,7 +77,7 @@ class PasswordResetController extends Controller
             $request->only('email_address', 'password', 'password_confirmation', 'token'),
             function (User $user, string $password) {
                 $user->forceFill([
-                    'password' => Hash::make($password)
+                    'password' => Hash::make($password),
                 ])->setRememberToken(Str::random(60));
                 $user->save();
                 event(new PasswordReset($user));
@@ -76,12 +86,13 @@ class PasswordResetController extends Controller
 
         if ($status === Password::PASSWORD_RESET) {
             $response = $this->sendResponse($status, 'Password reset successfully.');
-        } elseif($status === Password::INVALID_TOKEN) {
+        } elseif ($status === Password::INVALID_TOKEN) {
             $response = $this->sendError(self::INVALID_TOKEN_MESSAGE);
         } else {
             Log::info($status);
             $response = $this->sendError('Unable to reset password.');
         }
+
         return $response;
     }
 }

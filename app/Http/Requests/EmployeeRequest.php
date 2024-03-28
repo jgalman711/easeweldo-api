@@ -22,9 +22,9 @@ class EmployeeRequest extends BaseRequest
             'job_title' => self::REQUIRED_STRING,
             'date_of_hire' => self::REQUIRED_DATE,
             'date_of_birth' => self::REQUIRED_DATE,
-            'status' => 'nullable|string|in:' . implode(',', Employee::STATUS),
-            'employment_status' => 'nullable|string|in:' . implode(',', Employee::EMPLOYMENT_STATUS),
-            'employment_type' => 'nullable|string|in:' . implode(',', Employee::EMPLOYMENT_TYPE),
+            'status' => 'nullable|string|in:'.implode(',', Employee::STATUS),
+            'employment_status' => 'nullable|string|in:'.implode(',', Employee::EMPLOYMENT_STATUS),
+            'employment_type' => 'nullable|string|in:'.implode(',', Employee::EMPLOYMENT_TYPE),
             'working_days_per_week' => [
                 'nullable',
                 'integer',
@@ -59,7 +59,7 @@ class EmployeeRequest extends BaseRequest
                 Rule::unique('employees', 'mobile_number')
                     ->whereNull('deleted_at')
                     ->ignore($this->employee),
-                self::PH_MOBILE_NUMBER
+                self::PH_MOBILE_NUMBER,
             ],
             'address_line' => self::REQUIRED_STRING,
             'barangay_town_city_province' => self::REQUIRED_STRING,

@@ -25,20 +25,22 @@ class LeaveController extends Controller
         try {
             $query = $company->leaves()->where('employee_id', $employeeId);
             $leaves = $this->leaveService->filter($request, $query);
+
             return $this->sendResponse(LeaveResource::collection($leaves), 'Leaves retrieved successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
     }
-    
+
     public function store(LeaveRequest $leaveRequest, Company $company, int $employeeId): JsonResponse
     {
         try {
             $employee = $company->employees()->find($employeeId);
             $leaves = $this->leaveService->apply($company, $employee, $leaveRequest);
+
             return $this->sendResponse(LeaveResource::collection($leaves), 'Leaves created successfully.');
         } catch (Exception $e) {
-            return $this->sendError("Unable to apply leave.", $e->getMessage());
+            return $this->sendError('Unable to apply leave.', $e->getMessage());
         }
     }
 
@@ -46,6 +48,7 @@ class LeaveController extends Controller
     {
         $employee = $company->getEmployeeById($employeeId);
         $leave = $employee->getLeaveById($leaveId);
+
         return $this->sendResponse(new LeaveResource($leave), 'Leave retrieved successfully');
     }
 
@@ -59,6 +62,7 @@ class LeaveController extends Controller
         $employee = $company->getEmployeeById($employeeId);
         $leave = $employee->getLeaveById($leaveId);
         $leave->update($input);
+
         return $this->sendResponse(new LeaveResource($leave), 'Leave updated successfully.');
     }
 
@@ -67,6 +71,7 @@ class LeaveController extends Controller
         $employee = $company->getEmployeeById($employeeId);
         $leave = $employee->getLeaveById($leaveId);
         $leave->delete();
+
         return $this->sendResponse(new LeaveResource($leave), 'Leave deleted successfully');
     }
 }

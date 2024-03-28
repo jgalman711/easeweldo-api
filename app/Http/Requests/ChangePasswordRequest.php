@@ -11,6 +11,7 @@ class ChangePasswordRequest extends BaseRequest
     public function rules(): array
     {
         $user = self::retrieveUser();
+
         return [
             'old_password' => [
                 'required',
@@ -38,7 +39,7 @@ class ChangePasswordRequest extends BaseRequest
     private function checkOldPassword(User $user, string $value): bool
     {
         return
-            ($user->temporary_password == null && !Hash::check($value, $user->password)) ||
+            ($user->temporary_password == null && ! Hash::check($value, $user->password)) ||
             ($user->temporary_password != null && $user->temporary_password != $value);
     }
 
@@ -51,6 +52,7 @@ class ChangePasswordRequest extends BaseRequest
         } else {
             $employee = null;
         }
+
         return $employee->user;
     }
 }

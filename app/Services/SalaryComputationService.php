@@ -22,6 +22,7 @@ class SalaryComputationService
             $data['available_sick_leave_hours'] = $data['available_sick_leave_hours'] ?? $data['total_sick_leave_hours'];
             $data['available_vacation_leave_hours'] = $data['available_vacation_leave_hours'] ?? $data['total_vacation_leave_hours'];
         }
+
         return SalaryComputation::create($data);
     }
 }

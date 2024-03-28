@@ -19,7 +19,7 @@ class TimeCorrectionResource extends BaseResource
             'clock_in' => $this->timeFormat($this->clock_in),
             'clock_out' => $this->timeFormat($this->clock_out),
             'remarks' => $this->remarks,
-            'status' => $this->status
+            'status' => $this->status,
         ];
     }
 
@@ -27,8 +27,10 @@ class TimeCorrectionResource extends BaseResource
     {
         if ($dateTime) {
             $datetime = new DateTime($dateTime);
+
             return $datetime->format('H:i:s');
         }
+
         return $dateTime;
     }
 }

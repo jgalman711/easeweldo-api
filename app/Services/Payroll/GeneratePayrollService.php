@@ -24,15 +24,23 @@ class GeneratePayrollService
     ];
 
     protected $contributionsService;
+
     protected $holidayRepository;
 
     protected $payroll;
+
     protected $company;
+
     protected $employee;
+
     protected $period;
+
     protected $schedules;
+
     protected $timesheet;
+
     protected $salaryComputation;
+
     protected $companySettings;
 
     public function __construct(ContributionsService $contributionsService, HolidayRepository $holidayRepository)
@@ -54,6 +62,7 @@ class GeneratePayrollService
             $this->calculateContributions();
             $this->payroll->save();
             DB::commit();
+
             return $this->payroll;
         } catch (Exception $e) {
             DB::rollBack();
@@ -67,7 +76,7 @@ class GeneratePayrollService
         $this->employee = $employee;
         $this->period = $period;
 
-        if (!$this->period->start_date) {
+        if (! $this->period->start_date) {
             $this->period->start_date = $employee->date_of_hire
                 ? Carbon::parse($employee->date_of_hire)
                 : $employee->created_at;
@@ -87,18 +96,18 @@ class GeneratePayrollService
             'status' => PayrollEnumerator::STATUS_TO_PAY,
             'description' => $period->description ?? "Payroll for {$period->salary_date}",
             'pay_date' => $period->salary_date,
-            'period_cycle' => $period->type
+            'period_cycle' => $period->type,
         ]);
 
         $this->payroll->payroll_number = $this->generatePayrollNumber();
 
-        if (!$this->salaryComputation) {
+        if (! $this->salaryComputation) {
             $this->payroll->status = PayrollEnumerator::STATUS_FAILED;
             $this->payroll->save();
             throw new InvalidPayrollGenerationException(
                 "Payroll {$this->payroll->id} generation encountered an error. No salary data found."
             );
-        } elseif (!$this->companySettings) {
+        } elseif (! $this->companySettings) {
             $this->payroll->status = PayrollEnumerator::STATUS_FAILED;
             $this->payroll->save();
             throw new InvalidPayrollGenerationException(
@@ -110,7 +119,7 @@ class GeneratePayrollService
         if ($this->salaryComputation->is_clock_required) {
             $this->timesheet = $employee->timeRecords()->byRange([
                 'dateFrom' => $period->start_date,
-                'dateTo' => $period->end_date
+                'dateTo' => $period->end_date,
             ])->get();
         }
     }
@@ -124,7 +133,7 @@ class GeneratePayrollService
     protected function calculateAttendanceEarnings(): void
     {
         $earnings = [];
-        foreach($this->timesheet as $record) {
+        foreach ($this->timesheet as $record) {
             $expectedClockIn = Carbon::parse($record->expected_clock_in);
             $expectedClockOut = Carbon::parse($record->expected_clock_out);
             $date = $expectedClockIn->format('Y-m-d');
@@ -137,7 +146,7 @@ class GeneratePayrollService
                         'date' => $date,
                         'hours' => $lateHours,
                         'rate' => 1,
-                        'amount' => round($lateHours * $this->salaryComputation->hourly_rate, 2)
+                        'amount' => round($lateHours * $this->salaryComputation->hourly_rate, 2),
                     ];
                 }
                 if ($clockOut->lt($expectedClockOut)) {
@@ -146,7 +155,7 @@ class GeneratePayrollService
                         'date' => $date,
                         'hours' => $undertimeHours,
                         'rate' => 1,
-                        'amount' => round($undertimeHours * $this->salaryComputation->hourly_rate, 2)
+                        'amount' => round($undertimeHours * $this->salaryComputation->hourly_rate, 2),
                     ];
                 }
                 if ($this->isOvertime($clockOut, $expectedClockOut)) {
@@ -156,7 +165,7 @@ class GeneratePayrollService
                         'date' => $date,
                         'hours' => $overtimeHours,
                         'rate' => $rate,
-                        'amount' => round($overtimeHours * $rate * $this->salaryComputation->hourly_rate, 2)
+                        'amount' => round($overtimeHours * $rate * $this->salaryComputation->hourly_rate, 2),
                     ];
                 }
             } else {
@@ -165,7 +174,7 @@ class GeneratePayrollService
                     'date' => $date,
                     'rate' => 1,
                     'hours' => $absentHours,
-                    'amount' => round($absentHours * $this->salaryComputation->hourly_rate, 2)
+                    'amount' => round($absentHours * $this->salaryComputation->hourly_rate, 2),
                 ];
             }
         }
@@ -186,16 +195,20 @@ class GeneratePayrollService
                 / self::CYCLE_DIVISOR[$this->period->subtype];
         } else {
             throw new InvalidPayrollGenerationException(
-                "Invalid payroll type. Please contact the Easeweldo administrator."
+                'Invalid payroll type. Please contact the Easeweldo administrator.'
             );
         }
     }
 
     protected function calculateHoliday(): void
     {
-        if (!$this->schedules || !$this->timesheet) { return; }
+        if (! $this->schedules || ! $this->timesheet) {
+            return;
+        }
         $holidays = $this->holidayRepository->getHolidaysForPeriod($this->period->start_date, $this->period->end_date);
-        if (!$holidays) { return; }
+        if (! $holidays) {
+            return;
+        }
         $payrollHolidays = [];
         $payrollHolidaysWorked = [];
         $absents = [];
@@ -204,22 +217,25 @@ class GeneratePayrollService
             $holidayTimesheet = $this->timesheet->where(function ($item) use ($holiday) {
                 $expectedClockInDate = substr($item['expected_clock_in'], 0, 10);
                 $clockInDate = substr($item['clock_in'], 0, 10);
+
                 return $expectedClockInDate == $holiday->date || $clockInDate == $holiday->date;
             });
 
-            if ($holidayTimesheet->isEmpty()) { continue; }
+            if ($holidayTimesheet->isEmpty()) {
+                continue;
+            }
             $hours = $this->salaryComputation->working_hours_per_day;
             $hoursAmount = $this->salaryComputation->working_hours_per_day * $this->salaryComputation->hourly_rate;
             $payrollHolidays[$holiday->simplified_type][] = [
                 'date' => $holiday->date,
-                'hours' =>  $hours,
+                'hours' => $hours,
                 'amount' => $hoursAmount,
-                'rate' => $this->salaryComputation->{$holiday->simplified_type} . "_holiday_rate"
+                'rate' => $this->salaryComputation->{$holiday->simplified_type}.'_holiday_rate',
             ];
 
             $daySchedule = $holidayTimesheet->first();
 
-            if (!$daySchedule->clock_in) {
+            if (! $daySchedule->clock_in) {
                 $absents[PayrollEnumerator::ABSENT][] = [
                     'date' => $holiday->date,
                     'hours' => $hours,
@@ -237,7 +253,7 @@ class GeneratePayrollService
         $leaves = $this->payroll->employee->leaves()->where([
             ['date', '>=', $this->period->start_date],
             ['date', '<=', $this->period->end_date],
-            ['status', '=' , Leave::APPROVED]
+            ['status', '=', Leave::APPROVED],
         ])->get();
 
         if ($leaves->isNotEmpty()) {
@@ -246,7 +262,7 @@ class GeneratePayrollService
                 $transformedLeaves[$leave->type][] = [
                     'date' => $leave->date,
                     'hours' => $leave->hours,
-                    'amount' => $pay
+                    'amount' => $pay,
                 ];
             }
             $this->payroll->leaves = $transformedLeaves;
@@ -275,7 +291,8 @@ class GeneratePayrollService
         $employeeId = str_pad($this->employee->id, 5, '0', STR_PAD_LEFT);
         $periodId = str_pad($this->period->id, 5, '0', STR_PAD_LEFT);
         $lastNumber = str_pad($this->payroll->id, 7, '0', STR_PAD_LEFT);
-        return $companyInitials . date('Ymd') . '-' . $periodId . $employeeId . '-' . $lastNumber;
+
+        return $companyInitials.date('Ymd').'-'.$periodId.$employeeId.'-'.$lastNumber;
     }
 
     private function isLate(Carbon $clockIn, Carbon $expectedClockIn): bool

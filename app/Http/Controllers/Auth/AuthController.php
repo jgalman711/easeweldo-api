@@ -22,11 +22,15 @@ class AuthController extends Controller
      *     path="/api/login",
      *     summary="Authenticate user and generate access token",
      *     tags={"Authentication"},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
+     *
      *                 @OA\Property(
      *                      property="email_address",
      *                      type="string",
@@ -37,12 +41,16 @@ class AuthController extends Controller
      *             ),
      *         ),
      *     ),
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Authentication successful",
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
+     *
      *                 @OA\Property(property="success", type="boolean", example=true),
      *                 @OA\Property(property="message", type="string", example="User login successfully."),
      *                 @OA\Property(
@@ -75,8 +83,10 @@ class AuthController extends Controller
      *                          property="companies",
      *                          type="array",
      *                          description="User's associated companies",
+     *
      *                          @OA\Items()
      *                     ),
+     *
      *                     @OA\Property(
      *                          property="employee",
      *                          type="object",
@@ -91,6 +101,7 @@ class AuthController extends Controller
      *             ),
      *         ),
      *     ),
+     *
      *     @OA\Response(response="422", description="Validation errors"),
      *     @OA\Response(response="401", description="Unauthorized"),
      * )
@@ -101,6 +112,7 @@ class AuthController extends Controller
         try {
             $user = $this->loginService->login($credentials, $request->remember);
             $message = $this->loginService->getSuccessMessage($user);
+
             return $this->sendResponse(new LoginResource($user), $message);
         } catch (\Exception $e) {
             return $this->sendError($e->getMessage());
@@ -111,6 +123,7 @@ class AuthController extends Controller
     {
         $user = $request->user();
         $user->currentAccessToken()->delete();
+
         return $this->sendResponse($user, 'User successfully logged out.');
     }
 }

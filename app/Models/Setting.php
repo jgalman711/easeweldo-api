@@ -21,7 +21,7 @@ class Setting extends Model
         'auto_pay_disbursement',
         'clock_action_required',
         'disbursement_method',
-        'leaves_convertible'
+        'leaves_convertible',
     ];
 
     protected $casts = [

@@ -26,7 +26,7 @@ class EditPayrollResource extends BaseResource
             'taxesAndContributions' => self::getTaxesAndContributions(),
             'deductions' => self::getDeductions(),
             'otherDeductions' => $this->other_deductions,
-            'remarks' => $this->remarks
+            'remarks' => $this->remarks,
         ];
     }
 
@@ -40,6 +40,7 @@ class EditPayrollResource extends BaseResource
         $regularEarnings['specialHolidayWorked'] = $this->holidays_worked[Holiday::SPECIAL_HOLIDAY] ?? null;
         $regularEarnings['sickLeave'] = $this->leaves[Leave::TYPE_SICK_LEAVE] ?? null;
         $regularEarnings['vacationLeave'] = $this->leaves[Leave::TYPE_VACATION_LEAVE] ?? null;
+
         return $regularEarnings;
     }
 
@@ -48,6 +49,7 @@ class EditPayrollResource extends BaseResource
         $otherEarnings = [];
         $otherEarnings['taxableEarnings'] = $this->taxable_earnings ?? null;
         $otherEarnings['nonTaxableEarnings'] = $this->non_taxable_earnings ?? null;
+
         return $otherEarnings;
     }
 
@@ -58,6 +60,7 @@ class EditPayrollResource extends BaseResource
         $contributions['philhealthContributions'] = $this->philhealth_contributions ?? null;
         $contributions['pagibigContributions'] = $this->pagibig_contributions ?? null;
         $contributions['withheldTax'] = $this->withheld_tax ?? null;
+
         return $contributions;
     }
 
@@ -67,6 +70,7 @@ class EditPayrollResource extends BaseResource
         $deductions['late'] = $this->attendance_earnings['late'] ?? null;
         $deductions['absent'] = $this->attendance_earnings['absent'] ?? null;
         $deductions['undertime'] = $this->attendance_earnings['undertime'] ?? null;
+
         return $deductions;
     }
 }

@@ -15,7 +15,7 @@ class FinalDisbursement extends BaseDisbursement
     public function create(): Period
     {
         $disbursementRepository = app()->make(DisbursementRepository::class);
-        $disbursement =$disbursementRepository->getLatestDisbursement(
+        $disbursement = $disbursementRepository->getLatestDisbursement(
             PayrollEnumerator::TYPE_REGULAR,
             PayrollEnumerator::STATUS_PAID
         );
@@ -23,14 +23,16 @@ class FinalDisbursement extends BaseDisbursement
         $this->input = [
             ...$this->input,
             'start_date' => $startDate,
-            'end_date' => $this->input['salary_date']
+            'end_date' => $this->input['salary_date'],
         ];
+
         return Period::create($this->input);
     }
 
     public function generatePayroll(Period $disbursement, Employee $employee): Payroll
     {
         $payrollService = app()->make(GeneratePayrollService::class);
+
         return $payrollService->generate($employee->company, $disbursement, $employee);
     }
 }

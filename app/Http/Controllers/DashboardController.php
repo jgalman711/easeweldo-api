@@ -10,7 +10,9 @@ use App\Services\PeriodService;
 class DashboardController extends Controller
 {
     protected $companyAttendanceService;
+
     protected $employeeService;
+
     protected $periodService;
 
     public function __construct(
@@ -28,10 +30,11 @@ class DashboardController extends Controller
         $employees = $this->employeeService->generateDashboardDetails($company);
         $period = $this->periodService->generateDashboardDetails($company);
         $attendance = $this->companyAttendanceService->getAttendanceSummaryByWeek($company);
+
         return [
             ...$period,
             ...$employees,
-            'attendance_summary' => $attendance
+            'attendance_summary' => $attendance,
         ];
     }
 }

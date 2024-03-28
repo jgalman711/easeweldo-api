@@ -38,7 +38,7 @@ class EmployeeScheduleResource extends BaseResource
         ];
     }
 
-    private static function format(string $time = null): ?string
+    private static function format(?string $time = null): ?string
     {
         return $time ? substr($time, 0, 5) : $time;
     }

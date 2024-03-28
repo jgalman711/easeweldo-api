@@ -33,6 +33,7 @@ class SubscriptionController extends Controller
     public function show(Subscription $subscription): JsonResponse
     {
         $subscription = $subscription->load('subscriptionPrices');
+
         return $this->sendResponse(new BaseResource($subscription), 'Subscription retrieved successfully.');
     }
 }

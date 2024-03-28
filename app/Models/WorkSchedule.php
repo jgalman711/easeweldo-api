@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class WorkSchedule extends Model
 {
     use SoftDeletes;
-    
+
     protected $fillable = [
         'name',
         'company_id',
@@ -28,15 +28,16 @@ class WorkSchedule extends Model
         'saturday_clock_in_time',
         'saturday_clock_out_time',
         'sunday_clock_in_time',
-        'sunday_clock_out_time'
+        'sunday_clock_out_time',
     ];
 
     public const TYPES = [
         self::STANDARD,
-        self::CUSTOM
+        self::CUSTOM,
     ];
 
     public const STANDARD = 'standard';
+
     public const CUSTOM = 'custom';
 
     public function company(): BelongsTo

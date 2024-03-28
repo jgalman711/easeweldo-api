@@ -22,6 +22,7 @@ class CompanyAttendanceService
         $timeRecords = $company->timeRecords()
             ->whereBetween('expected_clock_in', [$startDate, $endDate])
             ->get();
+
         return $this->getAttendanceSummary($timeRecords);
     }
 
@@ -32,7 +33,7 @@ class CompanyAttendanceService
         });
         $summary = [
             'total_absents' => 0,
-            'total_lates' => 0
+            'total_lates' => 0,
         ];
         $date = Carbon::now();
         $days = [];
@@ -43,10 +44,10 @@ class CompanyAttendanceService
             $latesPerDay = 0;
             if (isset($groupedRecords[$formattedDate])) {
                 foreach ($groupedRecords[$formattedDate] as $record) {
-                    if (!$record->clock_in && !$record->clock_out) {
+                    if (! $record->clock_in && ! $record->clock_out) {
                         $absentsPerDay++;
                         $summary['total_absents']++;
-                    } elseif($this->attendanceService->calculateLates($record->expected_clock_in, $record->clock_in)) {
+                    } elseif ($this->attendanceService->calculateLates($record->expected_clock_in, $record->clock_in)) {
                         $latesPerDay++;
                         $summary['total_lates']++;
                     }
@@ -65,8 +66,8 @@ class CompanyAttendanceService
         $summary['average_lates'] = round($summary['total_lates'] / 7, 2);
         $summary['average_absents_lates'] = round(
             $summary['average_absents'] +
-            $summary['average_lates'] / 2
-        , 2);
+            $summary['average_lates'] / 2, 2);
+
         return $summary;
     }
 }

@@ -27,57 +27,73 @@ class EmployeeController extends Controller
         $this->userService = $userService;
         $this->setCacheIdentifier('employees');
     }
-    
+
     /**
      * @OA\Get(
      *     path="/api/companies/{company-slug}/employees",
      *     summary="Get a list of employees for a specific company",
      *     security={{"bearerAuth":{}}},
      *     tags={"Company Employees"},
+     *
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
      *         required=true,
      *         description="Slug of the company",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
      *         description="Page number for pagination",
+     *
      *         @OA\Schema(type="integer", default=1)
      *     ),
+     *
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
      *         description="Number of items per page",
+     *
      *         @OA\Schema(type="integer", default=10)
      *     ),
+     *
      *     @OA\Parameter(
      *         name="sort",
      *         in="query",
      *         description="Sort order for the results (e.g., first_name, -last_name)",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="search",
      *         in="query",
      *         description="Search term for filtering results",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *         response="200",
      *         description="List of employees retrieved successfully",
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
+     *
      *                 @OA\Property(property="success", type="boolean", example=true),
      *                 @OA\Property(property="message", type="string", example="Employees retrieved successfully."),
      *                 @OA\Property(
      *                     property="data",
      *                     type="array",
+     *
      *                     @OA\Items(
      *                         type="object",
+     *
      *                         @OA\Property(property="id", type="integer", example=1),
      *                         @OA\Property(property="first_name", type="string", example="John"),
      *                         @OA\Property(property="last_name", type="string", example="Doe"),
@@ -89,6 +105,7 @@ class EmployeeController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response="404", description="Company not found")
      * )
      */
@@ -100,8 +117,9 @@ class EmployeeController extends Controller
             'user.full_name',
             'job_title',
             'employment_status',
-            'department'
+            'department',
         ]);
+
         return $this->sendResponse(EmployeeResource::collection($employees), 'Employees retrieved successfully.');
     }
 
@@ -111,19 +129,25 @@ class EmployeeController extends Controller
      *     summary="Create a new employee for a specific company",
      *     security={{"bearerAuth":{}}},
      *     tags={"Company Employees"},
+     *
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
      *         required=true,
      *         description="Slug of the company",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(property="user_id", type="integer", nullable=true, description="User ID associated with the employee (optional)"),
      *                 @OA\Property(property="first_name", type="string", description="First name of the employee", example="John"),
      *                 @OA\Property(property="last_name", type="string", description="Last name of the employee", example="Doe"),
@@ -153,6 +177,7 @@ class EmployeeController extends Controller
      *             ),
      *         ),
      *     ),
+     *
      *     @OA\Response(response="201", description="Employee created successfully"),
      *     @OA\Response(response="422", description="Validation errors")
      * )
@@ -162,7 +187,8 @@ class EmployeeController extends Controller
         try {
             $data = $request->validated();
             $employee = $this->employeeService->create($request, $company);
-            return $this->sendResponse(new EmployeeResource($employee), "Employee created successfully.");
+
+            return $this->sendResponse(new EmployeeResource($employee), 'Employee created successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
         }
@@ -174,20 +200,25 @@ class EmployeeController extends Controller
      *     summary="Get details of a specific employee",
      *     security={{"bearerAuth":{}}},
      *     tags={"Company Employees"},
+     *
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
      *         required=true,
      *         description="Slug of the company",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="employee-id",
      *         in="path",
      *         required=true,
      *         description="ID of the employee",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(response="200", description="Employee details retrieved successfully"),
      *     @OA\Response(response="404", description="Employee not found")
      * )
@@ -195,6 +226,7 @@ class EmployeeController extends Controller
     public function show(Company $company, int $employeeId): JsonResponse
     {
         $employee = $company->getEmployeeById($employeeId);
+
         return $this->sendResponse(new EmployeeResource($employee), 'Employee retrieved successfully.');
     }
 
@@ -204,26 +236,34 @@ class EmployeeController extends Controller
      *     summary="Update details of a specific employee",
      *     security={{"bearerAuth":{}}},
      *     tags={"Company Employees"},
+     *
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
      *         required=true,
      *         description="Slug of the company",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="employee-id",
      *         in="path",
      *         required=true,
      *         description="ID of the employee",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(property="user_id", type="integer", nullable=true, description="User ID associated with the employee (optional)"),
      *                 @OA\Property(property="first_name", type="string", description="First name of the employee", example="John"),
      *                 @OA\Property(property="last_name", type="string", description="Last name of the employee", example="Doe"),
@@ -253,6 +293,7 @@ class EmployeeController extends Controller
      *             ),
      *         ),
      *     ),
+     *
      *     @OA\Response(response="200", description="Employee details updated successfully"),
      *     @OA\Response(response="404", description="Employee not found"),
      *     @OA\Response(response="422", description="Validation errors")
@@ -266,9 +307,11 @@ class EmployeeController extends Controller
             $employee = $this->employeeService->update($request, $company, $employee);
             DB::commit();
             $this->forget($company, $employee->id);
+
             return $this->sendResponse(new EmployeeResource($employee), 'Employee updated successfully.');
         } catch (Exception $e) {
             DB::rollBack();
+
             return $this->sendError($e->getMessage());
         }
     }
@@ -279,20 +322,25 @@ class EmployeeController extends Controller
      *     summary="Delete a specific employee",
      *     security={{"bearerAuth":{}}},
      *     tags={"Company Employees"},
+     *
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
      *         required=true,
      *         description="Slug of the company",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="employee-id",
      *         in="path",
      *         required=true,
      *         description="ID of the employee",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(response="204", description="Employee deleted successfully"),
      *     @OA\Response(response="404", description="Employee not found")
      * )
@@ -302,6 +350,7 @@ class EmployeeController extends Controller
         $company->getEmployeeById($employee->id);
         $employee->delete();
         $this->forget($company, $employee->id);
+
         return $this->sendResponse(new EmployeeResource($employee), 'Employee deleted successfully.');
     }
 
@@ -311,8 +360,9 @@ class EmployeeController extends Controller
             'first_name',
             'last_name',
             'employment_status',
-            'company.name'
+            'company.name',
         ]);
+
         return $this->sendResponse(EmployeeResource::collection($employees), 'Employees retrieved successfully.');
     }
 }

@@ -22,7 +22,7 @@ class SpecialDisbursement extends BaseDisbursement
             'period_id' => $disbursement->id,
             'status' => PayrollEnumerator::STATUS_TO_PAY,
             'basic_salary' => $this->input['pay_amount'],
-            'pay_date' => $this->input['salary_date']
+            'pay_date' => $this->input['salary_date'],
         ]);
     }
 }

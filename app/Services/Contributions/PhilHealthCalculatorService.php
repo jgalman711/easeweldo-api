@@ -6,7 +6,6 @@ use App\Models\PhilHealth;
 
 class PhilHealthCalculatorService
 {
-    
     public function compute(float $salary): float
     {
         $philhealth = PhilHealth::where('status', PhilHealth::ACTIVE)->first();
@@ -19,6 +18,7 @@ class PhilHealthCalculatorService
         } elseif ($contribution > $philhealth->max_contribution) {
             $contribution = $philhealth->max_contribution;
         }
+
         return $contribution;
     }
 }

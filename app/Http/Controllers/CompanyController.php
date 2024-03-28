@@ -30,6 +30,7 @@ class CompanyController extends Controller
      *     summary="Get all companies",
      *     security={{"bearerAuth":{}}},
      *     tags={"Companies"},
+     *
      *     @OA\Response(response="200", description="Companies retrieved successfully"),
      *     @OA\Response(response="422", description="Validation errors")
      * )
@@ -37,8 +38,9 @@ class CompanyController extends Controller
     public function index(Request $request): JsonResponse
     {
         $companies = $this->applyFilters($request, Company::query(), [
-            'name'
+            'name',
         ]);
+
         return $this->sendResponse(CompanyResource::collection($companies), 'Companies retrieved successfully.');
     }
 
@@ -48,12 +50,16 @@ class CompanyController extends Controller
      *     summary="Register a new company",
      *     security={{"bearerAuth":{}}},
      *     tags={"Companies"},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="name",
      *                     type="string",
@@ -163,12 +169,16 @@ class CompanyController extends Controller
      *             ),
      *         ),
      *     ),
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Company created successfully",
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
+     *
      *                 @OA\Property(property="success", type="boolean", example=true),
      *                 @OA\Property(property="message", type="string", example="Company created successfully."),
      *                 @OA\Property(
@@ -194,12 +204,16 @@ class CompanyController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response="422",
      *         description="Validation errors",
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
+     *
      *                 @OA\Property(property="success", type="boolean", example=false),
      *                 @OA\Property(property="message", type="string", example="The given data was invalid."),
      *                 @OA\Property(
@@ -208,6 +222,7 @@ class CompanyController extends Controller
      *                     @OA\Property(
      *                          property="name",
      *                          type="array",
+     *
      *                          @OA\Items(
      *                              type="string",
      *                              example="['The name field is required.']"
@@ -226,13 +241,14 @@ class CompanyController extends Controller
         $input['slug'] = strtolower(str_replace(' ', '-', $input['name']));
         $input['status'] = Company::STATUS_ACTIVE;
         if (isset($input['logo']) && $input['logo']) {
-            $filename = time() . '.' . $request->logo->extension();
+            $filename = time().'.'.$request->logo->extension();
             $request->logo->storeAs('uploads/companies/images', $filename);
             $input['logo'] = $filename;
         } else {
             unset($input['logo']);
         }
         $company = Company::create($input);
+
         return $this->sendResponse(new CompanyResource($company), 'Company created successfully.');
     }
 
@@ -242,13 +258,16 @@ class CompanyController extends Controller
      *     summary="Get company by slug",
      *     security={{"bearerAuth":{}}},
      *     tags={"Companies"},
+     *
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
      *         required=true,
      *         description="Slug of the company",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(response="200", description="Companies retrieved successfully"),
      *     @OA\Response(response="404", description="Company not found"),
      * )
@@ -264,19 +283,25 @@ class CompanyController extends Controller
      *     summary="Update company details by slug",
      *     security={{"bearerAuth":{}}},
      *     tags={"Companies"},
+     *
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
      *         required=true,
      *         description="Slug of the company",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
+     *
      *             @OA\Schema(
      *                 type="object",
+     *
      *                 @OA\Property(
      *                     property="name",
      *                     type="string",
@@ -386,12 +411,16 @@ class CompanyController extends Controller
      *             ),
      *         ),
      *     ),
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Company created successfully",
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
+     *
      *                 @OA\Property(property="success", type="boolean", example=true),
      *                 @OA\Property(property="message", type="string", example="Company created successfully."),
      *                 @OA\Property(
@@ -417,12 +446,16 @@ class CompanyController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response="422",
      *         description="Validation errors",
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
+     *
      *                 @OA\Property(property="success", type="boolean", example=false),
      *                 @OA\Property(property="message", type="string", example="The given data was invalid."),
      *                 @OA\Property(
@@ -431,6 +464,7 @@ class CompanyController extends Controller
      *                     @OA\Property(
      *                          property="name",
      *                          type="array",
+     *
      *                          @OA\Items(
      *                              type="string",
      *                              example="['The name field is required.']"
@@ -454,13 +488,14 @@ class CompanyController extends Controller
                     File::delete($filePath);
                 }
             }
-            $filename = time() . '.' . $request->logo->extension();
+            $filename = time().'.'.$request->logo->extension();
             $request->logo->storeAs($companyUploadPath, $filename);
             $input['logo'] = $filename;
         } else {
             unset($input['logo']);
         }
         $company->update($input);
+
         return $this->sendResponse(new CompanyResource($company), 'Company updated successfully.');
     }
 
@@ -470,13 +505,16 @@ class CompanyController extends Controller
      *     summary="Delete a company by slug",
      *     security={{"bearerAuth":{}}},
      *     tags={"Companies"},
+     *
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
      *         required=true,
      *         description="Slug of the company",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(response="204", description="Company deleted successfully"),
      *     @OA\Response(response="404", description="Company not found"),
      * )
@@ -484,6 +522,7 @@ class CompanyController extends Controller
     public function destroy(Company $company): JsonResponse
     {
         $company->delete();
+
         return $this->sendResponse(new CompanyResource($company), 'Company deleted successfully.');
     }
 }

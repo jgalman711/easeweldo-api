@@ -7,7 +7,6 @@ use App\Strategies\Qr\EmployeeQrStrategy;
 
 class QrStrategyFactory
 {
-
     public static function createStrategy(string $type)
     {
         if ($type == 'employee') {
@@ -15,6 +14,7 @@ class QrStrategyFactory
         } elseif ($type == 'company') {
             $strategy = new CompanyQrStrategy;
         }
+
         return $strategy;
     }
 }

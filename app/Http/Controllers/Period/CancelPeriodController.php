@@ -14,6 +14,7 @@ class CancelPeriodController extends Controller
     {
         try {
             $period->state()->cancel();
+
             return $this->sendResponse(new PeriodResource($period), 'Period cancelled successfully.');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());

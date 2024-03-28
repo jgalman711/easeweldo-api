@@ -9,18 +9,18 @@ class PeriodResource extends BaseResource
     public function toArray(Request $request): array
     {
         return [
-            "id" => $this->id,
-            "company_id" => $this->company_id,
-            "company_period_id" => $this->company_period_id,
-            "description" => $this->description,
-            "type" => ucfirst($this->type),
-            "subtype" => ucfirst($this->subtype),
-            "start_date" => $this->start_date,
-            "end_date" => $this->end_date,
-            "duration" => $this->getDuration(),
-            "pay_day" => $this->formatDate($this->salary_date),
-            "salary_date" => $this->salary_date,
-            "status" => $this->status,
+            'id' => $this->id,
+            'company_id' => $this->company_id,
+            'company_period_id' => $this->company_period_id,
+            'description' => $this->description,
+            'type' => ucfirst($this->type),
+            'subtype' => ucfirst($this->subtype),
+            'start_date' => $this->start_date,
+            'end_date' => $this->end_date,
+            'duration' => $this->getDuration(),
+            'pay_day' => $this->formatDate($this->salary_date),
+            'salary_date' => $this->salary_date,
+            'status' => $this->status,
             'employees_count' => $this->employees_count,
             'employees_net_pay' => number_format($this->employees_net_pay, 2),
             'withheld_taxes' => number_format($this->withheld_taxes, 2),
@@ -36,8 +36,9 @@ class PeriodResource extends BaseResource
     private function getDuration(): ?string
     {
         if ($this->start_date && $this->end_date) {
-            return $this->formatCompactDate($this->start_date) . " - " . $this->formatDate($this->end_date);
+            return $this->formatCompactDate($this->start_date).' - '.$this->formatDate($this->end_date);
         }
+
         return null;
     }
 }

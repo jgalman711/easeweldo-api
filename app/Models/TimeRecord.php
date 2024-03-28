@@ -16,15 +16,21 @@ class TimeRecord extends Model
         self::LATE,
         self::ABSENT,
         self::OVERTIME,
-        self::UNDERTIME
+        self::UNDERTIME,
     ];
 
     public const ON_TIME = 'on-time';
+
     public const LATE = 'late';
+
     public const ABSENT = 'absent';
+
     public const OVERTIME = 'overtime';
+
     public const UNDERTIME = 'undertime';
+
     public const MISSED_CLOCK_IN = 'missed-clock-in';
+
     public const MISSED_CLOCK_OUT = 'missed-clock-out';
 
     protected $fillable = [
@@ -37,12 +43,12 @@ class TimeRecord extends Model
         'original_clock_in',
         'original_clock_out',
         'source',
-        'remarks'
+        'remarks',
     ];
 
     protected $appends = [
         'attendance_status',
-        'next_action'
+        'next_action',
     ];
 
     public function employee()
@@ -62,6 +68,7 @@ class TimeRecord extends Model
                 $dateToQuery->where('expected_clock_out', '<=', $end);
             });
         });
+
         return $timeRecordsQuery;
     }
 
@@ -86,29 +93,31 @@ class TimeRecord extends Model
             } else {
                 $attendanceStatus = self::ON_TIME;
             }
-        } elseif (!$clockIn && $clockOut) {
+        } elseif (! $clockIn && $clockOut) {
             $attendanceStatus = self::MISSED_CLOCK_IN;
-        } elseif ($clockIn && !$clockOut) {
+        } elseif ($clockIn && ! $clockOut) {
             $attendanceStatus = self::MISSED_CLOCK_OUT;
-        } elseif (!$expectedClockIn || !$expectedClockOut) {
+        } elseif (! $expectedClockIn || ! $expectedClockOut) {
             $attendanceStatus = self::OVERTIME;
         } else {
             $attendanceStatus = self::ABSENT;
         }
+
         return $attendanceStatus;
     }
 
     public function getNextActionAttribute()
     {
         if ($this->clock_in === null && $this->clock_out === null) {
-            $action = "Clock In";
+            $action = 'Clock In';
         } elseif ($this->clock_in !== null && $this->clock_out === null) {
-            $action = "Clock Out";
+            $action = 'Clock Out';
         } elseif ($this->clock_in !== null && $this->clock_out !== null) {
-            $action = "Already Clocked Out";
+            $action = 'Already Clocked Out';
         } else {
-            $action = "Missed Clock In";
+            $action = 'Missed Clock In';
         }
+
         return $action;
     }
 
@@ -117,6 +126,7 @@ class TimeRecord extends Model
         if ($clock && $expectedClock) {
             return $clock->isSameDay($expectedClock);
         }
+
         return false;
     }
 

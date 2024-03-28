@@ -33,8 +33,10 @@ trait Filter
         }
         if ($request->has('per_page')) {
             $perPage = $request->input('per_page', 10);
+
             return $query->paginate($perPage);
         }
+
         return $query->get();
     }
 
@@ -56,6 +58,7 @@ trait Filter
     protected function search(array $searchableColumns, Request $request): Closure
     {
         $search = $request->input('search');
+
         return function ($searchQuery) use ($searchableColumns, $search) {
             foreach ($searchableColumns as $searchableColumn) {
                 $columnRelationship = explode('.', $searchableColumn);
@@ -89,6 +92,7 @@ trait Filter
             in_array(count($columnRelationship), [1, 2]),
             new Exception('Unsupported search query')
         );
+
         return count($columnRelationship) == 2;
     }
 }

@@ -21,8 +21,9 @@ class AnnualExtraDisbursement extends BaseDisbursement
         $input = [
             ...$this->input,
             'start_date' => $startOfYear,
-            'end_date' => $endOfYear
+            'end_date' => $endOfYear,
         ];
+
         return Period::create($input);
     }
 
@@ -31,13 +32,13 @@ class AnnualExtraDisbursement extends BaseDisbursement
         $payrollRepository = app()->make(PayrollRepository::class);
         $payrolls = $payrollRepository->getEmployeePayrollsByDateRange($employee->id, [
             $disbursement->start_date,
-            $disbursement->end_date
+            $disbursement->end_date,
         ]);
 
         $totalBasicSalary = 0;
         $totalTaxableEarnings = 0;
         $totalNonTaxableEarnings = 0;
-        foreach($payrolls as $payroll) {
+        foreach ($payrolls as $payroll) {
             $totalBasicSalary += $payroll->net_income;
             $totalTaxableEarnings += $this->getEarningsTotal($payroll->taxable_earnings ?? []);
             $totalNonTaxableEarnings += $this->getEarningsTotal($payroll->non_taxable_earnings ?? []);
@@ -52,16 +53,16 @@ class AnnualExtraDisbursement extends BaseDisbursement
             'taxable_earnings' => [
                 [
                     'name' => 'Prorated Taxable Earnings',
-                    'amount' => round($totalTaxableEarnings / self::TWELVE_MONTHS, 2)
-                ]
+                    'amount' => round($totalTaxableEarnings / self::TWELVE_MONTHS, 2),
+                ],
             ],
             'non_taxable_earnings' => [
                 [
                     'name' => 'Prorated Non-taxable Earnings',
-                    'amount' => round($totalNonTaxableEarnings / self::TWELVE_MONTHS, 2)
-                ]
+                    'amount' => round($totalNonTaxableEarnings / self::TWELVE_MONTHS, 2),
+                ],
             ],
-            'pay_date' => $this->input['salary_date']
+            'pay_date' => $this->input['salary_date'],
         ]);
     }
 
@@ -71,6 +72,7 @@ class AnnualExtraDisbursement extends BaseDisbursement
         foreach ($earnings as $earning) {
             $totalEarnings += $earning['amount'] ?? 0;
         }
+
         return $totalEarnings;
     }
 }

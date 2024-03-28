@@ -13,23 +13,31 @@ class ForgotPasswordController extends Controller
      *     path="/api/forgot-password",
      *     summary="Send password reset email",
      *     tags={"Authentication"},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
+     *
      *                 @OA\Property(
      *                      property="email_address",
      *                      type="string", format="email", description="User's email address", maxLength=255),
      *             ),
      *         ),
      *     ),
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Password reset email sent successfully",
+     *
      *         @OA\MediaType(
      *             mediaType="application/json",
+     *
      *             @OA\Schema(
+     *
      *                 @OA\Property(property="success", type="boolean", example=true),
      *                 @OA\Property(
      *                      property="message",
@@ -38,6 +46,7 @@ class ForgotPasswordController extends Controller
      *             ),
      *         ),
      *     ),
+     *
      *     @OA\Response(response="422", description="Validation errors"),
      *     @OA\Response(response="404", description="User not found"),
      * )
@@ -52,6 +61,7 @@ class ForgotPasswordController extends Controller
         } else {
             $response = $this->sendError('Unable to send reset password link.');
         }
+
         return $response;
     }
 }

@@ -10,10 +10,11 @@ trait CompanyEmployee
     {
         $companyEmployeeIds = $company->employees()->pluck('id')->toArray();
         foreach ($employeeIds as $employeeId) {
-            if (!in_array($employeeId, $companyEmployeeIds)) {
+            if (! in_array($employeeId, $companyEmployeeIds)) {
                 return false;
             }
         }
+
         return true;
     }
 }

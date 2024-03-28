@@ -9,7 +9,7 @@ trait PayrollJsonParser
         $totalAmount = 0;
         if ($elements) {
             foreach ($elements as $element) {
-                if (is_array($element) && !isset($element['amount'])) {
+                if (is_array($element) && ! isset($element['amount'])) {
                     $totalAmount += $this->totalAmountParser($element);
                 } else {
                     // added key pay just in case
@@ -17,6 +17,7 @@ trait PayrollJsonParser
                 }
             }
         }
+
         return round($totalAmount, 2);
     }
 }

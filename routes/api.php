@@ -64,7 +64,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('artisan-migrate', function () {
     Artisan::call('migrate', [
-        '--force' => true
+        '--force' => true,
     ]);
 });
 
@@ -111,7 +111,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
             Route::apiResource('subscriptions', CompanySubscriptionController::class);
             Route::apiResource('work-schedules', WorkScheduleController::class);
-            
+
             Route::apiResource('reports', ReportController::class)->only('show');
             Route::apiResource('settings', SettingController::class)->only('index', 'store');
             Route::post('timesheet/upload', [TimesheetUploadController::class, 'store']);
@@ -156,7 +156,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::put('change-password', [UserChangePasswordController::class, 'update']);
         Route::put('reset-temporary-password', [UserTemporaryPasswordResetController::class, 'update']);
 
-            // QR - START
+        // QR - START
         Route::get('qrcode', [EmployeeQrController::class, 'index']);
         Route::post('qrcode', [CompanyQrController::class, 'store']);
         // END

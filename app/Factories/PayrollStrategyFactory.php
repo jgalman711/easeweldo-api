@@ -21,9 +21,10 @@ class PayrollStrategyFactory
             $strategy = new RegularPayrollStrategy();
         } elseif ($type == PayrollEnumerator::TYPE_FINAL) {
             $strategy = new FinalPayrollStrategy();
-        }else {
-            throw new Exception("Invalid payroll type");
+        } else {
+            throw new Exception('Invalid payroll type');
         }
+
         return $strategy;
     }
 }

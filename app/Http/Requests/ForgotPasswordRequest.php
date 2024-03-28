@@ -7,7 +7,7 @@ class ForgotPasswordRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'email_address' => 'required'
+            'email_address' => 'required',
         ];
     }
 }

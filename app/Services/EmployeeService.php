@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\File;
 class EmployeeService
 {
     protected $employeeUploadPath;
+
     protected $userService;
 
     public function __construct()
@@ -32,7 +33,7 @@ class EmployeeService
             $input['company_employee_id'] = $this->generateCompanyEmployeeId($company);
             $input['status'] = Employee::ACTIVE;
             if (isset($input['profile_picture']) && $input['profile_picture']) {
-                $filename = time() . '.' . $request->profile_picture->extension();
+                $filename = time().'.'.$request->profile_picture->extension();
                 $request->profile_picture->storeAs($this->employeeUploadPath, $filename);
                 $input['profile_picture'] = $filename;
             }
@@ -43,6 +44,7 @@ class EmployeeService
             DB::rollback();
             throw $e;
         }
+
         return $employee;
     }
 
@@ -52,8 +54,9 @@ class EmployeeService
             ...$data,
             'company_id' => $company->id,
             'company_employee_id' => $this->generateCompanyEmployeeId($company),
-            'status' => $company->isInSettlementPeriod() ? Employee::PENDING : Employee::ACTIVE
+            'status' => $company->isInSettlementPeriod() ? Employee::PENDING : Employee::ACTIVE,
         ];
+
         return Employee::create($data);
     }
 
@@ -67,7 +70,7 @@ class EmployeeService
                     File::delete($filePath);
                 }
             }
-            $filename = time() . '.' . $request->profile_picture->extension();
+            $filename = time().'.'.$request->profile_picture->extension();
             $request->profile_picture->storeAs($this->employeeUploadPath, $filename);
             $input['profile_picture'] = $filename;
         } else {
@@ -82,6 +85,7 @@ class EmployeeService
         if ($employee->user) {
             $employee->user->update($input);
         }
+
         return $employee;
     }
 
@@ -94,7 +98,7 @@ class EmployeeService
         });
         $typeCount = [];
         $typePercentage = [];
-        foreach(Employee::EMPLOYMENT_TYPE as $type) {
+        foreach (Employee::EMPLOYMENT_TYPE as $type) {
             $count = $employees->where('employment_type', $type)->count();
             $typeCount[$type] = $count;
             $typePercentage[$type] = round(($count / $employees->count()) * 100, 2);
@@ -107,11 +111,12 @@ class EmployeeService
         });
 
         $retention = $this->generateRetentionRateByMonth($previousEmployees, $previousMonthStart);
+
         return [
             'active_employees' => $employees->count(),
             'employment_type_count' => $typeCount,
             'employment_type_percentatge' => $typePercentage,
-            'retention' => $retention
+            'retention' => $retention,
         ];
     }
 
@@ -123,7 +128,7 @@ class EmployeeService
         })->count();
 
         $terminatedEmployees = $employees->filter(function ($employee) use ($month) {
-            return !is_null($employee->date_of_termination)
+            return ! is_null($employee->date_of_termination)
                 && ($employee->date_of_termination >= $month)
                 && ($employee->date_of_termination <= Carbon::now()->endOfMonth());
         })->count();
@@ -134,7 +139,7 @@ class EmployeeService
             'active_employees_start_of_month' => $activeEmployeesBeforeMonthStart,
             'newly_hired_employees' => $newlyHiredEmployees,
             'terminated_employees' => $terminatedEmployees,
-            'retention_rate' =>  $this->calculateRetentionRate(
+            'retention_rate' => $this->calculateRetentionRate(
                 $activeEmployeesBeforeMonthStart,
                 $terminatedEmployees
             ),
@@ -144,6 +149,7 @@ class EmployeeService
     private function generateCompanyEmployeeId(Company $company): int
     {
         $latestEmployee = $company->employees()->orderByDesc('id')->first();
+
         return $latestEmployee ? $latestEmployee->company_employee_id + 1 : 1;
     }
 

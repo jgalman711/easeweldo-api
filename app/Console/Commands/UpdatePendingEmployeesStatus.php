@@ -17,7 +17,7 @@ class UpdatePendingEmployeesStatus extends Command
         $companies = Company::all();
 
         foreach ($companies as $company) {
-            if (!$company->isInSettlementPeriod()) {
+            if (! $company->isInSettlementPeriod()) {
                 $company->employees()->where('status', Employee::PENDING)
                     ->update(['status' => Employee::ACTIVE]);
             }

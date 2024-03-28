@@ -9,11 +9,12 @@ class BasePayrollResource extends BaseResource
 {
     public function toArray(Request $request): array
     {
-        $resource = match($request->format)  {
+        $resource = match ($request->format) {
             'edit' => new EditPayrollResource($this->resource),
             'details' => new DetailsPayrollResource($this->resource),
             default => new DefaultPayrollResource($this->resource)
         };
+
         return $resource->toArray($request);
     }
 }

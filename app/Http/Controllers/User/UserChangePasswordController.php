@@ -23,6 +23,7 @@ class UserChangePasswordController extends Controller
         $data = $request->validated();
         $employee = $company->employees()->findOrFail($employeeId);
         $this->authService->changePassword($employee->user, $data);
+
         return $this->sendResponse(new EmployeeResource($employee), 'Password changed successfully.');
     }
 }

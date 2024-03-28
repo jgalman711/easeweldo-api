@@ -18,7 +18,7 @@ class TimesheetUploadController extends Controller
     private const CSV_HEADERS = [
         'employee_id',
         'clock_in',
-        'clock_out'
+        'clock_out',
     ];
 
     private const EMPLOYEE_ID = 0;
@@ -26,7 +26,6 @@ class TimesheetUploadController extends Controller
     private const CLOCK_IN = 1;
 
     private const CLOCK_OUT = 2;
-
 
     public function __construct(TimeRecordService $timeRecordService)
     {
@@ -47,12 +46,13 @@ class TimesheetUploadController extends Controller
                 while (($data = fgetcsv($handle)) !== false) {
                     if ($firstRow) {
                         $firstRow = false;
+
                         continue;
                     }
 
                     $employee = Employee::find($data[self::EMPLOYEE_ID]);
 
-                    throw_unless($employee, new Exception("Employee not found. ID: " . $data[self::EMPLOYEE_ID]));
+                    throw_unless($employee, new Exception('Employee not found. ID: '.$data[self::EMPLOYEE_ID]));
 
                     $expectedSchedule = $this->timeRecordService->getExpectedScheduleOf(
                         $employee,
@@ -64,18 +64,18 @@ class TimesheetUploadController extends Controller
                         'company_id' => $company->id,
                         'employee_id' => $employee->id,
                         'clock_in' => $data[self::CLOCK_IN],
-                        'clock_out' => $data[self::CLOCK_OUT]
+                        'clock_out' => $data[self::CLOCK_OUT],
                     ];
 
                     if ($expectedSchedule['expected_clock_in'] && $expectedSchedule['expected_clock_out']) {
                         $expectedClockIn = Carbon::parse($data[self::CLOCK_IN])->format('Y-m-d')
-                            . ' ' . Carbon::parse($expectedSchedule['expected_clock_in'])->format('H:i:s');
+                            .' '.Carbon::parse($expectedSchedule['expected_clock_in'])->format('H:i:s');
                         $expectedClockOut = Carbon::parse($data[self::CLOCK_OUT])->format('Y-m-d')
-                            . ' ' . Carbon::parse($expectedSchedule['expected_clock_out'])->format('H:i:s');
+                            .' '.Carbon::parse($expectedSchedule['expected_clock_out'])->format('H:i:s');
 
                         TimeRecord::updateOrCreate([
                             'expected_clock_in' => $expectedClockIn,
-                            'expected_clock_out' => $expectedClockOut
+                            'expected_clock_out' => $expectedClockOut,
                         ], $timeData);
                     } else {
                         $timeData['expected_clock_in'] = null;
@@ -85,6 +85,7 @@ class TimesheetUploadController extends Controller
                 }
                 fclose($handle);
             }
+
             return $this->sendResponse(null, 'CSV file uploaded and processed successfully.');
         }
     }

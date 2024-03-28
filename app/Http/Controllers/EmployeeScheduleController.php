@@ -3,12 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\EmployeeScheduleRequest;
-use App\Http\Resources\BaseResource;
 use App\Http\Resources\EmployeeScheduleResource;
 use App\Models\Company;
 use App\Models\Employee;
-use App\Models\EmployeeSchedule;
-use App\Models\WorkSchedule;
 use App\Services\EmployeeScheduleService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -30,44 +27,57 @@ class EmployeeScheduleController extends Controller
      *     summary="List Employee Schedules",
      *     security={{"bearerAuth":{}}},
      *     tags={"Employee Schedules"},
+     *
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
      *         required=true,
      *         description="Slug of the company",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="employee-id",
      *         in="path",
      *         required=true,
      *         description="ID of the employee",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="page",
      *         in="query",
      *         description="Page number for pagination",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
      *         description="Number of items per page",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="sort",
      *         in="query",
      *         description="Sort order (e.g., name)",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="search",
      *         in="query",
      *         description="Search term",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Employee Schedules retrieved successfully"
@@ -86,8 +96,9 @@ class EmployeeScheduleController extends Controller
                 'status',
                 'start_date',
                 'workSchedule.name',
-                'workSchedule.type'
+                'workSchedule.type',
             ]);
+
             return $this->sendResponse(
                 EmployeeScheduleResource::collection($employeeSchedule),
                 'Employee schedules retrieved successfully.'
@@ -103,23 +114,30 @@ class EmployeeScheduleController extends Controller
      *     summary="Create Employee Schedule",
      *     security={{"bearerAuth":{}}},
      *     tags={"Employee Schedules"},
+     *
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
      *         required=true,
      *         description="Slug of the company",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="employee-id",
      *         in="path",
      *         required=true,
      *         description="ID of the employee",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(
      *                  property="work_schedule_id",
      *                  type="integer",
@@ -135,11 +153,14 @@ class EmployeeScheduleController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Employee Schedule created successfully",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Employee Schedule created successfully."),
      *             @OA\Property(
@@ -151,11 +172,14 @@ class EmployeeScheduleController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response="422",
      *         description="Validation errors",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="The given data was invalid.")
      *         )
@@ -168,6 +192,7 @@ class EmployeeScheduleController extends Controller
             $employee = $company->getEmployeeById($employeeId);
             $employeeSchedule = $this->employeeScheduleService->create($request, $employee);
             $this->forget($company);
+
             return $this->sendResponse(
                 new EmployeeScheduleResource($employeeSchedule),
                 'Employee schedule created successfully.'
@@ -183,32 +208,41 @@ class EmployeeScheduleController extends Controller
      *     summary="Get Employee Schedule",
      *     security={{"bearerAuth":{}}},
      *     tags={"Employee Schedules"},
+     *
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
      *         required=true,
      *         description="Slug of the company",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="employee-id",
      *         in="path",
      *         required=true,
      *         description="ID of the employee",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="schedule-id",
      *         in="path",
      *         required=true,
      *         description="ID of the employee schedule or 'latest' to get the latest schedule",
+     *
      *         @OA\Schema(type="string", default="latest"),
      *     ),
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Employee Schedule retrieved successfully",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Employee Schedule retrieved successfully."),
      *             @OA\Property(
@@ -225,11 +259,14 @@ class EmployeeScheduleController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response="404",
      *         description="Employee Schedule not found",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Employee Schedule not found.")
      *         )
@@ -251,6 +288,7 @@ class EmployeeScheduleController extends Controller
                 $employeeSchedule,
                 'Work schedule not found.'
             );
+
             return $this->sendResponse(
                 new EmployeeScheduleResource($employeeSchedule),
                 'Employee schedule retrieved successfully.'
@@ -266,41 +304,53 @@ class EmployeeScheduleController extends Controller
      *     summary="Delete Employee Schedule",
      *     security={{"bearerAuth":{}}},
      *     tags={"Employee Schedules"},
+     *
      *     @OA\Parameter(
      *         name="company-slug",
      *         in="path",
      *         required=true,
      *         description="Slug of the company",
+     *
      *         @OA\Schema(type="string")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="employee-id",
      *         in="path",
      *         required=true,
      *         description="ID of the employee",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="schedule-id",
      *         in="path",
      *         required=true,
      *         description="ID of the employee schedule",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response="200",
      *         description="Employee Schedule deleted successfully",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Employee Schedule deleted successfully.")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response="404",
      *         description="Employee Schedule not found",
+     *
      *         @OA\JsonContent(
      *             type="object",
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Employee Schedule not found.")
      *         )
@@ -317,6 +367,7 @@ class EmployeeScheduleController extends Controller
                 'Work schedule not found.'
             );
             $employeeSchedule->delete();
+
             return $this->sendResponse(
                 new EmployeeScheduleResource($employeeSchedule),
                 'Employee schedule retrieved successfully.'

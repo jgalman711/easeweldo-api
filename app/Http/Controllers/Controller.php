@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 
 class Controller
 {
-    use AuthorizesRequests, ValidatesRequests, CompanyEmployee, Filter, Cache;
+    use AuthorizesRequests, Cache, CompanyEmployee, Filter, ValidatesRequests;
 
     public const ADMIN_CACHE_KEY = 'admin';
 
@@ -20,6 +20,7 @@ class Controller
      *    title="Easeweldo API Documentation",
      *    version="1.0.0",
      * )
+     *
      * @OA\SecurityScheme(
      *     type="http",
      *     securityScheme="bearerAuth",
@@ -36,7 +37,6 @@ class Controller
             ...$data,
         ];
 
-
         return response()->json($response, 200);
     }
 
@@ -47,7 +47,7 @@ class Controller
             'message' => $error,
         ];
 
-        if (!empty($errorMessages)) {
+        if (! empty($errorMessages)) {
             $response['errors'] = $errorMessages;
         }
 

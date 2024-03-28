@@ -14,24 +14,24 @@ class RegularEarningsRule implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (!is_array($value)) {
+        if (! is_array($value)) {
             $fail('The :attribute must be an array.');
         }
-        
+
         foreach ($value as $type => $earnings) {
-            if (!is_array($earnings) && !is_null($earnings)) {
+            if (! is_array($earnings) && ! is_null($earnings)) {
                 $fail('The :attribute must be an array.');
             }
-            
+
             if (is_array($earnings)) {
                 foreach ($earnings as $earning) {
-                    if (!isset($item['date']) || !$item['date']) {
+                    if (! isset($item['date']) || ! $item['date']) {
                         $fail('The :attribute date is required.');
                     }
-                    if (!isset($item['rate']) || !$item['rate']) {
+                    if (! isset($item['rate']) || ! $item['rate']) {
                         $fail('The :attribute rate is required.');
                     }
-                    if (!isset($item['hours']) || !$item['hours']) {
+                    if (! isset($item['hours']) || ! $item['hours']) {
                         $fail('The :attribute hours is required.');
                     }
                 }

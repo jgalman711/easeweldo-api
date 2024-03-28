@@ -13,6 +13,7 @@ class PayPayrollController extends Controller
     {
         try {
             $payroll->state()->pay();
+
             return $this->sendResponse(new BasePayrollResource($payroll), 'Payroll paid successfully.');
         } catch (\Exception $e) {
             return $this->sendError($e->getMessage());

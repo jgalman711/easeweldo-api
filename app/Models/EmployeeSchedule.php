@@ -14,24 +14,26 @@ class EmployeeSchedule extends Model
         'work_schedule_id',
         'start_date',
         'status',
-        'remarks'
+        'remarks',
     ];
 
     public const STATUS_TYPES = [
         self::TYPE_ACTIVE,
         self::TYPE_INACTIVE,
-        self::TYPE_UPCOMING
+        self::TYPE_UPCOMING,
     ];
 
     public const TYPE_ACTIVE = 'active';
+
     public const TYPE_INACTIVE = 'inactive';
+
     public const TYPE_UPCOMING = 'upcoming';
 
     public function employee()
     {
         return $this->belongsTo(Employee::class);
     }
-    
+
     public function workSchedule()
     {
         return $this->belongsTo(WorkSchedule::class);

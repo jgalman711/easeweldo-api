@@ -12,7 +12,7 @@ class UserSeeder extends Seeder
         User::create([
             'email_address' => 'admin@easeweldo.com',
             'username' => 'admin',
-            'password' => bcrypt('pixHC%u0')
+            'password' => bcrypt('pixHC%u0'),
         ])->assignRole('super-admin');
     }
 }
