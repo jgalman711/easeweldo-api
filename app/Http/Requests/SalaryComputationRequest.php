@@ -14,6 +14,7 @@ class SalaryComputationRequest extends BaseRequest
             'daily_rate' => self::NUMERIC,
             'taxable_earnings' => [new EarningTypeJsonRule()],
             'non_taxable_earnings' => [new EarningTypeJsonRule()],
+            'other_deductions' => [new EarningTypeJsonRule()],
             'working_hours_per_day' => self::NUMERIC,
             'working_days_per_week' => self::NUMERIC,
             'overtime_rate' => self::REQUIRED_NUMERIC,
@@ -22,6 +23,8 @@ class SalaryComputationRequest extends BaseRequest
             'special_holiday_rate' => self::REQUIRED_NUMERIC,
             'total_sick_leave_hours' => self::REQUIRED_NUMERIC,
             'total_vacation_leave_hours' => self::REQUIRED_NUMERIC,
+            'available_sick_leave_hours' => self::REQUIRED_NUMERIC,
+            'available_vacation_leave_hours' => self::REQUIRED_NUMERIC,
         ];
     }
 }

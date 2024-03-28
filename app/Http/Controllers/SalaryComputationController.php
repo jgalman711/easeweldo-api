@@ -7,6 +7,7 @@ use App\Http\Resources\BaseResource;
 use App\Models\Company;
 use App\Services\SalaryComputationService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class SalaryComputationController extends Controller
 {

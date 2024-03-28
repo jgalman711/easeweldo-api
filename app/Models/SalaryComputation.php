@@ -18,6 +18,7 @@ class SalaryComputation extends Model
     protected $casts = [
         'taxable_earnings' => 'array',
         'non_taxable_earnings' => 'array',
+        'other_deductions' => 'array',
     ];
 
     protected $fillable = [
@@ -27,6 +28,7 @@ class SalaryComputation extends Model
         'daily_rate',
         'non_taxable_earnings',
         'taxable_earnings',
+        'other_deductions',
         'working_hours_per_day',
         'working_days_per_week',
         'overtime_rate',
