@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\PayrollResource;
+use App\Http\Resources\Payroll\BasePayrollResource;
 use App\Models\Company;
-use App\Services\Payroll\PayrollResourceService;
+use App\Models\Employee;
 use App\Traits\PayrollFilter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,14 +13,7 @@ use Illuminate\Http\Request;
 class UserPayrollController extends Controller
 {
     use PayrollFilter;
-
-    protected $payrollService;
-
-    public function __construct(PayrollResourceService $payrollService)
-    {
-        $this->payrollService = $payrollService;
-    }
-
+    
     /**
      * @OA\Get(
      *     path="/api/companies/{company-slug}/employees/{employee-id}/payrolls",
@@ -88,12 +81,11 @@ class UserPayrollController extends Controller
      *     )
      * )
      */
-    public function index(Request $request, Company $company, int $employeeId): JsonResponse
+    public function index(Request $request, Employee $employee): JsonResponse
     {
-        $employee = $company->employees()->findOrFail($employeeId);
-        $payrolls = $this->applyFilters($request, $employee->payrolls());
+        $payrolls = $this->applyFilters($request, $employee->payrolls()->where('type', 'regular')->where('status', 'paid'));
         if ($payrolls) {
-            return $this->sendResponse(PayrollResource::collection($payrolls), 'Payrolls retrieved successfully.');
+            return $this->sendResponse(BasePayrollResource::collection($payrolls), 'Payrolls retrieved successfully.');
         } else {
             return $this->sendError('Payrolls not found');
         }

@@ -74,8 +74,9 @@ class DetailsPayrollResource extends BaseResource
             if (isset($this->holidays[$type])) {
                 $label = ucfirst($type).' Holiday';
                 foreach ($this->holidays[$type] as $holiday) {
+                    $formattedLabel = $label . "(" . $holiday['date'] ?? '' . ")";
                     array_push($earnings, [
-                        'label' => "$label (".$holiday['date'].')',
+                        'label' => $formattedLabel,
                         'rate' => $holiday['rate'],
                         'hours' => $holiday['hours'],
                         'amount' => $holiday['amount'] ?? $holiday['pay'] ?? 0,
