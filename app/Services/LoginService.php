@@ -27,11 +27,15 @@ class LoginService
                 'employee',
                 'roles',
             ]);
+            $user->token = $user->createToken(env('APP_NAME'))->plainTextToken;
+            if ($user->hasRole('super-admin')) {
+                return $user;
+            }
+
             $company = $user->companies->first();
             throw_if($company->status == Company::STATUS_PENDING, new Exception(
                 'Your registration is currently pending review. You will receive an email notification once the review process is complete.'
             ));
-            $user->token = $user->createToken(env('APP_NAME'))->plainTextToken;
 
             return $user;
         } else {

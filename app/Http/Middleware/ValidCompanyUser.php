@@ -17,17 +17,17 @@ class ValidCompanyUser
     public function handle(Request $request, Closure $next): Response
     {
         $user = Auth::user();
-        $companyIdFromRequest = $request->company->id;
-        $belongsToCompany = $user->companies()->where('company_id', $companyIdFromRequest)->exists();
-        if (! $belongsToCompany) {
-            $response = [
-                'success' => false,
-                'message' => 'Unauthorized',
-            ];
-
-            return response()->json($response, 403);
+        if (!$user->hasRole('super-admin')) {
+            $companyIdFromRequest = $request->company->id;
+            $belongsToCompany = $user->companies()->where('company_id', $companyIdFromRequest)->exists();
+            if (! $belongsToCompany) {
+                $response = [
+                    'success' => false,
+                    'message' => 'Unauthorized',
+                ];
+                return response()->json($response, 403);
+            }
         }
-
         return $next($request);
     }
 }

@@ -28,8 +28,6 @@ trait Filter
                 $sortColumn = ltrim($sortColumn, '-');
             }
             $query->orderBy($sortColumn, $sortDirection);
-        } else {
-            $query->orderBy('created_at', 'asc');
         }
         if ($request->has('per_page')) {
             $perPage = $request->input('per_page', 10);

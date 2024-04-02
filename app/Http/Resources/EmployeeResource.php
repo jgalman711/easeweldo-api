@@ -11,7 +11,7 @@ class EmployeeResource extends JsonResource
     {
         $uploadsConfig = config('app.uploads');
         $employeeUploadPath = $uploadsConfig['url'].'/'.$uploadsConfig['employee_path'];
-        $latestSchedule = $this->employeeSchedules()->latest('start_date')->first();
+        $latestSchedule = $this->employeeSchedules->first();
 
         return [
             'id' => $this->id,

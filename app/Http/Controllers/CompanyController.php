@@ -37,10 +37,9 @@ class CompanyController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $companies = $this->applyFilters($request, Company::query(), [
+        $companies = $this->applyFilters($request, Company::query()->with('setting'), [
             'name',
         ]);
-
         return $this->sendResponse(CompanyResource::collection($companies), 'Companies retrieved successfully.');
     }
 

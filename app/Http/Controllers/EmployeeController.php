@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\EmployeeRequest;
+use App\Http\Resources\BaseResource;
 use App\Http\Resources\EmployeeResource;
 use App\Models\Company;
 use App\Models\Employee;
@@ -111,7 +112,16 @@ class EmployeeController extends Controller
      */
     public function index(Request $request, Company $company): JsonResponse
     {
-        $employees = $this->applyFilters($request, $company->employees()->with('user'), [
+        // Todo: must fix this circular relationship with the company
+        $builder = $company->employees()->with([
+            'company',
+            'user',
+            'salaryComputation',
+            'employeeSchedules' => function ($query) {
+                $query->latest('start_date')->limit(1);
+            }
+        ]);
+        $employees = $this->applyFilters($request, $builder, [
             'user.first_name',
             'user.last_name',
             'user.full_name',
@@ -119,7 +129,6 @@ class EmployeeController extends Controller
             'employment_status',
             'department',
         ]);
-
         return $this->sendResponse(EmployeeResource::collection($employees), 'Employees retrieved successfully.');
     }
 
@@ -225,7 +234,14 @@ class EmployeeController extends Controller
      */
     public function show(Company $company, int $employeeId): JsonResponse
     {
-        $employee = $company->getEmployeeById($employeeId);
+        $employee = $company->getEmployeeById($employeeId)->with([
+            'company',
+            'user',
+            'salaryComputation',
+            'employeeSchedules' => function ($query) {
+                $query->latest('start_date')->limit(1);
+            }
+        ]);
 
         return $this->sendResponse(new EmployeeResource($employee), 'Employee retrieved successfully.');
     }

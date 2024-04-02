@@ -83,16 +83,7 @@ Route::apiResource('/payment-methods', PaymentMethodController::class)->only('in
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('verify', [VerifyTokenController::class, 'verify']);
-    /**
-     * Super Admin Only Route
-     */
-    Route::group(['middleware' => ['role:super-admin']], function () {
-        Route::apiResource('biometrics', AdminBiometricsController::class);
-        Route::apiResource('companies', CompanyController::class);
-        Route::apiResource('holidays', HolidayController::class);
-        Route::apiResource('users', UserController::class);
-        Route::get('employees', [EmployeeController::class, 'all']);
-    });
+
     Route::group(['middleware' => ['role:super-admin|business-admin', 'valid.company.user']], function () {
         Route::apiResource('companies', CompanyController::class)->only('show', 'update');
         Route::prefix('companies/{company}')->group(function () {
@@ -160,5 +151,43 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('qrcode', [EmployeeQrController::class, 'index']);
         Route::post('qrcode', [CompanyQrController::class, 'store']);
         // END
+    });
+
+    Route::group(['prefix' => 'employees/{employee}'], function () {
+        Route::get('/', [EmployeeController::class, 'show']);
+        Route::get('dashboard', [UserDashboardController::class, 'index']);
+        Route::post('clock', [TimeRecordController::class, 'clock']);
+        Route::apiResource('leaves', LeaveController::class);
+        Route::apiResource('time-records', TimeRecordController::class);
+        Route::apiResource('time-corrections', TimeCorrectionController::class);
+        Route::apiResource('work-schedules', EmployeeScheduleController::class);
+        Route::apiResource('payrolls', UserPayrollController::class)->only('index', 'show');
+        // Needs refactor
+        Route::controller(SalaryComputationController::class)->group(function () {
+            Route::get('salary-computation', 'show');
+            Route::post('salary-computation', 'store');
+            Route::put('salary-computation', 'update');
+            Route::delete('salary-computation', 'delete');
+        });
+
+        // Needs deletion
+        Route::put('change-password', [UserChangePasswordController::class, 'update']);
+        Route::put('reset-temporary-password', [UserTemporaryPasswordResetController::class, 'update']);
+
+        // QR - START
+        Route::get('qrcode', [EmployeeQrController::class, 'index']);
+        Route::post('qrcode', [CompanyQrController::class, 'store']);
+        // END
+    });
+
+     /**
+     * Super Admin Only Route
+     */
+    Route::group(['middleware' => ['role:super-admin']], function () {
+        Route::apiResource('biometrics', AdminBiometricsController::class);
+        Route::apiResource('companies', CompanyController::class);
+        Route::apiResource('holidays', HolidayController::class);
+        Route::apiResource('users', UserController::class);
+        Route::get('employees', [EmployeeController::class, 'all']);
     });
 });
