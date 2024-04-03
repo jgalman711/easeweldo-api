@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\BankController;
 use App\Http\Controllers\BiometricsController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanySubscriptionController;
@@ -84,6 +85,17 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('verify', [VerifyTokenController::class, 'verify']);
 
+     /**
+     * Super Admin Only Route
+     */
+    Route::group(['middleware' => ['role:super-admin']], function () {
+        Route::apiResource('biometrics', AdminBiometricsController::class);
+        Route::apiResource('companies', CompanyController::class);
+        Route::apiResource('holidays', HolidayController::class);
+        Route::apiResource('users', UserController::class);
+        Route::get('employees', [EmployeeController::class, 'all']);
+    });
+
     Route::group(['middleware' => ['role:super-admin|business-admin', 'valid.company.user']], function () {
         Route::apiResource('companies', CompanyController::class)->only('show', 'update');
         Route::prefix('companies/{company}')->group(function () {
@@ -105,6 +117,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
             Route::apiResource('reports', ReportController::class)->only('show');
             Route::apiResource('settings', SettingController::class)->only('index', 'store');
+            Route::apiResource('banks', BankController::class)->only('index', 'store');
+
             Route::post('timesheet/upload', [TimesheetUploadController::class, 'store']);
             Route::post('synch-biometrics/{module}/', [SynchBiometricsController::class, 'store']);
             Route::apiResource('biometrics', BiometricsController::class);
@@ -178,16 +192,5 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('qrcode', [EmployeeQrController::class, 'index']);
         Route::post('qrcode', [CompanyQrController::class, 'store']);
         // END
-    });
-
-     /**
-     * Super Admin Only Route
-     */
-    Route::group(['middleware' => ['role:super-admin']], function () {
-        Route::apiResource('biometrics', AdminBiometricsController::class);
-        Route::apiResource('companies', CompanyController::class);
-        Route::apiResource('holidays', HolidayController::class);
-        Route::apiResource('users', UserController::class);
-        Route::get('employees', [EmployeeController::class, 'all']);
     });
 });
