@@ -1,7 +1,7 @@
 @extends('emails.disbursement.layout')
 
 @section('content')
-    <p>Dear {{ $bankProvider }},</p>
+    <p>Dear {{ $bankProvider }} - {{ $bankProviderBranch }},</p>
 
     <p>
         Please find attached a PDF document containing the details of our employees for the upcoming

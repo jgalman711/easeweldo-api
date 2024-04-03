@@ -20,10 +20,11 @@ class PendingState extends BaseState
             }
         }
         $this->disbursement->update(['status' => DisbursementEnumerator::STATUS_COMPLETED]);
-        $company = $this->disbursement->company;
+        $company = $this->disbursement->company()->with('setting', 'banks')->first();
         $settings = $company->setting;
-        if ($company->bank_email && $settings->auto_send_email_to_bank) {
-            Mail::to($company->bank_email)->send(new PayEmployees($company, $this->disbursement));
+        $bank = $company->banks->first();
+        if ($bank->email && $settings->auto_send_email_to_bank) {
+            Mail::to($bank->email)->send(new PayEmployees($company, $bank, $this->disbursement));
         }
     }
 
