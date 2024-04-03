@@ -234,14 +234,18 @@ class EmployeeController extends Controller
      */
     public function show(Company $company, int $employeeId): JsonResponse
     {
-        $employee = $company->getEmployeeById($employeeId)->with([
-            'company',
-            'user',
-            'salaryComputation',
-            'employeeSchedules' => function ($query) {
-                $query->latest('start_date')->limit(1);
-            }
-        ]);
+        $employee = $company->getEmployeeById($employeeId);
+
+        if ($employee) {
+            $employee->load([
+                'company',
+                'user',
+                'salaryComputation',
+                'employeeSchedules' => function ($query) {
+                    $query->latest('start_date')->limit(1);
+                }
+            ]);
+        }
 
         return $this->sendResponse(new EmployeeResource($employee), 'Employee retrieved successfully.');
     }
