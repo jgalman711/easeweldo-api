@@ -130,7 +130,7 @@ class UpdatePayrollService
         $this->payroll->attendance_earnings = $attendanceEarnings;
     }
 
-    private function calculateLeaves(array $input): array
+    private function calculateLeaves(array $input): void
     {
         $leaveEarnings = null;
         if (isset($input['regularEarnings']) && isset($input['regularEarnings']['sickLeave'])) {
@@ -157,7 +157,7 @@ class UpdatePayrollService
             }
         }
 
-        return $this->payroll->leaves = $leaveEarnings;
+        $this->payroll->leaves = $leaveEarnings;
     }
 
     private function calculateHolidaysEarnings(array $input): void

@@ -22,6 +22,6 @@ class BankController extends Controller
         $input = $bankRequest->validated();
         $input['company_id'] = $company->id;
         $bank = Bank::updateOrCreate(['company_id' => $company->id], $input);
-        return $this->sendResponse(new BankResource($bank), 'Company bank retrieved successfully.');
+        return $this->sendResponse(new BankResource($bank), 'Company bank updated successfully.');
     }
 }
