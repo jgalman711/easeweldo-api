@@ -10,6 +10,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Auth;
 
 class PayEmployees extends Mailable
 {
@@ -21,11 +22,14 @@ class PayEmployees extends Mailable
 
     protected $disbursement;
 
+    protected $title;
+
     public function __construct(Company $company, Bank $bank, Period $disbursement)
     {
         $this->company = $company;
         $this->bank = $bank;
         $this->disbursement = $disbursement;
+        $this->title =  $company->name . " Salary Disbursement - " . $disbursement->salary_date;
     }
 
     /**
@@ -34,7 +38,7 @@ class PayEmployees extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Submission of Employee Details for Salary Disbursement',
+            subject: $this->title,
         );
     }
 
@@ -46,12 +50,11 @@ class PayEmployees extends Mailable
         return new Content(
             view: 'emails.disbursement.via-bank',
             with: [
-                'companyName' => $this->company->name,
-                'bankProvider' => $this->bank->name,
-                'bankProviderBranch' => $this->bank->branch,
-                'salaryDate' => $this->disbursement->salary_date,
-                'companyContactNumber' => $this->company->mobile_number,
-                'companyEmail' => $this->company->email_address,
+                'title' => $this->title,
+                'company' => $this->company,
+                'bank' => $this->bank,
+                'disbursement' => $this->disbursement,
+                'sender' => Auth::user()->load('employee')
             ],
         );
     }

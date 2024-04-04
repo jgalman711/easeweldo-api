@@ -6,47 +6,34 @@
     <title>@yield('title')</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            color: #000000;
+            font-family: 'Poppins', 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
         }
         .container {
-            width: 100%;
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #ffffff;
-            color: #000000;
         }
-        .header {
-            background-color: #3965FF;
-            color: #ffffff;
-            padding: 20px;
-            text-align: center;
+        .logo {
+            max-width: 150px;
+            height: auto;
         }
-        .content {
-            padding: 20px;
+        .bold {
+            font-weight: bold;
         }
-        .footer {
-            background-color: #f0f0f0;
-            padding: 20px;
+        .center {
             text-align: center;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>@yield('title')</h1>
-        </div>
-        <div class="content">
-            @yield('content')
-        </div>
-        <div class="footer">
-            &copy; {{ date('Y') }} {{ $companyName }}. All rights reserved.
-        </div>
+    <img src="{{ asset('uploads/companies/images/' . $company->logo) }}" alt="{{ $company->name }}" class="logo">
+        @yield('content')
+        <hr>
+        <p class="bold center">{{ $company->name }}</p>
+        <p class="center">{{ $company->address_line }} {{ $company->barangay_town_city_province }} </p>
     </div>
 </body>
 </html>
