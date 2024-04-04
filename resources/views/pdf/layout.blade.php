@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <link rel="stylesheet" href="{{ asset('css/payslip.css') }}" type="text/css">
-        <link rel="icon" href="/favicon.ico" type="image/x-icon">
     </head>
     <body>
         <div class="header">
             <table class="payslip-hearder">
                 <tr>
                     <th colspan="3"><h2>{{ ucwords($company->name) }}</h3></th>
-                    <th style="text-align: right"><h2>PAYSLIP</h3></th>
+                    <th style="text-align: right"><h2>@yield('title', 'INVOICE')</h3></th>
                 </tr>
                 @if($company->full_address)
                 <tr>
