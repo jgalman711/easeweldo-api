@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\DashboardResource;
 use App\Models\Company;
 use App\Services\TimeRecordService;
-use Illuminate\Http\Request;
 
 class UserDashboardController extends Controller
 {
@@ -24,7 +23,7 @@ class UserDashboardController extends Controller
         $workSchedule = $employee->schedules->first();
         $data = [
             'timeRecord' => $timeRecord,
-            'workSchedule' => $workSchedule
+            'workSchedule' => $workSchedule,
         ];
 
         return $this->sendResponse(new DashboardResource($data), 'Dashboard data successfully retrieved.');

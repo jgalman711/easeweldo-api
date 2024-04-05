@@ -9,6 +9,7 @@ use App\Models\Company;
 use App\Services\SubscriptionService;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class CompanySubscriptionController extends Controller
 {
@@ -20,11 +21,12 @@ class CompanySubscriptionController extends Controller
         $this->setCacheIdentifier('subscriptions');
     }
 
-    public function index(Company $company): JsonResponse
+    public function index(Request $request, Company $company): JsonResponse
     {
-        $subscriptions = $this->remember($company, function () use ($company) {
-            return $company->companySubscriptions()->with('subscription')->get();
-        });
+        $subscriptions = $this->remember($company, function () use ($company, $request) {
+            return $this->applyFilters($request, $company->companySubscriptions()->with('subscription'));
+        }, $request);
+
         return $this->sendResponse(CompanySubscriptionResource::collection($subscriptions),
             'Company subscriptions retrieved successfully.');
     }
@@ -34,17 +36,20 @@ class CompanySubscriptionController extends Controller
         $companySubscription = $this->remember($company, function () use ($company, $companySubscriptionId) {
             return $company->companySubscriptions()->where('id', $companySubscriptionId)->firstOrFail();
         }, $companySubscriptionId);
+
         return $this->sendResponse(
             new CompanySubscriptionResource($companySubscription),
             'Company subscription retrieved successfully.'
         );
     }
 
-    public function store(SubscriptionRequest $request, Company $company)
+    public function store(SubscriptionRequest $request, Company $company): JsonResponse
     {
         $input = $request->validated();
-        $companySubscription = $this->subscriptionService->subscribe($company, $input);
+        $currentSubscription = $company->companySubscriptions()->latest()->first();
+        $companySubscription = $this->subscriptionService->subscribe($company, $input, $currentSubscription);
         $this->forget($company);
+
         return $this->sendResponse(
             new CompanySubscriptionResource($companySubscription),
             "Company subscribed successfully to {$companySubscription->subscription->title}"
@@ -68,6 +73,7 @@ class CompanySubscriptionController extends Controller
                 }
             }
             $this->forget($company);
+
             return $this->sendResponse(
                 new CompanySubscriptionResource($companySubscription),
                 'Company subscription successfully updated.'
@@ -81,6 +87,7 @@ class CompanySubscriptionController extends Controller
     {
         $companySubscription = $company->companySubscriptions()->first();
         $companySubscription->delete();
+
         return $this->sendResponse(
             new CompanySubscriptionResource($companySubscription),
             'Company subscription successfully deleted.'

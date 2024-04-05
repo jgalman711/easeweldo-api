@@ -11,7 +11,9 @@ class Pagibig extends Model
     use HasFactory, SoftDeletes;
 
     public const ACTIVE = 'active';
+
     public const INACTIVE = 'inactive';
+
     public const MAX_SALARY = 5000;
 
     protected $table = 'pagibig';
@@ -21,6 +23,6 @@ class Pagibig extends Model
         'max_compensation',
         'employee_contribution_rate',
         'employer_contribution_rate',
-        'status'
+        'status',
     ];
 }

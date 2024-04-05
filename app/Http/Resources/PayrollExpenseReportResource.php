@@ -19,6 +19,7 @@ class PayrollExpenseReportResource extends BaseResource
                 $result[strtolower($month)][$key] = $value;
             }
         }
+
         return $result;
     }
 }

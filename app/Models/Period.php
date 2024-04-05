@@ -2,71 +2,99 @@
 
 namespace App\Models;
 
+use App\Enumerators\DisbursementEnumerator;
+use App\StateMachines\Contracts\DisbursementStateContract;
+use App\StateMachines\Disbursement\BaseState;
+use App\StateMachines\Disbursement\PendingState;
+use App\StateMachines\Disbursement\UninitializedState;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * This will act as the disbursements.
+ */
 class Period extends Model
 {
-    use HasFactory, SoftDeletes;
+    use SoftDeletes;
 
-    public const STATUS_ATTENTION_REQUIRED = 'attention_required';
+    public const STATUS_UNINITIALIZED = 'uninitialized';
+
     public const STATUS_CANCELLED = 'cancelled';
+
     public const STATUS_COMPLETED = 'completed';
-    public const STATUS_FAILED = 'failed';
+
     public const STATUS_PENDING = 'pending';
-    public const STATUS_PROCESSING = 'processing';
+
+    public const STATUS_FAILED = 'failed';
 
     public const STATUSES = [
-        self::STATUS_ATTENTION_REQUIRED,
-        self::STATUS_CANCELLED,
-        self::STATUS_COMPLETED,
+        self::STATUS_UNINITIALIZED,
         self::STATUS_FAILED,
         self::STATUS_PENDING,
-        self::STATUS_PROCESSING
+        self::STATUS_COMPLETED,
+        self::STATUS_CANCELLED,
     ];
-
-    public const TYPE_MONTHLY = 'monthly';
-    public const TYPE_SEMI_MONTHLY = 'semi-monthly';
-    public const TYPE_WEEKLY = 'weekly';
 
     public const TYPES = [
-        self::TYPE_MONTHLY,
-        self::TYPE_SEMI_MONTHLY,
-        self::TYPE_WEEKLY
+        self::TYPE_REGULAR,
+        self::TYPE_SPECIAL,
+        self::TYPE_NTH_MONTH_PAY,
+        self::TYPE_FINAL,
     ];
+
+    public const SUBTYPES = [
+        self::SUBTYPE_SEMI_MONTHLY,
+        self::SUBTYPE_MONTHLY,
+        self::SUBTYPE_WEEKLY,
+    ];
+
+    public const SUBTYPE_MONTHLY = 'monthly';
+
+    public const SUBTYPE_SEMI_MONTHLY = 'semi-monthly';
+
+    public const SUBTYPE_WEEKLY = 'weekly';
+
+    public const TYPE_REGULAR = 'regular';
+
+    public const TYPE_SPECIAL = 'special';
+
+    public const TYPE_NTH_MONTH_PAY = 'nth_month_pay';
+
+    public const TYPE_FINAL = 'final';
 
     public const ALLOWED_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
     protected $fillable = [
-        'name',
         'company_id',
-        'company_period_number',
-        'payroll_cost',
-        'employees_count',
-        'employees_net_pay',
-        'withheld_taxes',
-        'total_contributions',
+        'company_period_id',
         'description',
         'type',
+        'subtype',
         'start_date',
         'end_date',
         'salary_date',
-        'status'
+        'status',
     ];
 
     protected $appends = [
-        'next_period',
-        'previous_period',
         'employees_count',
         'employees_net_pay',
         'withheld_taxes',
         'total_contributions',
-        'payroll_cost'
+        'payroll_cost',
     ];
+
+    public function state(): DisbursementStateContract
+    {
+        return match ($this->status) {
+            DisbursementEnumerator::STATUS_UNINITIALIZED => new UninitializedState($this),
+            DisbursementEnumerator::STATUS_PENDING => new PendingState($this),
+            default => new BaseState($this)
+        };
+    }
 
     public function company(): BelongsTo
     {
@@ -100,23 +128,7 @@ class Period extends Model
 
     public function getPayrollCostAttribute(): float
     {
-        return $this->employees_net_pay +  $this->withheld_taxes +  $this->total_contributions;
-    }
-
-    public function getNextPeriodAttribute()
-    {
-        $next = Period::where('start_date', '>', $this->end_date)
-            ->orderBy('start_date', 'asc')
-            ->first();
-        return  optional($next)->id;
-    }
-
-    public function getPreviousPeriodAttribute()
-    {
-        $previous = Period::where('end_date', '<', $this->start_date)
-            ->orderBy('start_date', 'desc')
-            ->first();
-        return optional($previous)->id;
+        return $this->employees_net_pay + $this->withheld_taxes + $this->total_contributions;
     }
 
     public function scopeByRange(Builder $periodsQuery, array $range): Builder

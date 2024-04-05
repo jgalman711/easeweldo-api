@@ -11,6 +11,7 @@ class PaymentMethodController extends Controller
     public function index(): JsonResponse
     {
         $paymentMethods = PaymentMethod::where('status', PaymentMethod::STATUS_ACTIVE)->get();
+
         return $this->sendResponse(BaseResource::collection($paymentMethods), 'Payment methods succesfully retrieved.');
     }
 }

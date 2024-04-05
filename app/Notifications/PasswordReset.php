@@ -4,10 +4,8 @@ namespace App\Notifications;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Log;
 
 class PasswordReset extends Notification
 {
@@ -20,7 +18,7 @@ class PasswordReset extends Notification
      */
     public function __construct(User $user, string $token)
     {
-        $this->resetLink = config('app.auth_url') .
+        $this->resetLink = config('app.auth_url').
             "/reset-password?token={$token}&email_address={$user->email_address}";
     }
 

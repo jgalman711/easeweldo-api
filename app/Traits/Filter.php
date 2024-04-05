@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use Closure;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 trait Filter
@@ -27,13 +28,13 @@ trait Filter
                 $sortColumn = ltrim($sortColumn, '-');
             }
             $query->orderBy($sortColumn, $sortDirection);
-        } else {
-            $query->orderBy('created_at', 'asc');
         }
         if ($request->has('per_page')) {
             $perPage = $request->input('per_page', 10);
+
             return $query->paginate($perPage);
         }
+
         return $query->get();
     }
 
@@ -55,22 +56,41 @@ trait Filter
     protected function search(array $searchableColumns, Request $request): Closure
     {
         $search = $request->input('search');
+
         return function ($searchQuery) use ($searchableColumns, $search) {
             foreach ($searchableColumns as $searchableColumn) {
                 $columnRelationship = explode('.', $searchableColumn);
-                if (count($columnRelationship) == 2) {
-                    $searchQuery->orWhereHas(
-                        $columnRelationship[0],
+                if ($this->isWithRelationshipSearch($columnRelationship)) {
+                    $searchQuery->orWhereHas($columnRelationship[0],
                         function ($queryRelationship) use ($columnRelationship, $search) {
-                            $queryRelationship->where($columnRelationship[1], 'like', '%' . $search . '%');
+                            $this->searchByColumn($queryRelationship, $columnRelationship[1], $search);
                         }
                     );
-                } elseif (count($columnRelationship) == 1) {
-                    $searchQuery->orWhere($searchableColumn, 'like', '%' . $search . '%');
                 } else {
-                    throw new Exception('Unsupported search query');
+                    $searchQuery->orWhere(function ($singleQuery) use ($searchableColumn, $search) {
+                        $this->searchByColumn($singleQuery, $searchableColumn, $search);
+                    });
                 }
             }
         };
+    }
+
+    private function searchByColumn(Builder &$queryBuilder, string $column, string $key): void
+    {
+        if ($column == 'full_name') {
+            $queryBuilder->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$key%"]);
+        } else {
+            $queryBuilder->where($column, 'like', "%{$key}%");
+        }
+    }
+
+    private function isWithRelationshipSearch(array $columnRelationship): bool
+    {
+        throw_unless(
+            in_array(count($columnRelationship), [1, 2]),
+            new Exception('Unsupported search query')
+        );
+
+        return count($columnRelationship) == 2;
     }
 }

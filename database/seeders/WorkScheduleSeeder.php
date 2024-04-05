@@ -25,7 +25,7 @@ class WorkScheduleSeeder extends Seeder
             'saturday_clock_in_time' => null,
             'saturday_clock_out_time' => null,
             'sunday_clock_in_time' => null,
-            'sunday_clock_out_time' => null
+            'sunday_clock_out_time' => null,
         ]);
     }
 }

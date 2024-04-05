@@ -17,7 +17,8 @@ class SalaryComputation extends Model
 
     protected $casts = [
         'taxable_earnings' => 'array',
-        'non_taxable_earnings' => 'array'
+        'non_taxable_earnings' => 'array',
+        'other_deductions' => 'array',
     ];
 
     protected $fillable = [
@@ -27,6 +28,7 @@ class SalaryComputation extends Model
         'daily_rate',
         'non_taxable_earnings',
         'taxable_earnings',
+        'other_deductions',
         'working_hours_per_day',
         'working_days_per_week',
         'overtime_rate',
@@ -36,12 +38,12 @@ class SalaryComputation extends Model
         'total_sick_leave_hours',
         'total_vacation_leave_hours',
         'available_sick_leave_hours',
-        'available_vacation_leave_hours'
+        'available_vacation_leave_hours',
     ];
 
     protected $appends = [
         'total_available_leaves',
-        'total_leaves'
+        'total_leaves',
     ];
 
     public function employee(): BelongsTo
@@ -61,6 +63,6 @@ class SalaryComputation extends Model
 
     public function getTotalAvailableLeavesAttribute()
     {
-        return ($this->available_sick_leave_hours + $this->available_vacation_leave_hours);
+        return $this->available_sick_leave_hours + $this->available_vacation_leave_hours;
     }
 }

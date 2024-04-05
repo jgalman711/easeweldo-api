@@ -25,10 +25,12 @@ class ZKTecoBiometricsStrategy implements BiometricsStrategy
         $retry = 1;
         do {
             try {
-                if (!$this->zkTeco->connect()) {
+                if (! $this->zkTeco->connect()) {
                     $retry++;
+
                     continue;
                 }
+
                 return;
             } catch (Exception) {
                 $retry++;

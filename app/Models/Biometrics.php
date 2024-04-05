@@ -10,7 +10,7 @@ class Biometrics extends Model
     use SoftDeletes;
 
     public const PROVIDERS = [
-        self::ZKTECO_PROVIDER
+        self::ZKTECO_PROVIDER,
     ];
 
     public const TYPE_CLOCK_IN = 0;
@@ -31,7 +31,7 @@ class Biometrics extends Model
         'provider',
         'model',
         'product_number',
-        'status'
+        'status',
     ];
 
     public function company()

@@ -14,7 +14,7 @@ class UserResource extends JsonResource
                 'id' => $company->id,
                 'name' => $company->name,
                 'slug' => $company->slug,
-                'status' => $company->status
+                'status' => $company->status,
             ];
         })->toArray();
 
@@ -25,7 +25,7 @@ class UserResource extends JsonResource
             'email_address' => $this->email_address,
             'username' => $this->username,
             'status' => $this->status,
-            'companies' => $companies
+            'companies' => $companies,
         ];
     }
 }

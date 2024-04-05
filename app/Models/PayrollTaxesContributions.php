@@ -15,7 +15,7 @@ class PayrollTaxesContributions extends Model
         'company_id',
         'withholding_tax',
         'sss_contribution',
-        'pagibig_contribution'
+        'pagibig_contribution',
     ];
 
     public function company()

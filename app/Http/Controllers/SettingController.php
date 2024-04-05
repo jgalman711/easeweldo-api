@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SettingRequest;
 use App\Http\Resources\BaseResource;
+use App\Http\Resources\SettingsResource;
 use App\Models\Company;
 use App\Models\Setting;
 use App\Services\PeriodService;
@@ -20,24 +21,18 @@ class SettingController extends Controller
 
     public function index(Company $company): JsonResponse
     {
-        return $this->sendResponse(new BaseResource($company->setting), 'Company settings retrieved successfully.');
+        return $this->sendResponse(new SettingsResource($company->setting), 'Company settings retrieved successfully.');
     }
 
     public function store(SettingRequest $request, Company $company): JsonResponse
     {
         $input = $request->validated();
-        $companyPreviousPeriod = $company->periods()->latest()->first();
-        if ($companyPreviousPeriod) {
-            $companyPreviousPeriod->delete();
-        }
         $settings = Setting::updateOrCreate(
             ['company_id' => $company->id],
             $input
         );
+        $this->periodService->convertSalaryDayToDate($settings->salary_day, $settings->period_cycle);
 
-        $salaryDate = $this->periodService->convertSalaryDayToDate($settings->salary_day, $settings->period_cycle);
-
-        $this->periodService->initializeFromSalaryDate($company, $salaryDate, $settings->period_cycle);
         return $this->sendResponse(new BaseResource($settings), 'Company settings updated successfully.');
     }
 }

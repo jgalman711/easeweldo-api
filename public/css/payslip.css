@@ -1,0 +1,63 @@
+body {
+    font-family: sans-serif;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+.payslip-hearder h2 {
+    margin: 0;
+}
+
+.employee-details p,
+.employee-details h3 {
+    margin: 0;
+}
+
+.payslip-hearder th {
+    text-align: left;
+}
+
+.payroll-details th,
+.payslip .total {
+    background-color: #f2f2f2; 
+}
+
+.main-header {
+    background-color: #2F5F98;
+    color: #fff;
+}
+
+.main-header th {
+    text-align: center;
+}
+
+.column-header {
+    background-color: #5BA5F4; color: #fff;
+}
+
+.disbursement-table th {
+    text-align: left;
+}
+
+.disbursement-table tr {
+    background-color: rgb(96 165 250);
+}
+.disbursement-table th {
+    color: #ffffff;
+    padding: 0.5rem;
+}
+.disbursement-table tr.items {
+    background-color: rgb(241 245 249);
+}
+.disbursement-table tr.items td {
+    padding: 0.5rem;
+}

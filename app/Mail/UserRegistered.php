@@ -30,7 +30,7 @@ class UserRegistered extends Mailable
         return new Content(
             view: 'emails.registration-success',
             with: [
-                'temporaryPassword' => $this->user->temporary_password
+                'temporaryPassword' => $this->user->temporary_password,
             ]
         );
     }

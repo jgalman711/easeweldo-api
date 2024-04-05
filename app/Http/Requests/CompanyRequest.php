@@ -34,7 +34,7 @@ class CompanyRequest extends BaseRequest
             ],
             'mobile_number' => [
                 'nullable',
-                self::PH_MOBILE_NUMBER
+                self::PH_MOBILE_NUMBER,
             ],
             'landline_number' => self::NULLABLE_STRING,
             'bank_name' => self::NULLABLE_STRING,

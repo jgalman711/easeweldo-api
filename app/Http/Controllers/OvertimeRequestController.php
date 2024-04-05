@@ -15,6 +15,7 @@ class OvertimeRequestController extends Controller
     public function index(Request $request, Company $company)
     {
         $overtimeRequests = $this->applyFilters($request, $company->overtimeRequests());
+
         return $this->sendResponse(BaseResource::collection($overtimeRequests), 'Employees retrieved successfully.');
     }
 
@@ -27,9 +28,10 @@ class OvertimeRequestController extends Controller
         $employee = $company->employees()->where('company_employee_id', $request->employee_id)->first();
         if ($employee) {
             $overtime = ModelsOvertimeRequest::create($input);
-            return $this->sendResponse($overtime, "Overtime request successfully created.");
+
+            return $this->sendResponse($overtime, 'Overtime request successfully created.');
         } else {
-            return $this->sendError("Employee not found.");
+            return $this->sendError('Employee not found.');
         }
     }
 }

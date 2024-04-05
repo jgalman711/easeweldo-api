@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Company;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -10,34 +11,46 @@ class LoginService
 {
     public const LOGIN_TYPES = [
         self::TYPE_BUSINESS,
-        self::TYPE_PERSONAL
+        self::TYPE_PERSONAL,
     ];
+
     public const TYPE_BUSINESS = 'business';
+
     public const TYPE_PERSONAL = 'personal';
 
-    public function login(array $credentials, string $type = self::TYPE_BUSINESS, bool $remember = false): array
+    public function login(array $credentials, ?bool $remember = false): User
     {
         if (Auth::attempt($credentials, $remember)) {
-            $user = Auth::user()->load(['companies.companySubscriptions', 'employee', 'roles']);
-
-            throw_if($this->isTemporaryPasswordExpired($user), new Exception('Your temporary password has expired.'));
-            
-            throw_if(
-                $type == self::TYPE_BUSINESS && !$user->hasRole('business-admin') && !$user->hasRole('super-admin'),
-                new Exception('Unauthorized request.')
-            );
-         
-            $success['token'] =  $user->createToken(env('APP_NAME'))->plainTextToken;
-            $success['user'] = $user;
-            $message = 'User login successfully.';
-
-            if ($this->hasTemporaryPassword($user)) {
-                $message .= " Please go to your profile and change your temporary password.";
+            $user = Auth::user()->load([
+                'companies.subscriptions',
+                'companies.companySubscriptions',
+                'employee',
+                'roles',
+            ]);
+            $user->token = $user->createToken(env('APP_NAME'))->plainTextToken;
+            if ($user->hasRole('super-admin')) {
+                return $user;
             }
-            return [$success, $message];
+
+            $company = $user->companies->first();
+            throw_if($company->status == Company::STATUS_PENDING, new Exception(
+                'Your registration is currently pending review. You will receive an email notification once the review process is complete.'
+            ));
+
+            return $user;
         } else {
             throw new Exception('Incorrect email or password.');
         }
+    }
+
+    public function getSuccessMessage(User $user): string
+    {
+        $message = 'User login successfully.';
+        if ($this->hasTemporaryPassword($user)) {
+            $message .= ' Please go to your profile and change your temporary password.';
+        }
+
+        return $message;
     }
 
     protected function hasTemporaryPassword(User $user): bool

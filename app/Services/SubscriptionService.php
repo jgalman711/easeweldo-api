@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Enumerators\ErrorMessagesEnumerator;
 use App\Enumerators\SubscriptionEnumerator;
 use App\Mail\UserSubscribed;
 use App\Models\Company;
@@ -12,7 +11,6 @@ use App\Models\Subscription;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -45,7 +43,7 @@ class SubscriptionService
 
     public function updateSubscriptionDetails(Company $company): void
     {
-        if (!$company->isInSettlementPeriod()) {
+        if (! $company->isInSettlementPeriod()) {
             $employeeCount = $company->employees()->where('status', Employee::ACTIVE)->count();
             foreach ($company->companySubscriptions as $companySubscription) {
                 $companySubscription->amount = $employeeCount * $companySubscription->amount_per_employee;
@@ -65,7 +63,7 @@ class SubscriptionService
     {
         throw_if(
             $upgradeData['subscription_id'] < $companySubscription->subscription_id,
-            new Exception("Invalid upgrade plan.")
+            new Exception('Invalid upgrade plan.')
         );
         $employeeCount = $this->getEmployeeCount($companySubscription->employee_count, $upgradeData);
         $upgradedSubscriptionPlan = Subscription::with(['subscriptionPrices' => function ($query) {
@@ -82,9 +80,10 @@ class SubscriptionService
             'amount_per_employee' => $pricePerEmployee,
             'employee_count' => $employeeCount,
             'amount' => $amountToPay,
-            'balance' => $amountToPay - $companySubscription->amount_paid
+            'balance' => $amountToPay - $companySubscription->amount_paid,
         ]);
         $companySubscription->load('company', 'subscription');
+
         return $companySubscription;
     }
 
@@ -96,16 +95,17 @@ class SubscriptionService
         if ($companySubscription->renewals->isNotEmpty()) {
             return [
                 'companySubscription' => $companySubscription->renewals,
-                'message' => "Unable to renew your subscription."
+                'message' => 'Unable to renew your subscription.',
             ];
         }
+
         return $this->subscribe($companySubscription->company, $renewData, $companySubscription);
     }
 
     public function subscribe(
         Company $company,
         array $subscriptionData,
-        CompanySubscription $companySubscription = null
+        ?CompanySubscription $companySubscription = null
     ): CompanySubscription {
         $activeEmployees = $company->employees()->where('status', Employee::ACTIVE)->count();
         $employeeCount = $this->getEmployeeCount($activeEmployees, $subscriptionData);
@@ -136,12 +136,11 @@ class SubscriptionService
             'amount' => $pricePerEmployee * $employeeCount * $subscriptionData['months'],
             'balance' => $pricePerEmployee * $employeeCount * $subscriptionData['months'],
             'start_date' => $startDate,
-            'end_date' => $startDate->clone()->addMonth($subscriptionData['months'])
+            'end_date' => $startDate->clone()->addMonth($subscriptionData['months']),
         ])->load('company', 'subscription');
-        $user = Auth::user();
 
         try {
-            Mail::to($user->email_address)->send(new UserSubscribed($companySubscription));
+            Mail::to($company->email_address)->send(new UserSubscribed($companySubscription));
         } catch (Exception $e) {
             Log::error($e->getMessage());
         }

@@ -6,7 +6,6 @@ use App\Http\Requests\SynchBiometricsRequest;
 use App\Models\Company;
 use App\Services\BiometricsService;
 use App\Services\TimeRecordService;
-use DateTime;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -34,7 +33,7 @@ class SynchBiometricsController extends Controller
             $biometricsDevices = $company->biometrics;
 
             if ($biometricsDevices->isEmpty()) {
-                return $this->sendError("No registered biometrics device.");
+                return $this->sendError('No registered biometrics device.');
             }
 
             if ($module == self::EMPLOYEE_MODULE) {
@@ -49,12 +48,14 @@ class SynchBiometricsController extends Controller
             }
 
             DB::commit();
+
             return response()->json([
                 'success' => true,
-                'message' => "User data synched with biometric devices successfully."
+                'message' => 'User data synched with biometric devices successfully.',
             ], 200);
         } catch (Exception $e) {
             DB::rollback();
+
             return $this->sendError($e->getMessage());
         }
     }

@@ -3,12 +3,13 @@
 namespace App\Services;
 
 use App\Models\Tax;
-use Illuminate\Support\Facades\Cache;
 
 class TaxService
 {
     protected $baseTax;
+
     protected $compensationLevel;
+
     protected $taxRate;
 
     public function compute(float $taxableAmount, string $type): float
@@ -16,7 +17,7 @@ class TaxService
         $tax = Tax::where([
             'type' => $type,
             ['min_compensation', '<=', $taxableAmount],
-            ['max_compensation', '>=', $taxableAmount]
+            ['max_compensation', '>=', $taxableAmount],
         ])->first();
 
         if ($tax) {
@@ -24,8 +25,10 @@ class TaxService
             $this->compensationLevel = $tax->min_compensation;
             $this->taxRate = $tax->over_compensation_level_rate;
             $overCompensation = $taxableAmount - $tax->min_compensation;
+
             return $overCompensation * $tax->over_compensation_level_rate + $tax->base_tax;
         }
+
         return 0;
     }
 
@@ -44,4 +47,3 @@ class TaxService
         return $this->taxRate;
     }
 }
-

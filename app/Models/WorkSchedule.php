@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,11 +9,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WorkSchedule extends Model
 {
-    use HasFactory, SoftDeletes;
-    
+    use SoftDeletes;
+
     protected $fillable = [
         'name',
         'company_id',
+        'type',
         'monday_clock_in_time',
         'monday_clock_out_time',
         'tuesday_clock_in_time',
@@ -28,8 +28,17 @@ class WorkSchedule extends Model
         'saturday_clock_in_time',
         'saturday_clock_out_time',
         'sunday_clock_in_time',
-        'sunday_clock_out_time'
+        'sunday_clock_out_time',
     ];
+
+    public const TYPES = [
+        self::STANDARD,
+        self::CUSTOM,
+    ];
+
+    public const STANDARD = 'standard';
+
+    public const CUSTOM = 'custom';
 
     public function company(): BelongsTo
     {

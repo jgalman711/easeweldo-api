@@ -30,7 +30,7 @@ class ResetTemporaryPassword extends Mailable
         return new Content(
             view: 'emails.temporary-password-reset',
             with: [
-                'temporaryPassword' => $this->user->temporary_password
+                'temporaryPassword' => $this->user->temporary_password,
             ]
         );
     }

@@ -11,7 +11,7 @@ class EmployeeQrRequest extends FormRequest
         return [
             'action' => 'required|in:clock',
             'employee_id' => 'required|exists:employees,id',
-            'geolocation' => 'string'
+            'geolocation' => 'string',
         ];
     }
 }

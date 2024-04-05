@@ -12,6 +12,7 @@ class CustomUserProvider extends EloquentUserProvider
         if ($user) {
             $user->append('email');
         }
+
         return $user;
     }
 }

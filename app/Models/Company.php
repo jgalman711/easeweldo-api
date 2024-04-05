@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use App\Enumerators\SubscriptionEnumerator;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,16 +17,7 @@ class Company extends Model
     public const STATUSES = [
         self::STATUS_ACTIVE,
         self::STATUS_INACTIVE,
-        self::STATUS_PENDING
-    ];
-
-    protected $appends = [
-        'has_time_and_attendance_subscription',
-        'has_core_subscription',
-        'subscription_amount',
-        'subscription_amount_paid',
-        'subscription_balance',
-        'subscription_status'
+        self::STATUS_PENDING,
     ];
 
     public const STATUS_ACTIVE = 'active';
@@ -38,10 +27,6 @@ class Company extends Model
     public const STATUS_PENDING = 'pending';
 
     public const STATUS_TRIAL = 'trial';
-
-    public const ABSOLUTE_STORAGE_PATH = 'public/companies/images';
-
-    public const STORAGE_PATH = 'companies/images/';
 
     protected $fillable = [
         'name',
@@ -62,12 +47,17 @@ class Company extends Model
         'tin',
         'sss_number',
         'philhealth_number',
-        'pagibig_number'
+        'pagibig_number',
     ];
 
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    public function banks()
+    {
+        return $this->hasMany(Bank::class);
     }
 
     public function biometrics(): HasMany
@@ -78,11 +68,6 @@ class Company extends Model
     public function employees(): HasMany
     {
         return $this->HasMany(Employee::class);
-    }
-
-    public function earnings(): HasOne
-    {
-        return $this->hasOne(Earning::class);
     }
 
     public function payrolls(): HasManyThrough
@@ -130,6 +115,11 @@ class Company extends Model
         return $this->hasMany(Leave::class);
     }
 
+    public function timeRecords(): HasMany
+    {
+        return $this->hasMany(TimeRecord::class);
+    }
+
     public function subscriptions(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -139,39 +129,23 @@ class Company extends Model
             'id',
             'id',
             'subscription_id'
-        );
+        )->where('company_subscriptions.end_date', '>', now());
     }
 
     public function getEmployeeById(int $employeeId): ?Employee
     {
         $employee = $this->employees()->with('user')->where('id', $employeeId)->first();
-        if (!$employee) {
+        if (! $employee) {
             throw new \Exception('Employee not found');
         }
+
         return $employee;
-    }
-
-    public function getPeriodById(int $periodId): ?Period
-    {
-        $period =  $this->periods->where('id', $periodId)->first();
-        if (!$period) {
-            throw new \Exception('Period not found');
-        }
-        return $period;
-    }
-
-    public function currentPeriod(): ?Period
-    {
-        $now = Carbon::now();
-        return $this->periods()
-            ->where('start_date', '<=', $now)
-            ->where('end_date', '>=', $now)
-            ->first();
     }
 
     public function isInSettlementPeriod(): bool
     {
         $now = Carbon::now();
+
         return $this->periods()
             ->where('end_date', '<=', $now)
             ->where('salary_date', '>=', $now)
@@ -181,74 +155,15 @@ class Company extends Model
     public function getWorkScheduleById(int $workScheduleId): ?WorkSchedule
     {
         $workSchedule = $this->workSchedules->where('id', $workScheduleId)->first();
-        if (!$workSchedule) {
+        if (! $workSchedule) {
             throw new \Exception('Work schedule not found');
         }
+
         return $workSchedule;
     }
 
-    public function getHasTimeAndAttendanceSubscriptionAttribute()
+    public function getFullAddressAttribute(): string
     {
-        $subscription = Subscription::where('name', SubscriptionEnumerator::CORE_TIME)
-            ->orWhere('name', SubscriptionEnumerator::CORE_TIME_DISBURSE)
-            ->first();
-
-        foreach ($this->companySubscriptions as $companySubscription) {
-            if ($companySubscription->subscription_id == $subscription->id
-                && $companySubscription->status == SubscriptionEnumerator::PAID_STATUS
-                && Carbon::now()->lte($subscription->end_date)
-            ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public function getHasCoreSubscriptionAttribute()
-    {
-        $subscriptions = Subscription::whereIn('name', SubscriptionEnumerator::NAMES)->pluck('id');
-        foreach ($this->companySubscriptions as $companySubscription) {
-            if (in_array($companySubscription->subscription_id, $subscriptions->toArray())
-                && $companySubscription->status == SubscriptionEnumerator::PAID_STATUS
-                && Carbon::now()->lte($companySubscription->end_date)
-            ) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public function getSubscriptionBalanceAttribute(): float
-    {
-        return $this->companySubscriptions()->sum('balance');
-    }
-
-    public function getSubscriptionAmountPaidAttribute(): float
-    {
-        return $this->companySubscriptions()->sum('amount_paid');
-    }
-
-    public function getSubscriptionAmountAttribute(): float
-    {
-        return $this->companySubscriptions()->sum('amount');
-    }
-
-    public function getSubscriptionStatusAttribute(): string
-    {
-        $unpaidSubscriptionsCount = $this->companySubscriptions()
-            ->where('status', SubscriptionEnumerator::UNPAID_STATUS)
-            ->count();
-        return $unpaidSubscriptionsCount > 0
-            ? SubscriptionEnumerator::UNPAID_STATUS
-            : SubscriptionEnumerator::PAID_STATUS;
-    }
-
-    public function periodsForYear(int $year): Collection
-    {
-        return $this->periods()
-            ->whereNotNull('company_period_id')
-            ->whereYear('start_date', $year)
-            ->whereYear('end_date', $year)
-            ->get();
+        return trim($this->address_line.' '.$this->barangay_town_city_province);
     }
 }

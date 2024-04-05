@@ -5,22 +5,23 @@ namespace App\Http\Controllers;
 use App\Factories\ReportStrategyFactory;
 use App\Http\Requests\ReportRequest;
 use App\Models\Company;
-use Exception;
 use Illuminate\Http\JsonResponse;
 
 class ReportController extends Controller
 {
-    protected $reportService;
+    protected $reportStrategyFactory;
 
-    public function show(ReportRequest $request, Company $company, string $type): JsonResponse
+    public function __construct(ReportStrategyFactory $reportStrategyFactory)
     {
-        try {
-            $input = $request->validated();
-            $reportStrategy = ReportStrategyFactory::createStrategy($type);
-            $report = $reportStrategy->generate($company, $input);
-            return $this->sendResponse($report, 'Report data retrieved successfully.');
-        } catch (Exception $e) {
-            return $this->sendError($e->getMessage());
-        }
+        $this->reportStrategyFactory = $reportStrategyFactory;
+    }
+
+    public function show(ReportRequest $reportRequest, Company $company, string $type): JsonResponse
+    {
+        $filter = $reportRequest->validated();
+        $reportStrategy = $this->reportStrategyFactory->createStrategy($type);
+        $response['data'] = $reportStrategy->generate($company, $filter);
+
+        return $this->sendResponse($response, 'Reports successfully retrieved.');
     }
 }

@@ -38,7 +38,7 @@ class EmployeeOfCompany
         }
 
         return response()->json([
-            'message' => 'Access Denied. You are not authorized to perform this action in the current company'
+            'message' => 'Access Denied. You are not authorized to perform this action in the current company',
         ], 401);
     }
 }

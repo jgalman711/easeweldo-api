@@ -168,6 +168,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\TelescopeServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
     ])->toArray(),
 
@@ -186,5 +187,11 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
-    'auth_url' => env('AUTH_APP_URL')
+    'auth_url' => env('AUTH_APP_URL'),
+
+    'uploads' => [
+        'url' => env('UPLOAD_HOST_DOMAIN', 'localhost'),
+        'company_path' => env('COMPANY_UPLOAD_PATH', 'uploads/companies/images'),
+        'employee_path' => env('EMPLOYEE_UPLOAD_PATH', 'uploads/employees/images'),
+    ],
 ];

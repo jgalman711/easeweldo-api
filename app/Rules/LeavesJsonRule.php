@@ -10,15 +10,15 @@ class LeavesJsonRule implements ValidationRule
 {
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (isset($value) && !empty($value)) {
+        if (isset($value) && ! empty($value)) {
             foreach ($value as $item) {
-                if (!isset($item['type']) || !$item['type']) {
+                if (! isset($item['type']) || ! $item['type']) {
                     $fail('The :attribute type is required');
                 }
-                if (!isset($item['type']) || !$item['type'] || !in_array($item['type'], Leave::TYPES)) {
-                    $fail('The :attribute type must be in ' . implode(', ', Leave::TYPES) . '.');
+                if (! isset($item['type']) || ! $item['type'] || ! in_array($item['type'], Leave::TYPES)) {
+                    $fail('The :attribute type must be in '.implode(', ', Leave::TYPES).'.');
                 }
-                if (!isset($item['hours']) || !$item['hours']) {
+                if (! isset($item['hours']) || ! $item['hours']) {
                     $fail('The :attribute hours is required.');
                 }
             }

@@ -9,13 +9,14 @@ class SalaryComputationRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'basic_salary' => 'filled|required_without_all:hourly_rate',
-            'hourly_rate' => 'filled|required_without_all:basic_salary',
+            'basic_salary' => ! $this->filled('hourly_rate') ? self::REQUIRED_NUMERIC : '',
+            'hourly_rate' => ! $this->filled('basic_salary') ? self::REQUIRED_NUMERIC : '',
             'daily_rate' => self::NUMERIC,
             'taxable_earnings' => [new EarningTypeJsonRule()],
             'non_taxable_earnings' => [new EarningTypeJsonRule()],
+            'other_deductions' => [new EarningTypeJsonRule()],
             'working_hours_per_day' => self::NUMERIC,
-            'working_days_per_week' =>  self::NUMERIC,
+            'working_days_per_week' => self::NUMERIC,
             'overtime_rate' => self::REQUIRED_NUMERIC,
             'night_diff_rate' => self::REQUIRED_NUMERIC,
             'regular_holiday_rate' => self::REQUIRED_NUMERIC,

@@ -8,7 +8,8 @@ class EmployeeScheduleRequest extends BaseRequest
     {
         return [
             'work_schedule_id' => 'required',
-            'start_date' => 'required|date',
+            'start_date' => self::REQUIRED_DATE_AFTER_TODAY,
+            'remarks' => self::NULLABLE_STRING,
         ];
     }
 }

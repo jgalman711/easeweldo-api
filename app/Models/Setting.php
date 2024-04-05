@@ -15,7 +15,13 @@ class Setting extends Model
         'salary_day',
         'grace_period',
         'minimum_overtime',
-        'is_ot_auto_approve'
+        'is_ot_auto_approve',
+        'overtime_rate',
+        'auto_send_email_to_bank',
+        'auto_pay_disbursement',
+        'clock_action_required',
+        'disbursement_method',
+        'leaves_convertible',
     ];
 
     protected $casts = [

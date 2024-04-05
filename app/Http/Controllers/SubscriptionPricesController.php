@@ -11,8 +11,9 @@ class SubscriptionPricesController extends Controller
     public function index(Request $request)
     {
         $prices = $this->applyFilters($request, SubscriptionPrices::with('subscription'), [
-            'months'
+            'months',
         ]);
+
         return $this->sendResponse(BaseResource::collection($prices), 'Subscription prices retrieved successfully.');
     }
 }

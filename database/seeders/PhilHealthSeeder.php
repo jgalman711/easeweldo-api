@@ -11,7 +11,7 @@ class PhilHealthSeeder extends Seeder
         'min_contribution' => 400,
         'max_contribution' => 3200,
         'contribution_rate' => 0.04,
-        'status' => PhilHealth::ACTIVE
+        'status' => PhilHealth::ACTIVE,
     ];
 
     public function run(): void

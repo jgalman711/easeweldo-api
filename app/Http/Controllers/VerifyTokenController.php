@@ -12,6 +12,7 @@ class VerifyTokenController extends Controller
         $user = Auth::user();
         if ($user) {
             $user = $user->load(['companies.companySubscriptions', 'employee', 'roles']);
+
             return $this->sendResponse(new BaseResource($user), 'Token is valid');
         } else {
             return $this->sendError('Token is not valid');

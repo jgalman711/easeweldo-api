@@ -15,7 +15,7 @@ class PeriodRequest extends BaseRequest
             'salary_date' => [
                 'required',
                 'date',
-                'after:' . Carbon::now()->format('Y-m-d')],
+                'after:'.Carbon::now()->format('Y-m-d')],
         ];
     }
 }

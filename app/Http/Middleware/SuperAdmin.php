@@ -11,9 +11,10 @@ class SuperAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::user()->hasRole('super-admin')) {
+        if (! Auth::user()->hasRole('super-admin')) {
             abort(403, 'Unauthorized action.');
         }
+
         return $next($request);
     }
 }

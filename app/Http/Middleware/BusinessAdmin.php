@@ -11,9 +11,10 @@ class BusinessAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::user()->hasRole('business-admin')) {
+        if (! Auth::user()->hasRole('business-admin')) {
             abort(403, 'Unauthorized action.');
         }
+
         return $next($request);
     }
 }

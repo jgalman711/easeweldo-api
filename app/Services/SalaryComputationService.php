@@ -11,6 +11,7 @@ class SalaryComputationService
 
     public function initialize(Employee $employee, array $data): SalaryComputation
     {
+        $data['employee_id'] = $employee->id;
         if ($employee->employment_type == Employee::FULL_TIME) {
             $data['working_hours_per_day'] = $data['working_hours_per_day'] ?? Employee::EIGHT_HOURS_PER_DAY;
             $data['working_days_per_week'] = $data['working_days_per_week'] ?? Employee::FIVE_DAYS_PER_WEEK;
@@ -18,7 +19,10 @@ class SalaryComputationService
                 * self::MONTHS_12
                 / SalaryComputation::FIVE_DAYS_PER_WEEK_WORK_DAYS;
             $data['hourly_rate'] = $data['daily_rate'] / Employee::EIGHT_HOURS_PER_DAY;
+            $data['available_sick_leave_hours'] = $data['available_sick_leave_hours'] ?? $data['total_sick_leave_hours'];
+            $data['available_vacation_leave_hours'] = $data['available_vacation_leave_hours'] ?? $data['total_vacation_leave_hours'];
         }
+
         return SalaryComputation::create($data);
     }
 }

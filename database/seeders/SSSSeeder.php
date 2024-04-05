@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 class SSSSeeder extends Seeder
 {
     public const MIN_AMOUNT = 1;
+
     public const MAX_AMOUNT = 999999.99;
 
     public function run(): void
@@ -69,6 +70,6 @@ class SSSSeeder extends Seeder
         ['min_compensation' => 28250, 'max_compensation' => 28749.99, 'employer_contribution' => 2737.50, 'employee_contribution' => 1282.50],
         ['min_compensation' => 28750, 'max_compensation' => 29249.99, 'employer_contribution' => 2785, 'employee_contribution' => 1305],
         ['min_compensation' => 29250, 'max_compensation' => 29749.99, 'employer_contribution' => 2832.50, 'employee_contribution' => 1327.50],
-        ['min_compensation' => 29750, 'max_compensation' => self::MAX_AMOUNT, 'employer_contribution' => 2880, 'employee_contribution' => 1350]
+        ['min_compensation' => 29750, 'max_compensation' => self::MAX_AMOUNT, 'employer_contribution' => 2880, 'employee_contribution' => 1350],
     ];
 }

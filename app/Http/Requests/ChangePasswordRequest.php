@@ -2,15 +2,16 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Employee;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class ChangePasswordRequest extends BaseRequest
 {
     public function rules(): array
     {
-        $user = $this->user ?? Auth::user();
+        $user = self::retrieveUser();
+
         return [
             'old_password' => [
                 'required',
@@ -37,9 +38,21 @@ class ChangePasswordRequest extends BaseRequest
 
     private function checkOldPassword(User $user, string $value): bool
     {
-
         return
-            ($user->temporary_password == null && !Hash::check($value, $user->password)) ||
+            ($user->temporary_password == null && ! Hash::check($value, $user->password)) ||
             ($user->temporary_password != null && $user->temporary_password != $value);
+    }
+
+    private function retrieveUser(): User
+    {
+        if ($this->employee instanceof Employee) {
+            $employee = $this->employee;
+        } elseif ($this->employee) {
+            $employee = Employee::findOrFail($this->employee);
+        } else {
+            $employee = null;
+        }
+
+        return $employee->user;
     }
 }

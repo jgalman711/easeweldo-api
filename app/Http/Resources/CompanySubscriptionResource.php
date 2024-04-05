@@ -20,7 +20,7 @@ class CompanySubscriptionResource extends JsonResource
             'balance' => $this->balance,
             'overpaid_balance' => $this->overpaid_balance,
             'start_date' => $this->start_date,
-            'end_date' => $this->end_date
+            'end_date' => $this->end_date,
         ];
     }
 }

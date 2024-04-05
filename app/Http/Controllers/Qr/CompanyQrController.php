@@ -30,6 +30,7 @@ class CompanyQrController extends Controller
     public function index(): Response
     {
         $qr = $this->qrService->generate(['action' => 'clock']);
+
         return response($qr)->header('Content-type', 'image/png');
     }
 
@@ -41,7 +42,8 @@ class CompanyQrController extends Controller
         try {
             $input = $request->validated();
             $employee = $company->getEmployeeById($employeeId);
-            list($timeRecord, $message) = $this->clockService->clockAction($employee, $input);
+            [$timeRecord, $message] = $this->clockService->clockAction($employee, $input);
+
             return $this->sendResponse(new BaseResource($timeRecord), $message);
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());

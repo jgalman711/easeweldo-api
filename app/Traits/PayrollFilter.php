@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 trait PayrollFilter
 {
     use Filter;
+
     /*
      * @return LengthAwarePaginator or Collection
      */
@@ -32,8 +33,10 @@ trait PayrollFilter
         }
         if ($request->has('per_page')) {
             $perPage = $request->input('per_page', 10);
+
             return $query->paginate($perPage);
         }
+
         return $query->get();
     }
 

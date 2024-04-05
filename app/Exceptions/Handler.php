@@ -37,10 +37,12 @@ class Handler extends ExceptionHandler
             $model = $matches[1];
             $response = [
                 'success' => false,
-                'message' => "$model not found."
+                'message' => "$model not found.",
             ];
+
             return response()->json($response, 404);
         }
+
         return parent::render($request, $exception);
     }
 }

@@ -11,14 +11,21 @@ class Leave extends Model
     use HasFactory, SoftDeletes;
 
     public const PENDING = 'pending';
+
     public const APPROVED = 'approved';
+
     public const REJECTED = 'rejected';
 
-    public const TYPE_SICK_LEAVE = 'sick';
-    public const TYPE_VACATION_LEAVE = 'vacation';
-    public const TYPE_EMERGENCY_LEAVE = 'emergency';
+    public const TYPE_SICK_LEAVE = 'sick_leave';
+
+    public const TYPE_VACATION_LEAVE = 'vacation_leave';
+
+    public const TYPE_EMERGENCY_LEAVE = 'emergency_leave';
+
+    public const TYPE_WITHOUT_PAY = 'leave_without_pay';
 
     public const TYPE = 'type';
+
     public const HOURS = 'hours';
 
     public const ATTRIBUTES = [
@@ -29,7 +36,8 @@ class Leave extends Model
     public const TYPES = [
         self::TYPE_SICK_LEAVE,
         self::TYPE_VACATION_LEAVE,
-        self::TYPE_EMERGENCY_LEAVE
+        self::TYPE_EMERGENCY_LEAVE,
+        self::TYPE_WITHOUT_PAY,
     ];
 
     protected $fillable = [
@@ -42,7 +50,7 @@ class Leave extends Model
         'date',
         'submitted_date',
         'remarks',
-        'status'
+        'status',
     ];
 
     public function employee()

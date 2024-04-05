@@ -9,11 +9,12 @@ class LeaveRequest extends BaseRequest
     public function rules(): array
     {
         return [
-            'type' => 'required|in:' . implode("," , Leave::TYPES),
             'from_date' => self::REQUIRED_DATE,
-            'to_date' => self::REQUIRED_DATE,
+            'to_date' => self::REQUIRED_DATE.'|after_or_equal:from_date',
+            'type' => 'required|in:'.implode(',', Leave::TYPES),
+            'hours' => self::REQUIRED_NUMERIC,
             'description' => self::REQUIRED_STRING,
-            'remarks' => self::NULLABLE_STRING
+            'remarks' => self::NULLABLE_STRING,
         ];
     }
 }

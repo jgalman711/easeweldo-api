@@ -14,11 +14,11 @@ class Subscription extends Model
         'title',
         'amount',
         'description',
-        'features'
+        'features',
     ];
 
     protected $casts = [
-        'subscriptions' => 'array'
+        'subscriptions' => 'array',
     ];
 
     public function subscriptionPrices(): HasMany

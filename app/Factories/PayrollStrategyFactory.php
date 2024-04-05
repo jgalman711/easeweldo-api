@@ -11,7 +11,6 @@ use Exception;
 
 class PayrollStrategyFactory
 {
-
     public static function createStrategy(string $type)
     {
         if ($type == PayrollEnumerator::TYPE_NTH_MONTH_PAY) {
@@ -22,9 +21,10 @@ class PayrollStrategyFactory
             $strategy = new RegularPayrollStrategy();
         } elseif ($type == PayrollEnumerator::TYPE_FINAL) {
             $strategy = new FinalPayrollStrategy();
-        }else {
-            throw new Exception("Invalid payroll type");
+        } else {
+            throw new Exception('Invalid payroll type');
         }
+
         return $strategy;
     }
 }
