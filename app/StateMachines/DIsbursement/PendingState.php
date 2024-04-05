@@ -4,8 +4,6 @@ namespace App\StateMachines\Disbursement;
 
 use App\Enumerators\DisbursementEnumerator;
 use App\Mail\PayEmployees;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -17,7 +15,7 @@ class PendingState extends BaseState
         foreach ($this->disbursement->payrolls as $payroll) {
             try {
                 $payroll->state()->pay();
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 Log::error($e->getMessage());
             }
         }
@@ -35,7 +33,7 @@ class PendingState extends BaseState
         foreach ($this->disbursement->payrolls as $payroll) {
             try {
                 $payroll->state()->cancel();
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 Log::error($e->getMessage());
             }
         }

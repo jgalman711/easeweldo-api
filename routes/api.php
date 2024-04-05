@@ -99,8 +99,11 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['middleware' => ['role:super-admin|business-admin', 'valid.company.user']], function () {
         Route::apiResource('companies', CompanyController::class)->only('show', 'update');
         Route::prefix('companies/{company}')->group(function () {
+            Route::get('dashboard', DashboardController::class);
+
             Route::apiResource('employees', EmployeeController::class);
             Route::post('employees/import', ImportEmployeeController::class);
+
             Route::apiResource('disbursements', DisbursementController::class)->only('store');
             Route::apiResource('periods', PeriodController::class)->except('store');
             Route::post('periods/{period}/generate-payroll', GeneratePayrollsController::class);
@@ -119,12 +122,13 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::apiResource('settings', SettingController::class)->only('index', 'store');
             Route::apiResource('banks', BankController::class)->only('index', 'store');
 
+            //Verify
             Route::post('timesheet/upload', [TimesheetUploadController::class, 'store']);
             Route::post('synch-biometrics/{module}/', [SynchBiometricsController::class, 'store']);
             Route::apiResource('biometrics', BiometricsController::class);
             Route::apiResource('overtime-requests', OvertimeRequestController::class);
             Route::get('qrcode', [CompanyQrController::class, 'index']);
-            Route::get('dashboard', [DashboardController::class, 'index']);
+            //
 
             Route::prefix('verification')->group(function () {
                 Route::post('personal-information', PersonalInformationVerificationController::class);

@@ -25,7 +25,7 @@ class DashboardController extends Controller
         $this->periodService = $periodService;
     }
 
-    public function index(Company $company)
+    public function __invoke(Company $company)
     {
         $employees = $this->employeeService->generateDashboardDetails($company);
         $period = $this->periodService->generateDashboardDetails($company);
