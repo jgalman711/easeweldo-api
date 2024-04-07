@@ -144,7 +144,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
      * Should have the business-admin middleware as well.
      * Employee of company middleware should also check if the logged in user is the employee.
      */
-    Route::group(['prefix' => 'companies/{company}/employees/{employee}', 'middleware' => ['employee-of-company']], function () {
+    Route::group(['prefix' => 'companies/{company}/employees/{employee}', 'middleware' => ['valid.company.user']], function () {
         Route::get('/', [EmployeeController::class, 'show']);
         Route::get('dashboard', [UserDashboardController::class, 'index']);
         Route::post('clock', [TimeRecordController::class, 'clock']);
@@ -153,6 +153,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::apiResource('time-corrections', TimeCorrectionController::class);
         Route::apiResource('work-schedules', EmployeeScheduleController::class);
         Route::apiResource('payrolls', UserPayrollController::class)->only('index', 'show');
+        
         // Needs refactor
         Route::controller(SalaryComputationController::class)->group(function () {
             Route::get('salary-computation', 'show');
@@ -171,7 +172,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         // END
     });
 
-    Route::group(['prefix' => 'employees/{employee}'], function () {
+    Route::group(['prefix' => 'employees/{employee}', 'middleware' => ['valid.company.user']], function () {
         Route::get('/', [EmployeeController::class, 'show']);
         Route::get('dashboard', [UserDashboardController::class, 'index']);
         Route::post('clock', [TimeRecordController::class, 'clock']);
