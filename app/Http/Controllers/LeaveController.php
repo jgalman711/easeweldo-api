@@ -20,24 +20,19 @@ class LeaveController extends Controller
         $this->leaveService = $leaveService;
     }
 
-    public function index(Request $request, Company $company, int $employeeId): JsonResponse
+    public function index(Request $request, Company $company): JsonResponse
     {
-        try {
-            $query = $company->leaves()->where('employee_id', $employeeId);
-            $leaves = $this->leaveService->filter($request, $query);
-
-            return $this->sendResponse(LeaveResource::collection($leaves), 'Leaves retrieved successfully.');
-        } catch (Exception $e) {
-            return $this->sendError($e->getMessage());
-        }
+        $leaves = $this->applyFilters($request, $company->leaves());
+        return $this->sendResponse(LeaveResource::collection($leaves), 'Leaves retrieved successfully.');
     }
 
-    public function store(LeaveRequest $leaveRequest, Company $company, int $employeeId): JsonResponse
+    public function store(LeaveRequest $leaveRequest, Company $company): JsonResponse
     {
+        $input = $leaveRequest->validated();
+        $employee = $company->employees()->findOrFail($input['employee_id']);
+        $employee->setRelation('company', $company);
         try {
-            $employee = $company->employees()->find($employeeId);
-            $leaves = $this->leaveService->apply($company, $employee, $leaveRequest);
-
+            $leaves = $this->leaveService->apply($employee, $input);
             return $this->sendResponse(LeaveResource::collection($leaves), 'Leaves created successfully.');
         } catch (Exception $e) {
             return $this->sendError('Unable to apply leave.', $e->getMessage());

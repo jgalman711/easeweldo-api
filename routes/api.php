@@ -139,6 +139,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             });
         });
     });
+
+    Route::group(['middleware' => ['role:super-admin|business-admin|approver', 'valid.company.user']], function () {
+        Route::apiResource('companies.leaves', LeaveController::class);
+    });
     /**
      * @TODO
      *
