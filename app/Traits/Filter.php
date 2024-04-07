@@ -15,7 +15,7 @@ trait Filter
     protected function applyFilters(Request $request, $query, ?array $searchableColumns = [])
     {
         if ($request->has('filter')) {
-            $query->where($this->filter($searchableColumns, $request));
+            $query->where($this->filter($request));
         }
         if ($request->has('search')) {
             $query->where($this->search($searchableColumns, $request));
@@ -38,16 +38,25 @@ trait Filter
         return $query->get();
     }
 
-    protected function filter(array $searchableColumns, Request $request): Closure
+    protected function filter(Request $request): Closure
     {
-        return function ($filterQuery) use ($searchableColumns, $request) {
+        return function ($filterQuery) use ($request) {
             foreach ($request->filter as $key => $value) {
                 if ($key == 'from_date') {
                     $filterQuery->whereDate($key, '>=', $value);
                 } elseif ($key == 'to_date') {
                     $filterQuery->whereDate($key, '<=', $value);
+                } elseif ($key == 'role') {
+                    $roles = explode(',', $value);
+                    $filterQuery->whereHas('user.roles', function ($query) use ($roles) {
+                        $query->where(function ($rolesQueryFilter) use ($roles) {
+                            foreach ($roles as $role) {
+                                $rolesQueryFilter->orWhere('name', 'like', "%{$role}%");
+                            }
+                        });
+                    });
                 } else {
-                    $this->findInSearchableColumns($filterQuery, $searchableColumns, $value);
+                    $filterQuery->where($key, $value);
                 }
             }
         };
@@ -56,37 +65,29 @@ trait Filter
     protected function search(array $searchableColumns, Request $request): Closure
     {
         $search = $request->input('search');
-        return function ($searchQuery) use ($searchableColumns, $search) {
-            $this->findInSearchableColumns($searchQuery, $searchableColumns, $search);
-        };
-    }
 
-    protected function findInSearchableColumns(&$query, $columns, $needle): void
-    {
-        foreach ($columns as $column) {
-            $columnRelationship = explode('.', $column);
-            if ($this->isWithRelationshipSearch($columnRelationship)) {
-                $query->orWhereHas($columnRelationship[0],
-                    function ($queryRelationship) use ($columnRelationship, $needle) {
-                        $this->searchByColumn($queryRelationship, $columnRelationship[1], $needle);
-                    }
-                );
-            } else {
-                $query->orWhere(function ($singleQuery) use ($column, $needle) {
-                    $this->searchByColumn($singleQuery, $column, $needle);
-                });
+        return function ($searchQuery) use ($searchableColumns, $search) {
+            foreach ($searchableColumns as $searchableColumn) {
+                $columnRelationship = explode('.', $searchableColumn);
+                if ($this->isWithRelationshipSearch($columnRelationship)) {
+                    $searchQuery->orWhereHas($columnRelationship[0],
+                        function ($queryRelationship) use ($columnRelationship, $search) {
+                            $this->searchByColumn($queryRelationship, $columnRelationship[1], $search);
+                        }
+                    );
+                } else {
+                    $searchQuery->orWhere(function ($singleQuery) use ($searchableColumn, $search) {
+                        $this->searchByColumn($singleQuery, $searchableColumn, $search);
+                    });
+                }
             }
-        }
+        };
     }
 
     private function searchByColumn(Builder &$queryBuilder, string $column, string $key): void
     {
         if ($column == 'full_name') {
             $queryBuilder->whereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$key%"]);
-        } elseif ($column == 'role') {
-            $queryBuilder->whereHas('roles', function ($query) use ($key) {
-                $query->where('name', 'like', "%{$key}%");
-            });
         } else {
             $queryBuilder->where($column, 'like', "%{$key}%");
         }
