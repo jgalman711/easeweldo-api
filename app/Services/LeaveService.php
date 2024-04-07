@@ -30,17 +30,18 @@ class LeaveService
                 new Exception('No available leaves left for this type.')
             );
         }
-        $now = Carbon::now();
+        $date = Carbon::now()->toDateString();
         while ($fromDate->lte($toDate)) {
             $leave = Leave::create([
                 'company_id' => $employee->company->id,
                 'employee_id' => $employee->id,
                 'created_by' => $employee->user->id,
+                'title' => self::generateTitle($data['type'], $date),
                 'type' => $data['type'],
                 'description' => $data['description'],
                 'hours' => $data['hours'],
                 'date' => $fromDate,
-                'submitted_date' => $now->toDateString(),
+                'submitted_date' => $date,
                 'remarks' => $data['remarks'] ?? null,
                 'status' => Leave::PENDING,
             ]);
@@ -48,5 +49,11 @@ class LeaveService
             $fromDate->addDay();
         }
         return $leaves;
+    }
+
+    private function generateTitle(string $type, string $date): string
+    {
+        $type = ucwords(str_replace("_", " ", $type));
+        return "$type: $date";
     }
 }

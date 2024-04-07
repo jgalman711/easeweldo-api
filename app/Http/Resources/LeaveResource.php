@@ -14,10 +14,11 @@ class LeaveResource extends BaseResource
         return [
             'id' => $this->id,
             'type' => $this->type,
+            'title' => $this->title,
             'description' => $this->description,
             'hours' => $this->hours,
             'date' => $this->date,
-            'month' => $date->format('M'),
+            'month' => $date->format('F'),
             'day' => $date->format('d'),
             'year' => $date->year,
             'formatted_date' => Carbon::parse($date)->format('d F Y'),

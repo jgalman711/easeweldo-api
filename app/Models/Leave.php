@@ -44,6 +44,7 @@ class Leave extends Model
         'company_id',
         'employee_id',
         'created_by',
+        'title',
         'type',
         'description',
         'hours',
