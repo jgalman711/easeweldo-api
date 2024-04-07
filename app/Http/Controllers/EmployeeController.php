@@ -115,7 +115,7 @@ class EmployeeController extends Controller
         // Todo: must fix this circular relationship with the company
         $builder = $company->employees()->with([
             'company',
-            'user',
+            'user.roles',
             'salaryComputation',
             'employeeSchedules' => function ($query) {
                 $query->latest('start_date')->limit(1);
@@ -125,6 +125,7 @@ class EmployeeController extends Controller
             'user.first_name',
             'user.last_name',
             'user.full_name',
+            'user.role',
             'job_title',
             'employment_status',
             'department',

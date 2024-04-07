@@ -42,6 +42,7 @@ use App\Http\Controllers\SynchBiometricsController;
 use App\Http\Controllers\TimeCorrectionController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\TimesheetUploadController;
+use App\Http\Controllers\UpdateRoleController;
 use App\Http\Controllers\User\UserChangePasswordController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserDashboardController;
@@ -148,6 +149,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/', [EmployeeController::class, 'show']);
         Route::get('dashboard', [UserDashboardController::class, 'index']);
         Route::post('clock', [TimeRecordController::class, 'clock']);
+        Route::put('update-role', UpdateRoleController::class);
         Route::apiResource('leaves', LeaveController::class);
         Route::apiResource('time-records', TimeRecordController::class);
         Route::apiResource('time-corrections', TimeCorrectionController::class);
