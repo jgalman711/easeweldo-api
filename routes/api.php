@@ -19,7 +19,8 @@ use App\Http\Controllers\EmployeeVerification\PersonalInformationVerificationCon
 use App\Http\Controllers\EmployeeVerification\SalaryDetailsVerificationController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\ImportEmployeeController;
-use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\Leave\ApproveLeaveController;
+use App\Http\Controllers\Leave\LeaveController;
 use App\Http\Controllers\OvertimeRequestController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\Payroll\CancelPayrollController;
@@ -141,7 +142,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     });
 
     Route::group(['middleware' => ['role:super-admin|business-admin|approver', 'valid.company.user']], function () {
-        Route::apiResource('companies.leaves', LeaveController::class);
+        Route::prefix('companies/{company}')->group(function () {
+            Route::apiResource('leaves', LeaveController::class);
+            Route::post('leaves/{leave}/approve', ApproveLeaveController::class);
+        });
     });
     /**
      * @TODO
@@ -154,7 +158,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('dashboard', [UserDashboardController::class, 'index']);
         Route::post('clock', [TimeRecordController::class, 'clock']);
         Route::put('update-role', UpdateRoleController::class);
-        Route::apiResource('leaves', LeaveController::class);
         Route::apiResource('time-records', TimeRecordController::class);
         Route::apiResource('time-corrections', TimeCorrectionController::class);
         Route::apiResource('work-schedules', EmployeeScheduleController::class);
@@ -182,7 +185,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/', [EmployeeController::class, 'show']);
         Route::get('dashboard', [UserDashboardController::class, 'index']);
         Route::post('clock', [TimeRecordController::class, 'clock']);
-        Route::apiResource('leaves', LeaveController::class);
         Route::apiResource('time-records', TimeRecordController::class);
         Route::apiResource('time-corrections', TimeCorrectionController::class);
         Route::apiResource('work-schedules', EmployeeScheduleController::class);

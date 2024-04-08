@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Leave;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\LeaveRequest;
 use App\Http\Requests\LeaveUpdateRequest;
 use App\Http\Resources\LeaveResource;
@@ -39,11 +40,9 @@ class LeaveController extends Controller
         }
     }
 
-    public function show(Company $company, int $employeeId, int $leaveId): JsonResponse
+    public function show(Company $company, int $leaveId): JsonResponse
     {
-        $employee = $company->getEmployeeById($employeeId);
-        $leave = $employee->getLeaveById($leaveId);
-
+        $leave = $company->leaves()->findOrFail($leaveId);
         return $this->sendResponse(new LeaveResource($leave), 'Leave retrieved successfully');
     }
 
