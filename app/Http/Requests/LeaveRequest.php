@@ -8,13 +8,20 @@ class LeaveRequest extends BaseRequest
 {
     public function rules(): array
     {
-        return [
+        $rules = [
             'employee_id' => self::REQUIRED_NUMERIC,
-            'from_date' => self::REQUIRED_DATE,
-            'to_date' => self::REQUIRED_DATE.'|after_or_equal:from_date',
             'type' => 'required|in:'.implode(',', LeaveEnumerator::TYPES),
             'hours' => self::REQUIRED_NUMERIC,
             'description' => self::REQUIRED_STRING
         ];
+
+        if ($this->method() === "POST") {
+            $rules['from_date'] = self::REQUIRED_DATE;
+            $rules['to_date'] = self::REQUIRED_DATE.'|after_or_equal:from_date';
+
+        } elseif ($this->method() === "PUT" || $this->method() === "PATCH") {
+            $rules['date'] = self::REQUIRED_DATE;
+        }
+        return $rules;
     }
 }

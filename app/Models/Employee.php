@@ -166,11 +166,6 @@ class Employee extends Model
         return ucfirst(optional($this->user)->first_name).' '.ucfirst(optional($this->user)->last_name);
     }
 
-    public function getLeaveById(int $leaveId): Leave
-    {
-        return $this->leaves->where('id', $leaveId)->firstOrFail();
-    }
-
     public function getFirstNameAttribute(): ?string
     {
         return optional($this->user)->first_name;
