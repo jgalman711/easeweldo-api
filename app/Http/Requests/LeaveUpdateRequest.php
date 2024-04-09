@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Leave;
+use App\Enumerators\LeaveEnumerator;
 
 class LeaveUpdateRequest extends BaseRequest
 {
@@ -10,7 +10,7 @@ class LeaveUpdateRequest extends BaseRequest
     {
         return [
             'date' => self::REQUIRED_DATE,
-            'type' => 'required|in:'.implode(',', Leave::TYPES),
+            'type' => 'required|in:'.implode(',', LeaveEnumerator::TYPES),
             'hours' => self::REQUIRED_NUMERIC,
             'description' => self::REQUIRED_STRING,
             'remarks' => self::NULLABLE_STRING,

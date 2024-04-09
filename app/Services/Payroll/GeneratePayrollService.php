@@ -2,6 +2,7 @@
 
 namespace App\Services\Payroll;
 
+use App\Enumerators\LeaveEnumerator;
 use App\Enumerators\PayrollEnumerator;
 use App\Exceptions\InvalidPayrollGenerationException;
 use App\Models\Company;
@@ -253,7 +254,7 @@ class GeneratePayrollService
         $leaves = $this->payroll->employee->leaves()->where([
             ['date', '>=', $this->period->start_date],
             ['date', '<=', $this->period->end_date],
-            ['status', '=', Leave::APPROVED],
+            ['status', '=', LeaveEnumerator::APPROVED],
         ])->get();
 
         if ($leaves->isNotEmpty()) {

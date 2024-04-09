@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources\Payroll;
 
+use App\Enumerators\LeaveEnumerator;
 use App\Http\Resources\BaseResource;
 use App\Models\Holiday;
-use App\Models\Leave;
 use Illuminate\Http\Request;
 
 class EditPayrollResource extends BaseResource
@@ -38,8 +38,8 @@ class EditPayrollResource extends BaseResource
         $regularEarnings['regularHolidayWorked'] = $this->holidays_worked[Holiday::REGULAR_HOLIDAY] ?? null;
         $regularEarnings['specialHoliday'] = $this->holidays[Holiday::SPECIAL_HOLIDAY] ?? null;
         $regularEarnings['specialHolidayWorked'] = $this->holidays_worked[Holiday::SPECIAL_HOLIDAY] ?? null;
-        $regularEarnings['sickLeave'] = $this->leaves[Leave::TYPE_SICK_LEAVE] ?? null;
-        $regularEarnings['vacationLeave'] = $this->leaves[Leave::TYPE_VACATION_LEAVE] ?? null;
+        $regularEarnings['sickLeave'] = $this->leaves[LeaveEnumerator::TYPE_SICK_LEAVE] ?? null;
+        $regularEarnings['vacationLeave'] = $this->leaves[LeaveEnumerator::TYPE_VACATION_LEAVE] ?? null;
 
         return $regularEarnings;
     }

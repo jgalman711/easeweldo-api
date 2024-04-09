@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enumerators\LeaveEnumerator;
 use App\Models\Employee;
 use App\Models\Leave;
 use Carbon\Carbon;
@@ -22,7 +23,7 @@ class LeaveService
         $fromDate = Carbon::parse($data['from_date']);
         $toDate = Carbon::parse($data['to_date']);
         $days = $fromDate->diffInDays($toDate) + 1;
-        if ($data['type'] !== Leave::TYPE_WITHOUT_PAY) {
+        if ($data['type'] !== LeaveEnumerator::TYPE_WITHOUT_PAY) {
             $availableHoursLeaveType = "available_{$data['type']}_hours";
             $remainingLeaveHours = $employee->salaryComputation->{$availableHoursLeaveType};
             $totalHoursLeave = $data['hours'] * $days;
@@ -44,7 +45,7 @@ class LeaveService
                 'date' => $fromDate,
                 'submitted_date' => $date,
                 'remarks' => $data['remarks'] ?? null,
-                'status' => Leave::PENDING,
+                'status' => LeaveEnumerator::SUBMITTED
             ]);
             array_push($leaves, $leave);
             $fromDate->addDay();

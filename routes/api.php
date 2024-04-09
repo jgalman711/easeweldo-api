@@ -20,6 +20,8 @@ use App\Http\Controllers\EmployeeVerification\SalaryDetailsVerificationControlle
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\ImportEmployeeController;
 use App\Http\Controllers\Leave\ApproveLeaveController;
+use App\Http\Controllers\Leave\DeclineLeaveController;
+use App\Http\Controllers\Leave\DiscardLeaveController;
 use App\Http\Controllers\Leave\LeaveController;
 use App\Http\Controllers\OvertimeRequestController;
 use App\Http\Controllers\PaymentMethodController;
@@ -144,7 +146,11 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['middleware' => ['role:super-admin|business-admin|approver', 'valid.company.user']], function () {
         Route::prefix('companies/{company}')->group(function () {
             Route::apiResource('leaves', LeaveController::class);
-            Route::post('leaves/{leave}/approve', ApproveLeaveController::class);
+            Route::prefix('leaves/{leave}')->group(function () {
+                Route::post('approve', ApproveLeaveController::class);
+                Route::post('decline', DeclineLeaveController::class);
+                Route::post('discard', DiscardLeaveController::class);
+            });
         });
     });
     /**
