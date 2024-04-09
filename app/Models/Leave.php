@@ -48,7 +48,6 @@ class Leave extends Model implements ApprovableModel
 
     public function onApprovalCompleted(ProcessApproval $approval): bool
     {
-        // Write logic to be executed when the approval process is completed
         return true;
     }
 }
