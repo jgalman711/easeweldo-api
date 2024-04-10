@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Enumerators\DisbursementEnumerator;
+use ErrorException;
 use Illuminate\Http\Request;
 
 class SettingsResource extends BaseResource
@@ -25,24 +26,35 @@ class SettingsResource extends BaseResource
             'leaves_convertible' => $this->leaves_convertible,
             'disbursementMethodLabel' => ucwords(str_replace('_', ' ', $this->disbursement_method)),
             'payrollConfigLabel' => [
-                'title' => ucfirst(str_replace('_', ' ', $this->period_cycle)),
+                'title' => $this->getTitle(),
                 'subtitle' => $this->getSubtitle(),
             ],
         ];
     }
 
-    private function getSubtitle(): string
+    private function getTitle(): ?string
     {
-        if ($this->period_cycle == DisbursementEnumerator::SUBTYPE_WEEKLY) {
-            $salaryDay = ucfirst($this->salary_day);
-        } else {
-            $salaryDay = $this->getOrdinal($this->salary_day[0]);
-            if (isset($this->salary_day[1])) {
-                $salaryDay .= ' and '.$this->getOrdinal($this->salary_day[1]);
-            }
+        if ($this->period_cycle) {
+            return ucfirst(str_replace('_', ' ', $this->period_cycle));
         }
+        return null;
+    }
 
-        return "Every $salaryDay";
+    private function getSubtitle(): ?string
+    {
+        try {
+            if ($this->period_cycle == DisbursementEnumerator::SUBTYPE_WEEKLY) {
+                $salaryDay = ucfirst($this->salary_day);
+            } else {
+                $salaryDay = $this->getOrdinal($this->salary_day[0]);
+                if (isset($this->salary_day[1])) {
+                    $salaryDay .= ' and '.$this->getOrdinal($this->salary_day[1]);
+                }
+            }
+            return "Every $salaryDay";
+        } catch (ErrorException) {
+            return null;
+        }
     }
 
     private function getOrdinal(int $number): string
