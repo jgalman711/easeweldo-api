@@ -32,6 +32,10 @@ class LeaveResource extends BaseResource
                 $date->format('d F Y'),
                 $date->diffForHumans()
             ],
+            'approver' => [
+                optional(optional($this->employee)->supervisor)->full_name,
+                ucwords(optional(optional($this->employee)->supervisor)->job_title)
+            ],
             'status' => $this->status,
         ];
     }

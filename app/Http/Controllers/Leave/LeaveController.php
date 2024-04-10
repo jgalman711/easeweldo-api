@@ -23,7 +23,7 @@ class LeaveController extends Controller
 
     public function index(Request $request, Company $company): JsonResponse
     {
-        $leaves = $this->applyFilters($request, $company->leaves()->with('employee.user'));
+        $leaves = $this->applyFilters($request, $company->leaves()->with('employee.user', 'employee.supervisor'));
         return $this->sendResponse(LeaveResource::collection($leaves), 'Leaves retrieved successfully.');
     }
 
