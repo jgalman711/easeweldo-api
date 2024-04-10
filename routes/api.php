@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\BiometricsController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\CompanyEmployeeController;
 use App\Http\Controllers\CompanySubscriptionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DisbursementController;
@@ -93,19 +94,17 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
      */
     Route::group(['middleware' => ['role:super-admin']], function () {
         Route::apiResource('biometrics', AdminBiometricsController::class);
+        Route::apiResource('employees', EmployeeController::class);
         Route::apiResource('companies', CompanyController::class);
         Route::apiResource('holidays', HolidayController::class);
         Route::apiResource('users', UserController::class);
-        Route::get('employees', [EmployeeController::class, 'all']);
     });
 
     Route::group(['middleware' => ['role:super-admin|business-admin', 'valid.company.user']], function () {
         Route::apiResource('companies', CompanyController::class)->only('show', 'update');
         Route::prefix('companies/{company}')->group(function () {
             Route::get('dashboard', DashboardController::class);
-
-            Route::apiResource('employees', EmployeeController::class);
-            Route::post('employees/import', ImportEmployeeController::class);
+            Route::apiResource('employees', CompanyEmployeeController::class);
 
             Route::apiResource('disbursements', DisbursementController::class)->only('store');
             Route::apiResource('periods', PeriodController::class)->except('store');

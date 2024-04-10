@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\EmployeeRequest;
-use App\Http\Resources\BaseResource;
 use App\Http\Resources\EmployeeResource;
 use App\Models\Company;
 use App\Models\Employee;
@@ -14,7 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class EmployeeController extends Controller
+class CompanyEmployeeController extends Controller
 {
     protected $employeeService;
 
@@ -110,9 +109,10 @@ class EmployeeController extends Controller
      *     @OA\Response(response="404", description="Company not found")
      * )
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, Company $company): JsonResponse
     {
-        $builder = Employee::with([
+        // Todo: must fix this circular relationship with the company
+        $builder = $company->employees()->with([
             'company',
             'user.roles',
             'salaryComputation',
@@ -191,11 +191,10 @@ class EmployeeController extends Controller
      *     @OA\Response(response="422", description="Validation errors")
      * )
      */
-    public function store(EmployeeRequest $request): JsonResponse
+    public function store(EmployeeRequest $request, Company $company): JsonResponse
     {
         try {
-            $data = $request->validated();
-            $company = Company::where('slug', $data['company_slug'])->first();
+            $request->validated();
             $employee = $this->employeeService->create($request, $company);
             return $this->sendResponse(new EmployeeResource($employee), 'Employee created successfully.');
         } catch (Exception $e) {
@@ -232,8 +231,10 @@ class EmployeeController extends Controller
      *     @OA\Response(response="404", description="Employee not found")
      * )
      */
-    public function show(Employee $employee): JsonResponse
+    public function show(Company $company, int $employeeId): JsonResponse
     {
+        $employee = $company->getEmployeeById($employeeId);
+
         if ($employee) {
             $employee->load([
                 'company',
@@ -243,9 +244,9 @@ class EmployeeController extends Controller
                     $query->latest('start_date')->limit(1);
                 }
             ]);
-            return $this->sendResponse(new EmployeeResource($employee), 'Employee retrieved successfully.');
         }
-        return $this->sendError("Employee not found.");
+
+        return $this->sendResponse(new EmployeeResource($employee), 'Employee retrieved successfully.');
     }
 
     /**
@@ -317,14 +318,15 @@ class EmployeeController extends Controller
      *     @OA\Response(response="422", description="Validation errors")
      * )
      */
-    public function update(Request $request, Employee $employee): JsonResponse
+    public function update(Request $request, Company $company, int $employeeId): JsonResponse
     {
         try {
             DB::beginTransaction();
-            $company = $employee->company;
+            $employee = $company->getEmployeeById($employeeId);
             $employee = $this->employeeService->update($request, $company, $employee);
             DB::commit();
             $this->forget($company, $employee->id);
+
             return $this->sendResponse(new EmployeeResource($employee), 'Employee updated successfully.');
         } catch (Exception $e) {
             DB::rollBack();
@@ -362,10 +364,12 @@ class EmployeeController extends Controller
      *     @OA\Response(response="404", description="Employee not found")
      * )
      */
-    public function destroy(Employee $employee): JsonResponse
+    public function destroy(Company $company, Employee $employee): JsonResponse
     {
+        $company->getEmployeeById($employee->id);
         $employee->delete();
-        $this->forget($employee->company, $employee->id);
+        $this->forget($company, $employee->id);
+
         return $this->sendResponse(new EmployeeResource($employee), 'Employee deleted successfully.');
     }
 
