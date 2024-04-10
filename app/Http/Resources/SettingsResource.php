@@ -3,7 +3,6 @@
 namespace App\Http\Resources;
 
 use App\Enumerators\DisbursementEnumerator;
-use ErrorException;
 use Illuminate\Http\Request;
 
 class SettingsResource extends BaseResource
@@ -42,7 +41,7 @@ class SettingsResource extends BaseResource
 
     private function getSubtitle(): ?string
     {
-        try {
+        if ($this->salary_day && $this->period_cycle) {
             if ($this->period_cycle == DisbursementEnumerator::SUBTYPE_WEEKLY) {
                 $salaryDay = ucfirst($this->salary_day);
             } else {
@@ -52,9 +51,8 @@ class SettingsResource extends BaseResource
                 }
             }
             return "Every $salaryDay";
-        } catch (ErrorException) {
-            return null;
         }
+        return null;
     }
 
     private function getOrdinal(int $number): string
