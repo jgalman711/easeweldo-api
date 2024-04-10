@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\BiometricsController;
+use App\Http\Controllers\CompanyApprovers;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyEmployeeController;
 use App\Http\Controllers\CompanySubscriptionController;
@@ -19,7 +20,6 @@ use App\Http\Controllers\EmployeeVerification\OtherDetailsVerificationController
 use App\Http\Controllers\EmployeeVerification\PersonalInformationVerificationController;
 use App\Http\Controllers\EmployeeVerification\SalaryDetailsVerificationController;
 use App\Http\Controllers\HolidayController;
-use App\Http\Controllers\ImportEmployeeController;
 use App\Http\Controllers\Leave\ApproveLeaveController;
 use App\Http\Controllers\Leave\DeclineLeaveController;
 use App\Http\Controllers\Leave\DiscardLeaveController;
@@ -45,7 +45,6 @@ use App\Http\Controllers\SynchBiometricsController;
 use App\Http\Controllers\TimeCorrectionController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\TimesheetUploadController;
-use App\Http\Controllers\UpdateRoleController;
 use App\Http\Controllers\User\UserChangePasswordController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserDashboardController;
@@ -103,6 +102,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['middleware' => ['role:super-admin|business-admin', 'valid.company.user']], function () {
         Route::apiResource('companies', CompanyController::class)->only('show', 'update');
         Route::prefix('companies/{company}')->group(function () {
+            Route::get('approvers', CompanyApprovers::class);
             Route::get('dashboard', DashboardController::class);
             Route::apiResource('employees', CompanyEmployeeController::class);
 
@@ -151,16 +151,13 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             });
         });
     });
-    /**
-     * @TODO
-     *
-     * Should have the business-admin middleware as well.
-     * Employee of company middleware should also check if the logged in user is the employee.
-     */
-    Route::group(['prefix' => 'companies/{company}/employees/{employee}', 'middleware' => ['valid.company.user']], function () {
+
+    Route::group([
+        'prefix' => 'companies/{company}/employees/{employee}',
+        'middleware' => ['valid.company.user']
+    ], function () {
         Route::get('dashboard', [UserDashboardController::class, 'index']);
         Route::post('clock', [TimeRecordController::class, 'clock']);
-        Route::put('update-role', UpdateRoleController::class);
         Route::apiResource('time-records', TimeRecordController::class);
         Route::apiResource('time-corrections', TimeCorrectionController::class);
         Route::apiResource('work-schedules', EmployeeScheduleController::class);
@@ -173,10 +170,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::put('salary-computation', 'update');
             Route::delete('salary-computation', 'delete');
         });
-
-        // Needs deletion
-        Route::put('change-password', [UserChangePasswordController::class, 'update']);
-        Route::put('reset-temporary-password', [UserTemporaryPasswordResetController::class, 'update']);
 
         // QR - START
         Route::get('qrcode', [EmployeeQrController::class, 'index']);
