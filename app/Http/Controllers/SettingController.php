@@ -31,8 +31,11 @@ class SettingController extends Controller
             ['company_id' => $company->id],
             $input
         );
-        $this->periodService->convertSalaryDayToDate($settings->salary_day, $settings->period_cycle);
 
-        return $this->sendResponse(new BaseResource($settings), 'Company settings updated successfully.');
+        if ($settings->salary_day && $settings->period_cycle) {
+            $this->periodService->convertSalaryDayToDate($settings->salary_day, $settings->period_cycle);
+        }
+
+        return $this->sendResponse(new SettingsResource($settings), 'Company settings updated successfully.');
     }
 }
