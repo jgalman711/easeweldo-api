@@ -16,6 +16,7 @@ class EmployeeRequest extends BaseRequest
                 Rule::exists('users', 'id')->whereNull('deleted_at'),
             ],
             'company_slug' => $this->isRequired(),
+            'supervisor_id' => self::NULLABLE_NUMERIC,
             'first_name' => self::REQUIRED_STRING,
             'last_name' => self::REQUIRED_STRING,
             'employee_number' => self::NULLABLE_STRING,

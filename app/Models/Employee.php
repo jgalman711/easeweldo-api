@@ -73,6 +73,7 @@ class Employee extends Model
         'user_id',
         'company_id',
         'company_employee_id',
+        'supervisor_id',
         'employee_number',
         'department',
         'job_title',
@@ -109,6 +110,16 @@ class Employee extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function supervisor(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'supervisor_id');
+    }
+
+    public function supervisedEmployees(): HasMany
+    {
+        return $this->hasMany(Employee::class, 'supervisor_id');
     }
 
     public function payrolls(): HasMany

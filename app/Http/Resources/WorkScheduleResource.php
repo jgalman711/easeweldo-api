@@ -19,7 +19,7 @@ class WorkScheduleResource extends BaseResource
     public function toArray(Request $request): array
     {
         if ($request->format == 'tabular') {
-            $schedule = $this->formatAdminView();
+            $schedule = $this->formatTabular();
         } else {
             $schedule = $this->formatDefault();
         }
@@ -41,7 +41,7 @@ class WorkScheduleResource extends BaseResource
         return $schedule;
     }
 
-    private function formatAdminView()
+    private function formatTabular()
     {
         $schedule = [
             'id' => $this->id,

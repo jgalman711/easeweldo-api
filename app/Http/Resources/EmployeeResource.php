@@ -17,6 +17,7 @@ class EmployeeResource extends JsonResource
             'id' => $this->id,
             'company' => $this->company->name,
             'company_slug' => $this->company->slug,
+            'supervisor' => optional($this->supervisor)->full_name,
             'department' => ucwords($this->department),
             'job_title' => ucwords($this->job_title),
             'employment_status' => ucwords($this->employment_status),

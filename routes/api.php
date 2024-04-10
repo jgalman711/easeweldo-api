@@ -158,7 +158,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
      * Employee of company middleware should also check if the logged in user is the employee.
      */
     Route::group(['prefix' => 'companies/{company}/employees/{employee}', 'middleware' => ['valid.company.user']], function () {
-        Route::get('/', [EmployeeController::class, 'show']);
         Route::get('dashboard', [UserDashboardController::class, 'index']);
         Route::post('clock', [TimeRecordController::class, 'clock']);
         Route::put('update-role', UpdateRoleController::class);
