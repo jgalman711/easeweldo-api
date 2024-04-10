@@ -22,7 +22,6 @@ class SubmittedState extends BaseState
             'status' => LeaveEnumerator::APPROVED,
             'remarks' => $reason
         ]);
-
         $this->leave->load('employee.salaryComputation');
         $salaryComputation = $this->leave->employee->salaryComputation;
         if ($this->leave->type == LeaveEnumerator::TYPE_SICK_LEAVE) {
@@ -31,7 +30,6 @@ class SubmittedState extends BaseState
             $salaryComputation->available_vacation_leave_hours -= $this->leave->hours;
         }
         $salaryComputation->save();
-
         $this->leave->approve($reason, $this->user);
     }
 

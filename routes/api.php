@@ -23,7 +23,6 @@ use App\Http\Controllers\Leave\ApproveLeaveController;
 use App\Http\Controllers\Leave\DeclineLeaveController;
 use App\Http\Controllers\Leave\DiscardLeaveController;
 use App\Http\Controllers\Leave\LeaveController;
-use App\Http\Controllers\OvertimeRequestController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\Payroll\CancelPayrollController;
 use App\Http\Controllers\Payroll\PayPayrollController;
@@ -119,21 +118,21 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('payrolls/{payroll}/pay', PayPayrollController::class);
             Route::post('payrolls/{payroll}/cancel', CancelPayrollController::class);
 
-            Route::apiResource('subscriptions', CompanySubscriptionController::class);
-            Route::apiResource('work-schedules', WorkScheduleController::class);
-
+            Route::apiResource('banks', BankController::class)->only('index', 'store');
             Route::apiResource('reports', ReportController::class)->only('show');
             Route::apiResource('settings', SettingController::class)->only('index', 'store');
-            Route::apiResource('banks', BankController::class)->only('index', 'store');
+            Route::apiResource('subscriptions', CompanySubscriptionController::class);
+            Route::apiResource('work-schedules', WorkScheduleController::class);
 
             //Verify
             Route::post('timesheet/upload', [TimesheetUploadController::class, 'store']);
             Route::post('synch-biometrics/{module}/', [SynchBiometricsController::class, 'store']);
             Route::apiResource('biometrics', BiometricsController::class);
-            Route::apiResource('overtime-requests', OvertimeRequestController::class);
             Route::get('qrcode', [CompanyQrController::class, 'index']);
             //
 
+            // can use precognition instead for the validation of information
+            // in the employee creation
             Route::prefix('verification')->group(function () {
                 Route::post('personal-information', PersonalInformationVerificationController::class);
                 Route::post('employee-details', EmploymentDetailsVerificationController::class);
