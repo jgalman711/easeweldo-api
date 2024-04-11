@@ -19,10 +19,7 @@ class UserService
 
     public function create(Company $company, array $userData): User
     {
-        $username = $this->generateUniqueUsername($company, $userData['first_name'], $userData['last_name']);
         [$temporaryPassword, $temporaryPasswordExpiresAt] = $this->generateTemporaryPassword();
-
-        $userData['username'] = $username;
         $userData['password'] = bcrypt($temporaryPassword);
         $userData['temporary_password'] = $temporaryPassword;
         $userData['temporary_password_expires_at'] = $temporaryPasswordExpiresAt;
