@@ -102,7 +102,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['middleware' => ['role:super-admin|business-admin', 'valid.company.user']], function () {
         Route::apiResource('companies', CompanyController::class)->only('show', 'update');
         Route::prefix('companies/{company}')->group(function () {
-            Route::get('approvers', CompanyApprovers::class);
+            Route::apiResource('approvers', CompanyApprovers::class);
             Route::get('dashboard', DashboardController::class);
             Route::apiResource('employees', CompanyEmployeeController::class);
 

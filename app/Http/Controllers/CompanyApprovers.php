@@ -2,17 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\BaseResource;
 use App\Http\Resources\EmployeeResource;
 use App\Models\Company;
-use App\Models\User;
+use Illuminate\Http\Request;
 
 class CompanyApprovers extends Controller
 {
-    public function __invoke(Company $company)
+    public function index(Company $company)
     {
-        $all_users_with_all_their_roles = User::role('leave-approver')->get();
+        $users = $company->users()->role('approver')->get();
+        return $this->sendResponse(BaseResource::collection($users), "Approvers retrieved successfully.");
+    }
 
-        dd($all_users_with_all_their_roles);
-        return $this->sendResponse(EmployeeResource::collection($employees), 'Company approvers retrieved successfully.');
+    public function store(Request $request, Company $company)
+    {
+        $employee = $company->employees()->with('user')->findOrFail($request->employee_id);
+        $employee->user->assignRole('approver');
+        return $this->sendResponse(new EmployeeResource($employee), "Employee updated role successfully. ");
     }
 }
