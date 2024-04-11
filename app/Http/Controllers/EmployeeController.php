@@ -97,6 +97,7 @@ class EmployeeController extends Controller
 
     public function destroy(Employee $employee): JsonResponse
     {
+        $employee->user->delete();
         $employee->delete();
         $this->forget($employee->company, $employee->id);
         return $this->sendResponse(new EmployeeResource($employee), 'Employee deleted successfully.');

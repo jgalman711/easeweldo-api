@@ -100,7 +100,7 @@ class CompanyEmployeeController extends Controller
 
     public function destroy(Company $company, Employee $employee): JsonResponse
     {
-        $company->getEmployeeById($employee->id);
+        $employee->user->delete();
         $employee->delete();
         $this->forget($company, $employee->id);
 

@@ -33,7 +33,7 @@ class EmployeeService
             $input['company_employee_id'] = $this->generateCompanyEmployeeId($company);
             $input['status'] = Employee::ACTIVE;
             if (isset($input['profile_picture']) && $input['profile_picture']) {
-                $filename = time().'.'.$request->profile_picture->extension();
+                $filename = time() . '.' . $request->profile_picture->extension();
                 $request->profile_picture->storeAs($this->employeeUploadPath, $filename);
                 $input['profile_picture'] = $filename;
             }
@@ -44,7 +44,6 @@ class EmployeeService
             DB::rollback();
             throw $e;
         }
-
         return $employee;
     }
 
