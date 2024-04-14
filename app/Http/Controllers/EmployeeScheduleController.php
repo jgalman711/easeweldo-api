@@ -21,73 +21,6 @@ class EmployeeScheduleController extends Controller
         $this->setCacheIdentifier('employee-schedules');
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/companies/{company-slug}/employees/{employee-id}/work-schedules",
-     *     summary="List Employee Schedules",
-     *     security={{"bearerAuth":{}}},
-     *     tags={"Employee Schedules"},
-     *
-     *     @OA\Parameter(
-     *         name="company-slug",
-     *         in="path",
-     *         required=true,
-     *         description="Slug of the company",
-     *
-     *         @OA\Schema(type="string")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="employee-id",
-     *         in="path",
-     *         required=true,
-     *         description="ID of the employee",
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="page",
-     *         in="query",
-     *         description="Page number for pagination",
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="per_page",
-     *         in="query",
-     *         description="Number of items per page",
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="sort",
-     *         in="query",
-     *         description="Sort order (e.g., name)",
-     *
-     *         @OA\Schema(type="string")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="search",
-     *         in="query",
-     *         description="Search term",
-     *
-     *         @OA\Schema(type="string")
-     *     ),
-     *
-     *     @OA\Response(
-     *         response="200",
-     *         description="Employee Schedules retrieved successfully"
-     *     ),
-     *     @OA\Response(
-     *         response="404",
-     *         description="No employee schedules found"
-     *     )
-     * )
-     */
     public function index(Request $request, Company $company, Employee $employee)
     {
         try {
@@ -108,84 +41,6 @@ class EmployeeScheduleController extends Controller
         }
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/companies/{company-slug}/employees/{employee-id}/work-schedules",
-     *     summary="Create Employee Schedule",
-     *     security={{"bearerAuth":{}}},
-     *     tags={"Employee Schedules"},
-     *
-     *     @OA\Parameter(
-     *         name="company-slug",
-     *         in="path",
-     *         required=true,
-     *         description="Slug of the company",
-     *
-     *         @OA\Schema(type="string")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="employee-id",
-     *         in="path",
-     *         required=true,
-     *         description="ID of the employee",
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *
-     *         @OA\JsonContent(
-     *
-     *             @OA\Property(
-     *                  property="work_schedule_id",
-     *                  type="integer",
-     *                  description="ID of the work schedule",
-     *                  example="123"
-     *             ),
-     *             @OA\Property(
-     *                  property="start_date",
-     *                  type="string",
-     *                  format="date",
-     *                  description="Start date of the schedule",
-     *                  example="2024-01-15"
-     *             )
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response="200",
-     *         description="Employee Schedule created successfully",
-     *
-     *         @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Employee Schedule created successfully."),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="work_schedule_id", type="integer", example=123),
-     *                 @OA\Property(property="start_date", type="string", format="date", example="2024-01-15"),
-     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2024-01-15T12:00:00Z")
-     *             )
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response="422",
-     *         description="Validation errors",
-     *
-     *         @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="The given data was invalid.")
-     *         )
-     *     )
-     * )
-     */
     public function store(EmployeeScheduleRequest $request, Company $company, int $employeeId): JsonResponse
     {
         try {
@@ -202,77 +57,6 @@ class EmployeeScheduleController extends Controller
         }
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/companies/{company-slug}/employees/{employee-id}/work-schedules/{schedule-id}",
-     *     summary="Get Employee Schedule",
-     *     security={{"bearerAuth":{}}},
-     *     tags={"Employee Schedules"},
-     *
-     *     @OA\Parameter(
-     *         name="company-slug",
-     *         in="path",
-     *         required=true,
-     *         description="Slug of the company",
-     *
-     *         @OA\Schema(type="string")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="employee-id",
-     *         in="path",
-     *         required=true,
-     *         description="ID of the employee",
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="schedule-id",
-     *         in="path",
-     *         required=true,
-     *         description="ID of the employee schedule or 'latest' to get the latest schedule",
-     *
-     *         @OA\Schema(type="string", default="latest"),
-     *     ),
-     *
-     *     @OA\Response(
-     *         response="200",
-     *         description="Employee Schedule retrieved successfully",
-     *
-     *         @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Employee Schedule retrieved successfully."),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="work_schedule_id", type="integer", example=123),
-     *                 @OA\Property(property="start_date", type="string", format="date", example="2024-01-15"),
-     *                 @OA\Property(
-     *                      property="created_at",
-     *                      type="string",
-     *                      format="date-time",
-     *                      example="2024-01-15T12:00:00Z"
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response="404",
-     *         description="Employee Schedule not found",
-     *
-     *         @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Employee Schedule not found.")
-     *         )
-     *     )
-     * )
-     */
     public function show(Company $company, Employee $employee, $employeeSchedule): JsonResponse
     {
         try {
@@ -298,65 +82,25 @@ class EmployeeScheduleController extends Controller
         }
     }
 
-    /**
-     * @OA\Delete(
-     *     path="/api/companies/{company-slug}/employees/{employee-id}/work-schedules/{schedule-id}",
-     *     summary="Delete Employee Schedule",
-     *     security={{"bearerAuth":{}}},
-     *     tags={"Employee Schedules"},
-     *
-     *     @OA\Parameter(
-     *         name="company-slug",
-     *         in="path",
-     *         required=true,
-     *         description="Slug of the company",
-     *
-     *         @OA\Schema(type="string")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="employee-id",
-     *         in="path",
-     *         required=true,
-     *         description="ID of the employee",
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="schedule-id",
-     *         in="path",
-     *         required=true,
-     *         description="ID of the employee schedule",
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
-     *
-     *     @OA\Response(
-     *         response="200",
-     *         description="Employee Schedule deleted successfully",
-     *
-     *         @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Employee Schedule deleted successfully.")
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response="404",
-     *         description="Employee Schedule not found",
-     *
-     *         @OA\JsonContent(
-     *             type="object",
-     *
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Employee Schedule not found.")
-     *         )
-     *     )
-     * )
-     */
+    public function update(
+        EmployeeScheduleRequest $request,
+        Company $company,
+        Employee $employee,
+        int $employeeScheduleId
+    ): JsonResponse {
+        try {
+            $input = $request->validated();
+            $employeeSchedule = $employee->employeeSchedules()->findOrFail($employeeScheduleId);
+            $employeeSchedule->update($input);
+            return $this->sendResponse(
+                new EmployeeScheduleResource($employeeSchedule),
+                'Employee schedule updated successfully.'
+            );
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
+    }
+
     public function destroy(Company $company, Employee $employee, int $employeeScheduleId): JsonResponse
     {
         try {
