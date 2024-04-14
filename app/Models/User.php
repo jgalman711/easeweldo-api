@@ -58,13 +58,18 @@ class User extends Authenticatable
         return $this->hasOne(Employee::class);
     }
 
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new PasswordReset($this, $token));
+    }
+
     public function getEmailAttribute(): ?string
     {
         return $this->email_address;
     }
 
-    public function sendPasswordResetNotification($token)
+    public function getFullNameAttribute(): string
     {
-        $this->notify(new PasswordReset($this, $token));
+        return ucfirst($this->first_name) . ' ' . ucfirst($this->last_name);
     }
 }
