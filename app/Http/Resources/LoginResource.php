@@ -2,12 +2,14 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Company;
 use Illuminate\Http\Request;
 
 class LoginResource extends BaseResource
 {
     public function toArray(Request $request): array
     {
+        $companies = $this->hasRole('super-admin') ? Company::with('setting')->get() : $this->companies;
         return [
             'token' => $this->token,
             'username' => $this->username,
@@ -17,9 +19,9 @@ class LoginResource extends BaseResource
             'email' => $this->email_address,
             'email_address' => $this->email_address,
             'email_verified_at' => $this->email_verified_at,
-            'companies' => CompanyResource::collection($this->companies),
+            'companies' => CompanyResource::collection($companies),
             'employee' => new EmployeeResource($this->employee),
-            'roles' => $this->roles,
+            'roles' => $this->roles->pluck('name'),
         ];
     }
 }
