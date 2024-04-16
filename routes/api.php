@@ -16,7 +16,6 @@ use App\Http\Controllers\DisbursementController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeScheduleController;
 use App\Http\Controllers\EmployeeVerification\EmploymentDetailsVerificationController;
-use App\Http\Controllers\EmployeeVerification\OtherDetailsVerificationController;
 use App\Http\Controllers\EmployeeVerification\PersonalInformationVerificationController;
 use App\Http\Controllers\EmployeeVerification\SalaryDetailsVerificationController;
 use App\Http\Controllers\HolidayController;
@@ -136,7 +135,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
                 Route::post('personal-information', PersonalInformationVerificationController::class);
                 Route::post('employee-details', EmploymentDetailsVerificationController::class);
                 Route::post('salary-details', SalaryDetailsVerificationController::class);
-                Route::post('other-details', OtherDetailsVerificationController::class);
             });
         });
     });
