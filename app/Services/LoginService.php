@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Company;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -28,15 +27,6 @@ class LoginService
                 'roles',
             ]);
             $user->token = $user->createToken(env('APP_NAME'))->plainTextToken;
-            if ($user->hasRole('super-admin')) {
-                return $user;
-            }
-
-            $company = $user->companies->first();
-            throw_if($company->status == Company::STATUS_PENDING, new Exception(
-                'Your registration is currently pending review. You will receive an email notification once the review process is complete.'
-            ));
-
             return $user;
         } else {
             throw new Exception('Incorrect email or password.');

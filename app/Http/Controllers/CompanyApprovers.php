@@ -21,14 +21,12 @@ class CompanyApprovers extends Controller
         try {
             $user = $company->users()->findOrFail($request->user_id);
             if ($request->has('role_name') && $request->role_name) {
-                $user->assignRole('approver');
+                $user->syncRoles('approver');
             } else {
-                foreach ($user->roles as $role) {
-                    $user->removeRole($role);
-                }
+                $user->roles()->detach();
             }
             return $this->sendResponse(new UserResource($user), "User role updated successfully.");
-        } catch (Exception $_ENV) {
+        } catch (Exception) {
             return $this->sendError("Unable to update role.");
         }
     }
