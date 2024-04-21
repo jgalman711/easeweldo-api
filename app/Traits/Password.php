@@ -6,11 +6,8 @@ use Illuminate\Support\Str;
 
 trait Password
 {
-    public function generateTemporaryPassword(): array
+    public function generateTemporaryPassword(): string
     {
-        return [
-            Str::random(6),
-            now()->addMinutes(60),
-        ];
+        return strtoupper(Str::random(6));
     }
 }

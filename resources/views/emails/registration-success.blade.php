@@ -1,58 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        /* Add some basic styling for the email */
-        body {
-            font-family: sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            padding: 20px;
-            border: 1px solid #e0e0e0;
-            border-top: 5px solid #007bff;
-        }
-        .header {
-            text-align: center;
-            margin-top: 10px;
-            margin-bottom: 10px;
+@extends('emails.layout')
 
-        }
-        .logo {
-            max-width: 250px;
-        }
-        .thank-you {
-            margin-top: 20px;
-            font-size: 18px;
-            text-align: center;
-        }
-        .subscription-summary {
-            margin-top: 30px;
-            font-size: 16px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <img class="logo" src="{{ env('AUTH_APP_URL') }}/assets/images/easeweldo-logo.png" alt="Easeweldo Logo">
+@section('title', $title)
+
+@section('content')
+    <p>
+        Dear {{ $user->first_name }},<br><br>
+
+        Welcome to the team! We’re thrilled to have you at {{ $company->name }}. We know you’re going to be a valuable asset to our company and can’t wait to see what you accomplish.<br><br><br>
+    </p>
+    <div style="text-align: center; padding: 10px;">
+        <p>Your temporary password:</p>
+        <div style="text-align: center; background-color: #f4f4f4; padding: 10px; display: inline-block;">
+            <p style="margin:0; font-size: 24px; font-weight: bold;">{{ $temporaryPassword }}</p>
         </div>
-        <div class="thank-you">
-            <h1>Thank You for Joining Us!</h1>
-            <p>We are delighted to welcome you to Easeweldo!</p>
-        </div>
-        <div style="text-align: center; padding: 10px;">
-            <p>Your temporary password:</p>
-            <div style="text-align: center; background-color: #f4f4f4; padding: 10px; display: inline-block;">
-                <p style="margin:0; font-size: 24px; font-weight: bold;">{{ $temporaryPassword }}</p>
-            </div>
-            <p style="font-size: 12px; color: #777;">This password is valid for 1 hour. Please go to your profile and change it upon login.</p>
-        </div>
+        <p style="font-size: 12px; color: #777;">This password is valid for 1 hour. Please go to your profile and change it upon login.</p>
     </div>
-</body>
-</html>
+@endsection

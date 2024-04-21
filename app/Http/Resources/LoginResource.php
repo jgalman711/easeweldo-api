@@ -21,7 +21,7 @@ class LoginResource extends BaseResource
             'email_verified_at' => $this->email_verified_at,
             'companies' => CompanyResource::collection($companies),
             'employee' => new EmployeeResource($this->employee),
-            'role' => $this->roles->first()->name,
+            'role' => optional($this->roles->first())->name,
         ];
     }
 }

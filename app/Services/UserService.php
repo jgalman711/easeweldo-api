@@ -19,16 +19,16 @@ class UserService
 
     public function create(Company $company, array $userData): User
     {
-        [$temporaryPassword, $temporaryPasswordExpiresAt] = $this->generateTemporaryPassword();
+        $temporaryPassword = $this->generateTemporaryPassword();
         $userData['password'] = bcrypt($temporaryPassword);
         $userData['temporary_password'] = $temporaryPassword;
-        $userData['temporary_password_expires_at'] = $temporaryPasswordExpiresAt;
+        $userData['temporary_password_expires_at'] = now()->addMinutes(60);
 
         $user = User::create($userData);
         $user->temporary_password = $temporaryPassword;
 
         try {
-            Mail::to($user->email_address)->send(new UserRegistered($user));
+            Mail::to($user->email_address)->send(new UserRegistered($company, $user));
         } catch (Exception $e) {
             Log::error($e->getMessage());
         }
