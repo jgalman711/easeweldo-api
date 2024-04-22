@@ -103,7 +103,7 @@ class EmployeeRequest extends BaseRequest
             'bank_account_name' => self::NULLABLE_STRING,
             'bank_account_number' => self::NULLABLE_STRING,
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'is_admin' => 'nullable|boolean',
+            'role' => 'nullable|exists:roles,name'
         ];
     }
 

@@ -9,13 +9,10 @@ use App\Traits\Password;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Spatie\Permission\Models\Role;
 
 class UserService
 {
     use Password;
-
-    private const BUSINESS_ADMIN_ROLE = 'business-admin';
 
     public function create(Company $company, array $userData): User
     {
@@ -32,9 +29,9 @@ class UserService
         } catch (Exception $e) {
             Log::error($e->getMessage());
         }
-        if ($this->isRoleBusinessAdmin($userData)) {
-            $role = Role::where('name', self::BUSINESS_ADMIN_ROLE)->first();
-            $user->assignRole($role);
+
+        if (isset($userData['role']) && $userData['role']) {
+            $user->syncRoles($userData['role']);
         }
         $company->users()->attach($user->id);
 
@@ -69,10 +66,5 @@ class UserService
         throw_if($user->employee, new Exception('User is already linked to employee'));
 
         return $user;
-    }
-
-    private function isRoleBusinessAdmin($data): bool
-    {
-        return isset($data['role']) && $data['role'] == self::BUSINESS_ADMIN_ROLE;
     }
 }
