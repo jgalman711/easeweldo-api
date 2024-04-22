@@ -35,6 +35,7 @@ class EmployeeDetailsRequest extends BaseRequest
                     }
                 },
             ],
+            'role_name' => 'nullable|exists:roles,name'
         ];
     }
 

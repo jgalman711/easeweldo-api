@@ -43,13 +43,11 @@ class BaseRequest extends FormRequest
         return true;
     }
 
-    protected $message = "Sorry, we couldn't process your request due to invalid data.";
-
     protected function failedValidation(Validator $validator)
     {
         $response = [
             'success' => false,
-            'message' => $this->message,
+            'message' => "An error occurred while processing your request.",
             'errors' => $validator->errors(),
         ];
 
