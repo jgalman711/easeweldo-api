@@ -77,7 +77,7 @@ Route::post('login', [AuthController::class, 'login']);
 Route::post('personal/login', [PersonalLoginController::class, 'login']);
 Route::post('reset-password', [PasswordResetController::class, 'reset'])->name('password.reset');
 Route::get('reset-password', [PasswordResetController::class, 'index']);
-Route::post('forgot-password', [ForgotPasswordController::class, 'forgot']);
+Route::post('forgot-password', ForgotPasswordController::class);
 
 Route::apiResource('/subscriptions', SubscriptionController::class)->only('index', 'show');
 Route::apiResource('/subscription-prices', SubscriptionPricesController::class)->only('index');

@@ -25,15 +25,20 @@
         .center {
             text-align: center;
         }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-    <img src="{{ asset('uploads/companies/images/' . $company->logo) }}" alt="{{ $company->name }}" class="logo">
+        <img src="{{ asset('images/logo.png') }}" alt="Easeweldo" class="logo">
         @yield('content')
-        <hr>
-        <p class="bold center">{{ $company->name }}</p>
-        <p class="center">{{ $company->address_line }} {{ $company->barangay_town_city_province }} </p>
     </div>
 </body>
 </html>
