@@ -16,21 +16,7 @@ use Illuminate\Support\Str;
 
 class PasswordResetController extends Controller
 {
-    public const INVALID_TOKEN_MESSAGE = 'Token is invalid.';
-
-    public function index(Request $request): JsonResponse
-    {
-        $token = DB::table('password_reset_tokens')
-            ->where('email', $request->email_address)
-            ->first();
-        if ($token) {
-            return $this->sendResponse($token, 'Reset password token retrieved successfullly.');
-        }
-
-        return $this->sendError(self::INVALID_TOKEN_MESSAGE);
-    }
-
-    public function reset(PasswordResetRequest $request): JsonResponse
+    public function __invoke(PasswordResetRequest $request): JsonResponse
     {
         $status = Password::reset(
             $request->only('email_address', 'password', 'password_confirmation', 'token'),
@@ -44,10 +30,10 @@ class PasswordResetController extends Controller
         );
 
         if ($status === Password::PASSWORD_RESET) {
-            $response = $this->sendResponse($status, 'Password reset successfully.');
+            $response = $this->sendMessage('Password reset successfully.');
         } elseif ($status === Password::INVALID_TOKEN) {
             Log::info($status);
-            $response = $this->sendError(self::INVALID_TOKEN_MESSAGE);
+            $response = $this->sendError('Token is invalid.');
         } else {
             Log::info($status);
             $response = $this->sendError('Unable to reset password.');
