@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('leaves', function (Blueprint $table) {
             if (!Schema::hasColumn('leaves', 'title')) {
-                $table->string('title')->nullable()->after('remarks');
+                $table->string('title')->nullable()->after('created_by');
             }
         });
     }
