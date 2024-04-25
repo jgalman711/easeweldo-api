@@ -208,23 +208,25 @@ class PeriodService
     public function generateDashboardDetails(Company $company): array
     {
         $period = $this->getCurrentPeriod($company);
-        throw_unless($period, new Exception('No period found. Please contact the administrator.'));
-        $formattedStartDate = Carbon::parse($period->start_date)->isoFormat('MMM D');
-        $formattedEndDate = Carbon::parse($period->end_date)->isoFormat('MMM D');
-        $previousPeriod = Period::where('company_period_id', $period->company_period_id - 1)->first();
-        if ($previousPeriod && $previousPeriod->payrollCost > 0) {
-            $diff = round(
-                ($period->payrollCost - $previousPeriod->payrollCost) / $previousPeriod->payrollCost * 100, 2
-            );
+        if ($period) {
+            $formattedStartDate = Carbon::parse($period->start_date)->isoFormat('MMM D');
+            $formattedEndDate = Carbon::parse($period->end_date)->isoFormat('MMM D');
+            $previousPeriod = Period::where('company_period_id', $period->company_period_id - 1)->first();
+            if ($previousPeriod && $previousPeriod->payrollCost > 0) {
+                $diff = round(
+                    ($period->payrollCost - $previousPeriod->payrollCost) / $previousPeriod->payrollCost * 100, 2
+                );
+            }
+    
+            return [
+                'payroll_cost' => number_format($period->payrollCost, 2),
+                'pay_date' => Carbon::parse($period->salary_date)->isoFormat('MMM D'),
+                'period' => "Period $period->company_period_id: $formattedStartDate - $formattedEndDate",
+                'status' => $period->status,
+                'difference' => $diff ?? 0,
+            ];
         }
-
-        return [
-            'payroll_cost' => number_format($period->payrollCost, 2),
-            'pay_date' => Carbon::parse($period->salary_date)->isoFormat('MMM D'),
-            'period' => "Period $period->company_period_id: $formattedStartDate - $formattedEndDate",
-            'status' => $period->status,
-            'difference' => $diff ?? 0,
-        ];
+        return null;
     }
 
     private function salaryDayMonthly(int $salaryDay): DateTime

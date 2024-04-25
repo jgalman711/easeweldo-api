@@ -48,7 +48,7 @@ class EmployeeResource extends JsonResource
             'bank_name' => $this->bank_name,
             'bank_account_name' => $this->bank_account_name,
             'bank_account_number' => $this->bank_account_number,
-            'role' => optional(optional($this->user)->roles->first())->name,
+            'role' => optional(optional(optional($this->user)->roles)->first())->name,
             'work_schedule_start_date' => optional($latestSchedule)->start_date,
             'work_schedule_name' => optional(optional($latestSchedule)->workSchedule)->name,
             'salary_package' => $this->getSalaryPackage(),

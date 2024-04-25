@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\PeriodResource;
 use App\Models\Company;
 use App\Services\CompanyAttendanceService;
 use App\Services\EmployeeService;
 use App\Services\PeriodService;
+use Illuminate\Http\JsonResponse;
 
 class DashboardController extends Controller
 {
@@ -25,16 +27,17 @@ class DashboardController extends Controller
         $this->periodService = $periodService;
     }
 
-    public function __invoke(Company $company)
+    public function __invoke(Company $company): JsonResponse
     {
         $employees = $this->employeeService->generateDashboardDetails($company);
         $period = $this->periodService->generateDashboardDetails($company);
         $attendance = $this->companyAttendanceService->getAttendanceSummaryByWeek($company);
-
-        return [
+        $latestDisbursements = $company->getCompletedRegularDisbursements(6);
+        return $this->sendResponse([
             ...$period,
             ...$employees,
             'attendance_summary' => $attendance,
-        ];
+            'disbursement_history' => PeriodResource::collection($latestDisbursements)
+        ], 'Dashboard data retrieved successfully.');
     }
 }
