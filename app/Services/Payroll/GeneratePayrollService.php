@@ -283,7 +283,7 @@ class GeneratePayrollService
             ->compute($this->payroll->gross_income);
         $this->payroll->withheld_tax = $this->contributionsService
             ->taxCalculatorService
-            ->compute($this->payroll->gross_income, $this->period->type);
+            ->compute($this->payroll->taxable_income, $this->period->subtype);
     }
 
     private function generatePayrollNumber(): string

@@ -104,7 +104,7 @@ class DetailsPayrollResource extends BaseResource
                 foreach ($typeLeaves as $leave) {
                     array_push($earnings, [
                         'label' => ucwords(str_replace('_', ' ', $type))." ({$leave['date']})",
-                        'rate' => $leave['rate'],
+                        'rate' => $leave['rate'] ?? number_format(1, 2),
                         'hours' => $leave['hours'],
                         'amount' => number_format($leave['amount'] ?? $leave['pay'] ?? 0, 2),
                     ]);
@@ -154,19 +154,19 @@ class DetailsPayrollResource extends BaseResource
         return [
             [
                 'label' => 'SSS Contributions',
-                'amount' => $this->sss_contributions,
+                'amount' => number_format($this->sss_contributions, 2),
             ],
             [
                 'label' => 'PhilHealth Contributions',
-                'amount' => $this->philhealth_contributions,
+                'amount' => number_format($this->philhealth_contributions, 2),
             ],
             [
                 'label' => 'PagIbig Contributions',
-                'amount' => $this->pagibig_contributions,
+                'amount' => number_format($this->pagibig_contributions, 2),
             ],
             [
                 'label' => 'Withheld Tax',
-                'amount' => $this->withheld_tax,
+                'amount' => number_format($this->withheld_tax, 2),
             ],
         ];
     }
