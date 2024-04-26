@@ -40,7 +40,6 @@ class PayrollEnumerator
     ];
 
     public const FORMAT_DEFAULT = 'default';
-
     public const FORMAT_DETAILS = 'details';
 
     public const ATTENDANCE_EARNINGS_TYPES = [
@@ -51,10 +50,10 @@ class PayrollEnumerator
     ];
 
     public const ABSENT = 'absent';
-
     public const LATE = 'late';
-
     public const UNDERTIME = 'undertime';
-
     public const OVERTIME = 'overtime';
+
+    public const ERROR_NO_SALARY_DATA = 'No salary data found.';
+    public const ERROR_NO_COMPANY_SETTINGS = 'No company settings found.';
 }

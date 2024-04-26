@@ -32,7 +32,6 @@ class GeneratePayrollsController extends Controller
                 }
             }
             $period->save();
-
             return $this->sendResponse($payrolls, 'Payrolls generated successfully.');
         } else {
             return $this->sendError('Period already generated payrolls.');

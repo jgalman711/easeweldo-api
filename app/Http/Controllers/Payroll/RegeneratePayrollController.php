@@ -25,15 +25,11 @@ class RegeneratePayrollController extends Controller
         try {
             if ($payroll->status !== PayrollEnumerator::STATUS_PAID) {
                 $payroll = $this->regeneratePayrollService->regenerate($payroll);
-
                 return $this->sendResponse(new BasePayrollResource($payroll), 'Payroll regenerated successfully.');
             } else {
                 return $this->sendError('Payroll regeneration failed. Payroll is already paid.');
             }
         } catch (Exception $e) {
-            $payroll->status = PayrollEnumerator::STATUS_FAILED;
-            $payroll->save();
-
             return $this->sendError('Payroll regeneration failed.', $e->getMessage());
         }
     }
