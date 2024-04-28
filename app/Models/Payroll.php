@@ -129,7 +129,7 @@ class Payroll extends Model
 
     public function getTotalDeductionsAttribute(): float
     {
-        return $this->total_other_deductions + $this->total_attendance_deductions;
+        return $this->total_other_deductions + $this->total_attendance_deductions + $this->withheld_tax;
     }
 
     public function getGrossIncomeAttribute(): float
@@ -141,8 +141,7 @@ class Payroll extends Model
             $this->total_attendance_earnings +
             $this->total_non_taxable_earnings +
             $this->total_taxable_earnings -
-            $this->total_attendance_deductions -
-            $this->total_other_deductions;
+            $this->total_attendance_deductions;
 
         return max(0, $grossIncome);
     }

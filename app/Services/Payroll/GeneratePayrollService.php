@@ -56,6 +56,7 @@ class GeneratePayrollService
             DB::beginTransaction();
             $this->calculateBasicSalary();
             $this->calculateEarnings();
+            $this->calculateDeductions();
             $this->calculateHoliday();
             $this->calculateAttendanceEarnings();
             $this->calculateLeaves();
@@ -123,6 +124,11 @@ class GeneratePayrollService
     {
         $this->payroll->taxable_earnings = $this->salaryComputation->taxable_earnings;
         $this->payroll->non_taxable_earnings = $this->salaryComputation->non_taxable_earnings;
+    }
+
+    protected function calculateDeductions(): void
+    {
+        $this->payroll->other_deductions = $this->salaryComputation->other_deductions;
     }
 
     protected function calculateAttendanceEarnings(): void

@@ -17,6 +17,7 @@ class RegeneratePayrollService extends GeneratePayrollService
             $this->initByPayroll($payroll);
             DB::beginTransaction();
             $this->calculateEarnings();
+            $this->calculateDeductions();
             $this->calculateHoliday();
             $this->calculateLeaves();
             $this->calculateContributions();

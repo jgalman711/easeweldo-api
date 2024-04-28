@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Payroll;
 
+use App\Helpers\NumberHelper;
 use App\Http\Resources\BaseResource;
 use Exception;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class DefaultPayrollResource extends BaseResource
                 'status' => $this->status,
                 'description' => $this->description,
                 'pay_date' => $this->pay_date ? $this->formatDate($this->pay_date) : null,
-                'basic_salary' => round($this->basic_salary, 2),
+                'basic_salary' => NumberHelper::format($this->basic_salary),
                 'attendance_earnings' => $this->attendance_earnings,
                 'leaves' => $this->leaves,
                 'taxable_earnings' => $this->taxable_earnings,
@@ -33,15 +34,15 @@ class DefaultPayrollResource extends BaseResource
                 'remarks' => $this->remarks,
                 'total_attendance_earnings' => $this->total_attendance_earnings,
                 'total_attendance_deductions' => $this->total_attendance_deductions,
-                'total_non_taxable_earnings' => round($this->total_non_taxable_earnings, 2),
-                'total_other_deductions' => round($this->total_other_deductions, 2),
-                'total_taxable_earnings' => round($this->total_taxable_earnings, 2),
-                'total_contributions' => round($this->total_contributions, 2),
-                'total_deductions_contributions' => round($this->total_other_deductions + $this->total_contributions, 2),
-                'gross_income' => round($this->gross_income, 2),
-                'taxable_income' => round($this->taxable_income, 2),
-                'net_taxable_income' => round($this->net_taxable_income, 2),
-                'net_income' => round($this->net_income, 2),
+                'total_non_taxable_earnings' => NumberHelper::format($this->total_non_taxable_earnings),
+                'total_other_deductions' => NumberHelper::format($this->total_other_deductions),
+                'total_taxable_earnings' => NumberHelper::format($this->total_taxable_earnings),
+                'total_contributions' => NumberHelper::format($this->total_contributions),
+                'total_deductions_contributions' => NumberHelper::format($this->total_other_deductions + $this->total_contributions),
+                'gross_income' => NumberHelper::format($this->gross_income),
+                'taxable_income' => NumberHelper::format($this->taxable_income),
+                'net_taxable_income' => NumberHelper::format($this->net_taxable_income),
+                'net_income' => NumberHelper::format($this->net_income),
                 'period_duration' => $this->formatCompactDate(
                     optional($this->period)->start_date).' - '.$this->formatDate(optional($this->period)->end_date
                     ),
