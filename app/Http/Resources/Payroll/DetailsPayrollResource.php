@@ -5,6 +5,7 @@ namespace App\Http\Resources\Payroll;
 use App\Enumerators\PayrollEnumerator;
 use App\Helpers\NumberHelper;
 use App\Http\Resources\BaseResource;
+use App\Http\Resources\EmployeeResource;
 use App\Models\Holiday;
 use Illuminate\Http\Request;
 
@@ -23,12 +24,17 @@ class DetailsPayrollResource extends BaseResource
             'payroll_number' => $this->payroll_number,
             'status' => ucwords(str_replace('-', ' ', $this->status)),
             'employee_id' => $this->employee_id,
+            'employee' => new EmployeeResource($this->employee),
             'pay_date' => $this->pay_date,
+            'formatted_pay_date' => $this->formatDate($this->pay_date),
+            'gross_income' => NumberHelper::format($this->gross_income),
             'net_income' => NumberHelper::format($this->net_income),
             'type' => $type,
             'period' => optional($this->period)->start_date.' to '.optional($this->period)->end_date,
             'total_contributions' => NumberHelper::format($this->total_contributions),
             'total_deductions' => NumberHelper::format($this->total_deductions),
+            'overall_deductions' => NumberHelper::format($this->total_contributions + $this->total_deductions),
+            'remarks' => $this->remarks,
             'earnings' => $this->formatEarnings(),
             'deductions' => $this->formatDeductions(),
             'summary' => $this->formatSummary(),
@@ -173,6 +179,11 @@ class DetailsPayrollResource extends BaseResource
                 ]);
             }
         }
+
+        array_push($deductions,  [
+            'label' => 'Total Deductions',
+            'amount' => NumberHelper::format($this->total_contributions + $this->total_deductions)
+        ]);
         return $deductions;
     }
 
