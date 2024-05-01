@@ -41,7 +41,6 @@ class DefaultPayrollResource extends BaseResource
                 'total_deductions_contributions' => NumberHelper::format($this->total_other_deductions + $this->total_contributions),
                 'gross_income' => NumberHelper::format($this->gross_income),
                 'taxable_income' => NumberHelper::format($this->taxable_income),
-                'net_taxable_income' => NumberHelper::format($this->net_taxable_income),
                 'net_income' => NumberHelper::format($this->net_income),
                 'period_duration' => $this->formatCompactDate(
                     optional($this->period)->start_date).' - '.$this->formatDate(optional($this->period)->end_date
