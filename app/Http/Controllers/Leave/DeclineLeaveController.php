@@ -18,7 +18,7 @@ class DeclineLeaveController extends Controller
             return $this->sendResponse(new LeaveResource($leave), "Leave declined successfully");
         } catch (\Exception $e) {
             Log::error($e->getMessage());
-            return $this->sendError("Unable to approve leave.");
+            return $this->sendError("Unable to decline leave.");
         }
     }
 }

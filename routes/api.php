@@ -25,6 +25,7 @@ use App\Http\Controllers\Leave\DiscardLeaveController;
 use App\Http\Controllers\Leave\LeaveController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\Payroll\CancelPayrollController;
+use App\Http\Controllers\Payroll\DownloadPayrollController;
 use App\Http\Controllers\Payroll\PayPayrollController;
 use App\Http\Controllers\Payroll\PayrollController;
 use App\Http\Controllers\Payroll\RegeneratePayrollController;
@@ -114,6 +115,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('payrolls/{payroll}/regenerate', RegeneratePayrollController::class);
             Route::post('payrolls/{payroll}/pay', PayPayrollController::class);
             Route::post('payrolls/{payroll}/cancel', CancelPayrollController::class);
+            Route::post('payrolls/{payroll}/download', DownloadPayrollController::class);
 
             Route::apiResource('banks', BankController::class)->only('index', 'store');
             Route::apiResource('reports', ReportController::class)->only('show');

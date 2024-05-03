@@ -7,13 +7,14 @@ use App\StateMachines\Contracts\PayrollStateContract;
 use App\StateMachines\Payroll\BaseState;
 use App\StateMachines\Payroll\ToPayState;
 use App\Traits\PayrollCalculator;
+use App\Traits\PayslipDownloadable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payroll extends Model
 {
-    use PayrollCalculator, SoftDeletes;
+    use PayrollCalculator, PayslipDownloadable, SoftDeletes;
 
     protected $casts = [
         'attendance_earnings' => 'json',

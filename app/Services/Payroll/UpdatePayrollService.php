@@ -31,18 +31,6 @@ class UpdatePayrollService
         return $payroll;
     }
 
-    public function download(Payroll $payroll): string
-    {
-        $pdf = Pdf::loadView('pdf.payslip', [
-            'payroll' => $payroll,
-            'period' => $payroll->period,
-            'employee' => $payroll->employee,
-            'company' => optional($payroll->employee)->company,
-        ]);
-
-        return base64_encode($pdf->output());
-    }
-
     protected function init(Payroll $payroll, array $input)
     {
         $this->payroll = $payroll;

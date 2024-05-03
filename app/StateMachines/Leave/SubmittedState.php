@@ -39,7 +39,7 @@ class SubmittedState extends BaseState
             'status' => LeaveEnumerator::DECLINED,
             'remarks' => $reason
         ]);
-        $this->leave->decline($reason, $this->user);
+        $this->leave->reject($reason, $this->user);
     }
 
     public function discard(string $reason = null): void
