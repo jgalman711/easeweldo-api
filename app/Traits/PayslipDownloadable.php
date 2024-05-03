@@ -7,7 +7,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 trait PayslipDownloadable
 {
-    public function download(): string
+    public function download()
     {
         $pdf = Pdf::loadView('pdf.payslip', [
             'payroll' => $this,
@@ -15,6 +15,6 @@ trait PayslipDownloadable
             'employee' => $this->employee,
             'company' => optional($this->employee)->company,
         ]);
-        return $pdf->stream();
+        return $pdf->download('payslip.pdf');
     }
 }

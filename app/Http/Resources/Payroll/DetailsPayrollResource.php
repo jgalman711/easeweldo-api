@@ -38,7 +38,8 @@ class DetailsPayrollResource extends BaseResource
             'earnings' => $this->formatEarnings(),
             'deductions' => $this->formatDeductions(),
             'summary' => $this->formatSummary(),
-            'error' => $this->error
+            'error' => $this->error,
+            'download' => url("/api/payrolls/{$this->id}/download"),
         ];
     }
 
