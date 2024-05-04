@@ -83,6 +83,8 @@ Route::apiResource('/subscriptions', SubscriptionController::class)->only('index
 Route::apiResource('/subscription-prices', SubscriptionPricesController::class)->only('index');
 Route::apiResource('/payment-methods', PaymentMethodController::class)->only('index');
 
+Route::get('payrolls/{payroll}/download', DownloadPayrollController::class);
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('verify', [VerifyTokenController::class, 'verify']);
@@ -115,7 +117,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             Route::post('payrolls/{payroll}/regenerate', RegeneratePayrollController::class);
             Route::post('payrolls/{payroll}/pay', PayPayrollController::class);
             Route::post('payrolls/{payroll}/cancel', CancelPayrollController::class);
-            Route::post('payrolls/{payroll}/download', DownloadPayrollController::class);
 
             Route::apiResource('banks', BankController::class)->only('index', 'store');
             Route::apiResource('reports', ReportController::class)->only('show');
