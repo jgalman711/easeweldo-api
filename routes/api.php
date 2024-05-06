@@ -177,7 +177,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         // END
     });
 
-    Route::group(['prefix' => 'employees/{employee}', 'middleware' => ['valid.company.user']], function () {
+    Route::group(['prefix' => 'employees/{employee}'], function () {
         Route::get('/', [EmployeeController::class, 'show']);
         Route::get('dashboard', [UserDashboardController::class, 'index']);
         Route::post('clock', [TimeRecordController::class, 'clock']);
