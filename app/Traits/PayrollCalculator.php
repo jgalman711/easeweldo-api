@@ -53,6 +53,11 @@ trait PayrollCalculator
         return $totalNonTaxableEarnings;
     }
 
+    public function getTotalNonTaxableAndTaxableEarningsAttribute(): float
+    {
+        return $this->total_taxable_earnings + $this->total_non_taxable_earnings;
+    }
+
     public function getTotalLeavesPayAttribute(): float
     {
         return $this->totalAmountParser($this->leaves);
