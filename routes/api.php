@@ -26,6 +26,7 @@ use App\Http\Controllers\Leave\LeaveController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\Payroll\CancelPayrollController;
 use App\Http\Controllers\Payroll\DownloadPayrollController;
+use App\Http\Controllers\Payroll\EmployeePayrollController;
 use App\Http\Controllers\Payroll\PayPayrollController;
 use App\Http\Controllers\Payroll\PayrollController;
 use App\Http\Controllers\Payroll\RegeneratePayrollController;
@@ -48,7 +49,6 @@ use App\Http\Controllers\TimesheetUploadController;
 use App\Http\Controllers\User\UserChangePasswordController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserDashboardController;
-use App\Http\Controllers\User\UserPayrollController;
 use App\Http\Controllers\User\UserTemporaryPasswordResetController;
 use App\Http\Controllers\VerifyTokenController;
 use App\Http\Controllers\WorkScheduleController;
@@ -161,7 +161,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::apiResource('time-records', TimeRecordController::class);
         Route::apiResource('time-corrections', TimeCorrectionController::class);
         Route::apiResource('work-schedules', EmployeeScheduleController::class);
-        Route::apiResource('payrolls', UserPayrollController::class)->only('index', 'show');
+        Route::apiResource('payrolls', EmployeePayrollController::class);
         
         // Needs refactor
         Route::controller(SalaryComputationController::class)->group(function () {
@@ -181,17 +181,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/', [EmployeeController::class, 'show']);
         Route::get('dashboard', [UserDashboardController::class, 'index']);
         Route::post('clock', [TimeRecordController::class, 'clock']);
-        Route::apiResource('time-records', TimeRecordController::class);
-        Route::apiResource('time-corrections', TimeCorrectionController::class);
-        Route::apiResource('work-schedules', EmployeeScheduleController::class);
-        Route::apiResource('payrolls', UserPayrollController::class)->only('index', 'show');
-        // Needs refactor
-        Route::controller(SalaryComputationController::class)->group(function () {
-            Route::get('salary-computation', 'show');
-            Route::post('salary-computation', 'store');
-            Route::put('salary-computation', 'update');
-            Route::delete('salary-computation', 'delete');
-        });
 
         // Needs deletion
         Route::put('change-password', [UserChangePasswordController::class, 'update']);
