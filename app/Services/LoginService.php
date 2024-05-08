@@ -26,10 +26,6 @@ class LoginService
                 'employee',
                 'roles',
             ]);
-            if ($user->roles->isEmpty()) {
-                // Employees that has no role will be unable to login
-                throw new Exception('Incorrect email or password.');
-            }
             $user->token = $user->createToken(env('APP_NAME'))->plainTextToken;
             return $user;
         } else {
