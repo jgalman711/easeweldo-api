@@ -143,7 +143,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::group(['middleware' => ['role:super-admin|business-admin|approver', 'valid.company.user']], function () {
         Route::prefix('companies/{company}')->group(function () {
-            Route::apiResource('leaves', LeaveController::class);
+            Route::apiResource('leaves', LeaveController::class)->only('index', 'show');
             Route::prefix('leaves/{leave}')->group(function () {
                 Route::post('approve', ApproveLeaveController::class);
                 Route::post('decline', DeclineLeaveController::class);
@@ -159,6 +159,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('dashboard', [UserDashboardController::class, 'index']);
         Route::post('clock', [TimeRecordController::class, 'clock']);
         Route::apiResource('time-records', TimeRecordController::class);
+        Route::apiResource('leaves', LeaveController::class);
         Route::apiResource('time-corrections', TimeCorrectionController::class);
         Route::apiResource('work-schedules', EmployeeScheduleController::class);
         Route::apiResource('payrolls', EmployeePayrollController::class);
