@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\V2;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -23,8 +24,8 @@ class LeaveResource extends JsonResource
                     'submittedDate' => $this->submitted_date
                 ]),
                 'hours' => $this->hours,
-                'date' => $this->date,
-                'type' => $this->type,
+                'date' => [$this->date, Carbon::parse($this->date)->diffForHumans()],
+                'type' => ucwords(str_replace("_", " ", $this->type)),
                 'approver' => $this->when(
                     $request->routeIs('leaves.*'),
                     optional(optional($this->employee)->supervisor)->full_name,
