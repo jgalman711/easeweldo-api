@@ -4,6 +4,8 @@ namespace Database\Factories;
 
 use App\Models\Company;
 use App\Models\CompanyUser;
+use App\Models\Employee;
+use App\Models\SalaryComputation;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -45,9 +47,9 @@ class EmployeeFactory extends Factory
             'date_of_hire' => $this->faker->dateTimeBetween('-5 years', 'now'),
             'date_of_termination' => null,
             'date_of_birth' => $this->faker->dateTimeBetween('-70 years', '-18 years'),
-            'sss_number' => $this->faker->numerify('#########'),
-            'pagibig_number' => $this->faker->numerify('#########'),
-            'philhealth_number' => $this->faker->numerify('#########'),
+            'sss_number' => $this->faker->numerify('####-####-#'),
+            'pagibig_number' => $this->faker->numerify('##-#####-##'),
+            'philhealth_number' => $this->faker->numerify('#-####-####-##'),
             'tax_identification_number' => $this->faker->numerify('#########'),
             'bank_name' => $this->faker->randomElement(['Bank of America', 'Chase Bank', 'Wells Fargo']),
             'bank_account_name' => $this->faker->name,

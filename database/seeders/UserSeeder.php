@@ -9,6 +9,11 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::factory()->count(100)->create();
+        User::create([
+            'email_address' => 'admin@easeweldo.com',
+            'first_name' => 'super',
+            'last_name' => 'admin',
+            'password' => bcrypt('password'),
+        ])->assignRole('super-admin');
     }
 }

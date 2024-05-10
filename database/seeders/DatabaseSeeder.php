@@ -14,8 +14,9 @@ class DatabaseSeeder extends Seeder
             SSSSeeder::class,
             PagibigSeeder::class,
             PhilHealthSeeder::class,
+            UserSeeder::class,
             CompanySeeder::class,
-            EmployeeSeeder::class,
+            SalaryComputationSeeder::class,
             LeaveSeeder::class
         ]);
     }
