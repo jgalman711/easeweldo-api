@@ -23,6 +23,7 @@ use App\Http\Controllers\Leave\ApproveLeaveController;
 use App\Http\Controllers\Leave\DeclineLeaveController;
 use App\Http\Controllers\Leave\DiscardLeaveController;
 use App\Http\Controllers\Leave\LeaveController;
+use App\Http\Controllers\Leave\LeaveDetailsController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\Payroll\CancelPayrollController;
 use App\Http\Controllers\Payroll\DownloadPayrollController;
@@ -160,6 +161,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('clock', [TimeRecordController::class, 'clock']);
         Route::apiResource('time-records', TimeRecordController::class);
         Route::apiResource('leaves', LeaveController::class);
+        Route::get('leave-details', LeaveDetailsController::class);
         Route::apiResource('time-corrections', TimeCorrectionController::class);
         Route::apiResource('work-schedules', EmployeeScheduleController::class);
         Route::apiResource('payrolls', EmployeePayrollController::class);
