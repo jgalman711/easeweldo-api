@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class EmployeeResource extends JsonResource
+class EmployeeResource extends BaseResource
 {
     public function toArray(Request $request): array
     {
@@ -22,7 +22,7 @@ class EmployeeResource extends JsonResource
             'department' => ucwords($this->department),
             'job_title' => ucwords($this->job_title),
             'employment_status' => ucwords($this->employment_status),
-            'date_of_hire' => $this->date_of_hire,
+            'date_of_hire' => [$this->date_of_hire, $this->formatForHumans($this->date_of_hire)],
             'date_of_termination' => $this->date_of_termination,
             'date_of_birth' => $this->date_of_birth,
             'address_line' => ucwords($this->address_line),
