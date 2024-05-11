@@ -30,6 +30,7 @@ class LeaveResource extends JsonResource
                     $request->routeIs('leaves.*'),
                     optional(optional($this->employee)->supervisor)->full_name,
                 ),
+                'status' => $this->status
             ],
             'relationships' => [
                 'employee' => [
