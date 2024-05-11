@@ -44,7 +44,6 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SubscriptionPricesController;
 use App\Http\Controllers\SynchBiometricsController;
-use App\Http\Controllers\TimeCorrectionController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\TimesheetUploadController;
 use App\Http\Controllers\User\UserChangePasswordController;
@@ -162,7 +161,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::apiResource('time-records', TimeRecordController::class);
         Route::apiResource('leaves', LeaveController::class);
         Route::get('leave-details', LeaveDetailsController::class);
-        Route::apiResource('time-corrections', TimeCorrectionController::class);
         Route::apiResource('work-schedules', EmployeeScheduleController::class);
         Route::apiResource('payrolls', EmployeePayrollController::class);
         

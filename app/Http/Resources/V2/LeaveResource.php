@@ -16,7 +16,7 @@ class LeaveResource extends JsonResource
             'attributes' => [
                 'title' => $this->title,
                 $this->mergeWhen(
-                    $request->routeIs('leaves.show'), [
+                    $request->routeIs('employees.leaves.show'), [
                     'description' => $this->description,
                     'remarks' => $this->remarks,
                     'approvedBy' => $this->approved_by,
