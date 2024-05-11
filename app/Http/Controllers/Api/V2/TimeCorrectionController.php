@@ -7,6 +7,7 @@ use App\Http\Requests\TimeCorrectionRequest;
 use App\Http\Resources\V2\TimeCorrectionResource;
 use App\Models\Company;
 use App\Models\Employee;
+use App\Models\TimeCorrection;
 use Exception;
 use Illuminate\Http\JsonResponse;
 
@@ -18,6 +19,17 @@ class TimeCorrectionController extends Controller
         $timeCorrections->getCollection()->each->setRelation('employee', $employee);
         $timeCorrections->getCollection()->each->setRelation('company', $company);
         return $this->sendResponse(TimeCorrectionResource::collection($timeCorrections), 'Time correction requests retrieved successfully.');
+    }
+
+    public function show(Company $company, Employee $employee, TimeCorrection $timeCorrection): JsonResponse
+    {
+        try {
+            $timeCorrection->setRelation('employee', $employee);
+            $timeCorrection->setRelation('company', $company);
+            return $this->sendResponse(new TimeCorrectionResource($timeCorrection), 'Time correction details retrieved successfully.');
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
     }
 
     public function store(TimeCorrectionRequest $request, Company $company, int $employeeId)
@@ -32,26 +44,6 @@ class TimeCorrectionController extends Controller
                 new TimeCorrectionResource($timeCorrection),
                 'Time correction created successfully.',
                 200
-            );
-        } catch (Exception $e) {
-            return $this->sendError($e->getMessage());
-        }
-    }
-
-    public function show(Company $company, int $employeeId, int $timeCorrectionId): JsonResponse
-    {
-        try {
-            $employee = $company->getEmployeeById($employeeId);
-            $company->getEmployeeById($employee->id);
-            $timeCorrection = $employee->timeCorrections()->find($timeCorrectionId);
-            throw_unless(
-                $timeCorrection,
-                'Time correction not found.'
-            );
-
-            return $this->sendResponse(
-                new TimeCorrectionResource($timeCorrection),
-                'Time correction details retrieved successfully.'
             );
         } catch (Exception $e) {
             return $this->sendError($e->getMessage());
