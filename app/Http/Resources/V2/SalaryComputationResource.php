@@ -43,7 +43,7 @@ class SalaryComputationResource extends JsonResource
                 ]
             ],
             'links' => [
-                ['self' => route('employees.salary-computations.index', [$this->employee->company->slug, $this->employee_id])]
+                ['self' => route('employees.salary-computation.index', [$this->employee->company->slug, $this->employee_id])]
             ]
         ];
     }
