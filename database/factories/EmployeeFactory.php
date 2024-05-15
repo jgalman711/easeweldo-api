@@ -35,7 +35,6 @@ class EmployeeFactory extends Factory
             'company_id' => $company->id,
             'company_employee_id' => $this->faker->randomNumber(6),
             'supervisor_user_id' => null,
-            'employee_number' => $this->faker->unique()->randomNumber(6),
             'department' => $this->faker->word,
             'job_title' => $this->faker->jobTitle,
             'status' => $this->faker->randomElement(['active', 'inactive', 'pending']),
