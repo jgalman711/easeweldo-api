@@ -9,35 +9,29 @@ use App\Traits\Password;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Spatie\Permission\Models\Role;
 
 class UserService
 {
     use Password;
 
-    private const BUSINESS_ADMIN_ROLE = 'business-admin';
-
     public function create(Company $company, array $userData): User
     {
-        $username = $this->generateUniqueUsername($company, $userData['first_name'], $userData['last_name']);
-        [$temporaryPassword, $temporaryPasswordExpiresAt] = $this->generateTemporaryPassword();
-
-        $userData['username'] = $username;
+        $temporaryPassword = $this->generateTemporaryPassword();
         $userData['password'] = bcrypt($temporaryPassword);
         $userData['temporary_password'] = $temporaryPassword;
-        $userData['temporary_password_expires_at'] = $temporaryPasswordExpiresAt;
+        $userData['temporary_password_expires_at'] = now()->addMinutes(60);
 
         $user = User::create($userData);
         $user->temporary_password = $temporaryPassword;
 
         try {
-            Mail::to($user->email_address)->send(new UserRegistered($user));
+            Mail::to($user->email_address)->send(new UserRegistered($company, $user));
         } catch (Exception $e) {
             Log::error($e->getMessage());
         }
-        if ($this->isRoleBusinessAdmin($userData)) {
-            $role = Role::where('name', self::BUSINESS_ADMIN_ROLE)->first();
-            $user->assignRole($role);
+
+        if (isset($userData['role']) && $userData['role']) {
+            $user->syncRoles($userData['role']);
         }
         $company->users()->attach($user->id);
 
@@ -72,10 +66,5 @@ class UserService
         throw_if($user->employee, new Exception('User is already linked to employee'));
 
         return $user;
-    }
-
-    private function isRoleBusinessAdmin($data): bool
-    {
-        return isset($data['role']) && $data['role'] == self::BUSINESS_ADMIN_ROLE;
     }
 }

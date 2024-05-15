@@ -27,4 +27,12 @@ class BaseResource extends JsonResource
     {
         return $date ? Carbon::createFromFormat('Y-m-d', $date)->format('M d') : null;
     }
+
+    protected function formatForHumans($date): string
+    {
+        if (!$date instanceof Carbon) {
+            $date = Carbon::parse($date);
+        }
+        return $date->diffForHumans();
+    }
 }

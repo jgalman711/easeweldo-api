@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employee extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     public const ABSOLUTE_STORAGE_PATH = 'public/employees/images';
 
@@ -73,6 +74,7 @@ class Employee extends Model
         'user_id',
         'company_id',
         'company_employee_id',
+        'supervisor_user_id',
         'employee_number',
         'department',
         'job_title',
@@ -109,6 +111,16 @@ class Employee extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function supervisor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'supervisor_user_id');
+    }
+
+    public function supervisedEmployees(): HasMany
+    {
+        return $this->hasMany(Employee::class, 'supervisor_id');
     }
 
     public function payrolls(): HasMany
@@ -164,11 +176,6 @@ class Employee extends Model
     public function getFullNameAttribute(): ?string
     {
         return ucfirst(optional($this->user)->first_name).' '.ucfirst(optional($this->user)->last_name);
-    }
-
-    public function getLeaveById(int $leaveId): Leave
-    {
-        return $this->leaves->where('id', $leaveId)->firstOrFail();
     }
 
     public function getFirstNameAttribute(): ?string

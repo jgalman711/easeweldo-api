@@ -46,6 +46,15 @@ trait Filter
                     $filterQuery->whereDate($key, '>=', $value);
                 } elseif ($key == 'to_date') {
                     $filterQuery->whereDate($key, '<=', $value);
+                } elseif ($key == 'role') {
+                    $roles = explode(',', $value);
+                    $filterQuery->whereHas('user.roles', function ($query) use ($roles) {
+                        $query->where(function ($rolesQueryFilter) use ($roles) {
+                            foreach ($roles as $role) {
+                                $rolesQueryFilter->orWhere('name', 'like', "%{$role}%");
+                            }
+                        });
+                    });
                 } else {
                     $filterQuery->where($key, $value);
                 }

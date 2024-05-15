@@ -2,6 +2,7 @@
 
 namespace App\Services\Payroll;
 
+use App\Enumerators\LeaveEnumerator;
 use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\Payroll;
@@ -28,18 +29,6 @@ class UpdatePayrollService
         $payroll->save();
 
         return $payroll;
-    }
-
-    public function download(Payroll $payroll): string
-    {
-        $pdf = Pdf::loadView('pdf.payslip', [
-            'payroll' => $payroll,
-            'period' => $payroll->period,
-            'employee' => $payroll->employee,
-            'company' => optional($payroll->employee)->company,
-        ]);
-
-        return base64_encode($pdf->output());
     }
 
     protected function init(Payroll $payroll, array $input)
@@ -136,7 +125,7 @@ class UpdatePayrollService
         if (isset($input['regularEarnings']) && isset($input['regularEarnings']['sickLeave'])) {
             $leaves = $input['regularEarnings']['sickLeave'];
             foreach ($leaves as $leave) {
-                $leaveEarnings[Leave::TYPE_SICK_LEAVE][] = [
+                $leaveEarnings[LeaveEnumerator::TYPE_SICK_LEAVE][] = [
                     'date' => $leave['date'],
                     'rate' => $leave['rate'],
                     'hours' => $leave['hours'],
@@ -148,7 +137,7 @@ class UpdatePayrollService
         if (isset($input['regularEarnings']) && isset($input['regularEarnings']['vacationLeave'])) {
             $leaves = $input['regularEarnings']['vacationLeave'];
             foreach ($leaves as $leave) {
-                $leaveEarnings[Leave::TYPE_VACATION_LEAVE][] = [
+                $leaveEarnings[LeaveEnumerator::TYPE_VACATION_LEAVE][] = [
                     'date' => $leave['date'],
                     'rate' => $leave['rate'],
                     'hours' => $leave['hours'],

@@ -21,7 +21,15 @@ class SettingController extends Controller
 
     public function index(Company $company): JsonResponse
     {
-        return $this->sendResponse(new SettingsResource($company->setting), 'Company settings retrieved successfully.');
+        $settings = $company->setting;
+        if ($settings) {
+            return $this->sendResponse(
+                new SettingsResource($company->setting),
+                'Company settings retrieved successfully.'
+            );
+        } else {
+            return $this->sendError("No company settings found");
+        }
     }
 
     public function store(SettingRequest $request, Company $company): JsonResponse
@@ -31,8 +39,11 @@ class SettingController extends Controller
             ['company_id' => $company->id],
             $input
         );
-        $this->periodService->convertSalaryDayToDate($settings->salary_day, $settings->period_cycle);
 
-        return $this->sendResponse(new BaseResource($settings), 'Company settings updated successfully.');
+        if ($settings->salary_day && $settings->period_cycle) {
+            $this->periodService->convertSalaryDayToDate($settings->salary_day, $settings->period_cycle);
+        }
+
+        return $this->sendResponse(new SettingsResource($settings), 'Company settings updated successfully.');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Services\Payroll;
 
 use App\Enumerators\PayrollEnumerator;
+use App\Exceptions\InvalidPayrollGenerationException;
 use App\Models\Payroll;
 use App\Models\Period;
 use Exception;
@@ -12,10 +13,11 @@ class RegeneratePayrollService extends GeneratePayrollService
 {
     public function regenerate(Payroll $payroll): Payroll
     {
-        self::initByPayroll($payroll);
         try {
+            $this->initByPayroll($payroll);
             DB::beginTransaction();
             $this->calculateEarnings();
+            $this->calculateDeductions();
             $this->calculateHoliday();
             $this->calculateLeaves();
             $this->calculateContributions();
@@ -26,7 +28,10 @@ class RegeneratePayrollService extends GeneratePayrollService
             return $this->payroll;
         } catch (Exception $e) {
             DB::rollBack();
-            throw new Exception($e);
+            $this->payroll->status = PayrollEnumerator::STATUS_FAILED;
+            $this->payroll->error = $e->getMessage();
+            $this->payroll->save();
+            throw new InvalidPayrollGenerationException($e->getMessage());
         }
     }
 
@@ -49,10 +54,10 @@ class RegeneratePayrollService extends GeneratePayrollService
             'dateTo' => $this->period->end_date,
         ])->get();
 
-        if (! $this->salaryComputation || ! $this->companySettings) {
-            $this->payroll->status = PayrollEnumerator::STATUS_FAILED;
-            $this->payroll->save();
-            throw new Exception("Payroll {$this->payroll->id} generation encountered an error.");
+        if (! $this->salaryComputation) {
+            throw new InvalidPayrollGenerationException(PayrollEnumerator::ERROR_NO_SALARY_DATA);
+        } elseif (! $this->companySettings) {
+            throw new InvalidPayrollGenerationException(PayrollEnumerator::ERROR_NO_COMPANY_SETTINGS);
         }
     }
 }

@@ -53,4 +53,12 @@ class Controller
 
         return response()->json($response, $code);
     }
+
+    public function sendMessage(string $message): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => $message
+        ], 200);
+    }
 }

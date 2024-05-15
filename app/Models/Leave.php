@@ -2,48 +2,28 @@
 
 namespace App\Models;
 
+use App\Enumerators\LeaveEnumerator;
+use App\StateMachines\Contracts\LeaveStateContract;
+use App\StateMachines\Leave\BaseState;
+use App\StateMachines\Leave\SubmittedState;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use RingleSoft\LaravelProcessApproval\Contracts\ApprovableModel;
+use RingleSoft\LaravelProcessApproval\Models\ProcessApproval;
+use RingleSoft\LaravelProcessApproval\Traits\Approvable;
 
-class Leave extends Model
+class Leave extends Model implements ApprovableModel
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Approvable;
 
-    public const PENDING = 'pending';
-
-    public const APPROVED = 'approved';
-
-    public const REJECTED = 'rejected';
-
-    public const TYPE_SICK_LEAVE = 'sick_leave';
-
-    public const TYPE_VACATION_LEAVE = 'vacation_leave';
-
-    public const TYPE_EMERGENCY_LEAVE = 'emergency_leave';
-
-    public const TYPE_WITHOUT_PAY = 'leave_without_pay';
-
-    public const TYPE = 'type';
-
-    public const HOURS = 'hours';
-
-    public const ATTRIBUTES = [
-        self::TYPE,
-        self::HOURS,
-    ];
-
-    public const TYPES = [
-        self::TYPE_SICK_LEAVE,
-        self::TYPE_VACATION_LEAVE,
-        self::TYPE_EMERGENCY_LEAVE,
-        self::TYPE_WITHOUT_PAY,
-    ];
+    public bool $autoSubmit = true;
 
     protected $fillable = [
         'company_id',
         'employee_id',
         'created_by',
+        'title',
         'type',
         'description',
         'hours',
@@ -53,8 +33,21 @@ class Leave extends Model
         'status',
     ];
 
+    public function state(): LeaveStateContract
+    {
+        return match ($this->status) {
+            LeaveEnumerator::SUBMITTED => new SubmittedState($this),
+            default => new BaseState($this)
+        };
+    }
+
     public function employee()
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    public function onApprovalCompleted(ProcessApproval $approval): bool
+    {
+        return true;
     }
 }

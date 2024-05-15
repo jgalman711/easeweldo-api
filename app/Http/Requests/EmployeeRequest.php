@@ -15,6 +15,8 @@ class EmployeeRequest extends BaseRequest
                 'integer',
                 Rule::exists('users', 'id')->whereNull('deleted_at'),
             ],
+            'company_slug' => $this->isRequired(),
+            'supervisor_id' => self::NULLABLE_NUMERIC,
             'first_name' => self::REQUIRED_STRING,
             'last_name' => self::REQUIRED_STRING,
             'employee_number' => self::NULLABLE_STRING,
@@ -101,7 +103,12 @@ class EmployeeRequest extends BaseRequest
             'bank_account_name' => self::NULLABLE_STRING,
             'bank_account_number' => self::NULLABLE_STRING,
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'is_admin' => 'nullable|boolean',
+            'role' => 'nullable|exists:roles,name'
         ];
+    }
+
+    private function isRequired()
+    {
+        return $this->company ? 'nullable' : 'required|exists:companies,slug';
     }
 }

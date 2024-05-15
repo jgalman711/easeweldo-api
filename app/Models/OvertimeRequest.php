@@ -18,8 +18,6 @@ class OvertimeRequest extends Model
         'status',
         'employee_id',
         'company_id',
-        'approved_by',
-        'approved_date',
         'submitted_date',
         'created_by',
     ];

@@ -3,7 +3,9 @@
 namespace App\Http\Resources\Payroll;
 
 use App\Enumerators\PayrollEnumerator;
+use App\Helpers\NumberHelper;
 use App\Http\Resources\BaseResource;
+use App\Http\Resources\EmployeeResource;
 use App\Models\Holiday;
 use Illuminate\Http\Request;
 
@@ -18,17 +20,26 @@ class DetailsPayrollResource extends BaseResource
         }
 
         return [
+            'id' => $this->id,
+            'payroll_number' => $this->payroll_number,
             'status' => ucwords(str_replace('-', ' ', $this->status)),
             'employee_id' => $this->employee_id,
+            'employee' => new EmployeeResource($this->employee),
             'pay_date' => $this->pay_date,
-            'net_income' => number_format($this->net_income, 2),
+            'formatted_pay_date' => $this->formatDate($this->pay_date),
+            'gross_income' => NumberHelper::format($this->gross_income),
+            'net_income' => NumberHelper::format($this->net_income),
             'type' => $type,
             'period' => optional($this->period)->start_date.' to '.optional($this->period)->end_date,
-            'total_contributions' => number_format($this->total_contributions, 2),
-            'total_deductions' => number_format($this->total_deductions, 2),
+            'total_contributions' => NumberHelper::format($this->total_contributions),
+            'total_deductions' => NumberHelper::format($this->total_deductions),
+            'overall_deductions' => NumberHelper::format($this->total_contributions + $this->total_deductions),
+            'remarks' => $this->remarks,
             'earnings' => $this->formatEarnings(),
             'deductions' => $this->formatDeductions(),
             'summary' => $this->formatSummary(),
+            'error' => $this->error,
+            'download' => url("/api/payrolls/{$this->id}/download"),
         ];
     }
 
@@ -37,7 +48,7 @@ class DetailsPayrollResource extends BaseResource
         $earnings = [
             [
                 'label' => 'Regular Pay',
-                'amount' => number_format($this->basic_salary, 2),
+                'amount' => NumberHelper::format($this->basic_salary),
             ],
         ];
 
@@ -47,7 +58,7 @@ class DetailsPayrollResource extends BaseResource
                     'label' => 'Overtime ('.$overtime['date'].')',
                     'rate' => $overtime['rate'],
                     'hours' => $overtime['hours'],
-                    'amount' => number_format($overtime['amount'], 2),
+                    'amount' => NumberHelper::format($overtime['amount']),
                 ]);
             }
         }
@@ -64,7 +75,7 @@ class DetailsPayrollResource extends BaseResource
                         'label' => "$label (".$deduction['date'].')',
                         'rate' => $deduction['rate'],
                         'hours' => $deduction['hours'],
-                        'amount' => number_format($deduction['amount'] * -1, 2),
+                        'amount' => NumberHelper::format($deduction['amount'] * -1),
                     ]);
                 }
             }
@@ -104,9 +115,9 @@ class DetailsPayrollResource extends BaseResource
                 foreach ($typeLeaves as $leave) {
                     array_push($earnings, [
                         'label' => ucwords(str_replace('_', ' ', $type))." ({$leave['date']})",
-                        'rate' => $leave['rate'],
+                        'rate' => $leave['rate'] ?? NumberHelper::format(1),
                         'hours' => $leave['hours'],
-                        'amount' => number_format($leave['amount'] ?? $leave['pay'] ?? 0, 2),
+                        'amount' => NumberHelper::format($leave['amount'] ?? $leave['pay'] ?? 0),
                     ]);
                 }
             }
@@ -116,7 +127,7 @@ class DetailsPayrollResource extends BaseResource
             foreach ($this->taxable_earnings as $taxableEarnings) {
                 array_push($earnings, [
                     'label' => ucwords($taxableEarnings['name']),
-                    'amount' => number_format($taxableEarnings['amount'], 2),
+                    'amount' => NumberHelper::format($taxableEarnings['amount']),
                 ]);
             }
         }
@@ -126,24 +137,14 @@ class DetailsPayrollResource extends BaseResource
                 $label = ucwords($nonTaxableEarnings['name']).' (Non-taxable)';
                 array_push($earnings, [
                     'label' => $label,
-                    'amount' => number_format($nonTaxableEarnings['amount'], 2),
-                ]);
-            }
-        }
-
-        if ($this->other_deductions && ! empty($this->other_deductions)) {
-            foreach ($this->other_deductions as $otherDeductions) {
-                $label = ucwords($otherDeductions['name']);
-                array_push($earnings, [
-                    'label' => $label,
-                    'amount' => number_format($otherDeductions['amount'] * -1, 2),
+                    'amount' => NumberHelper::format($nonTaxableEarnings['amount']),
                 ]);
             }
         }
 
         array_push($earnings, [
             'label' => 'Gross Income',
-            'amount' => number_format($this->gross_income, 2),
+            'amount' => NumberHelper::format($this->gross_income),
         ]);
 
         return $earnings;
@@ -151,24 +152,40 @@ class DetailsPayrollResource extends BaseResource
 
     private function formatDeductions(): array
     {
-        return [
+        $deductions = [
             [
-                'label' => 'SSS Contributions',
-                'amount' => $this->sss_contributions,
+                'label' => 'SSS',
+                'amount' => NumberHelper::format($this->sss_contributions * -1, 'negate'),
             ],
             [
-                'label' => 'PhilHealth Contributions',
-                'amount' => $this->philhealth_contributions,
+                'label' => 'PhilHealth',
+                'amount' => NumberHelper::format($this->philhealth_contributions * -1),
             ],
             [
-                'label' => 'PagIbig Contributions',
-                'amount' => $this->pagibig_contributions,
+                'label' => 'PagIbig',
+                'amount' => NumberHelper::format($this->pagibig_contributions * -1),
             ],
             [
                 'label' => 'Withheld Tax',
-                'amount' => $this->withheld_tax,
+                'amount' => NumberHelper::format($this->withheld_tax * -1),
             ],
         ];
+
+        if ($this->other_deductions && ! empty($this->other_deductions)) {
+            foreach ($this->other_deductions as $otherDeductions) {
+                $label = ucwords($otherDeductions['name']);
+                array_push($deductions, [
+                    'label' => $label,
+                    'amount' => NumberHelper::format($otherDeductions['amount'] * -1),
+                ]);
+            }
+        }
+
+        array_push($deductions,  [
+            'label' => 'Total Deductions',
+            'amount' => NumberHelper::format($this->total_contributions + $this->total_deductions)
+        ]);
+        return $deductions;
     }
 
     private function formatSummary(): array
@@ -176,19 +193,19 @@ class DetailsPayrollResource extends BaseResource
         return [
             [
                 'label' => 'Gross Income',
-                'amount' => number_format($this->gross_income, 2),
+                'amount' => NumberHelper::format($this->gross_income),
             ],
             [
                 'label' => 'Total Contributions',
-                'amount' => number_format($this->total_contributions, 2),
+                'amount' => NumberHelper::format($this->total_contributions),
             ],
             [
                 'label' => 'Total Deductions',
-                'amount' => number_format($this->total_deductions, 2),
+                'amount' => NumberHelper::format($this->total_deductions),
             ],
             [
                 'label' => 'Net Income',
-                'amount' => number_format($this->net_income, 2),
+                'amount' => NumberHelper::format($this->net_income),
             ],
         ];
     }

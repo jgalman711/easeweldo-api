@@ -18,7 +18,7 @@ class PasswordReset extends Notification
      */
     public function __construct(User $user, string $token)
     {
-        $this->resetLink = config('app.auth_url').
+        $this->resetLink = config('app.easeweldo_portal_url') .
             "/reset-password?token={$token}&email_address={$user->email_address}";
     }
 

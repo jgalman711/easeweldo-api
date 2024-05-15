@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class EmployeeResource extends JsonResource
+class EmployeeResource extends BaseResource
 {
     public function toArray(Request $request): array
     {
@@ -17,10 +17,12 @@ class EmployeeResource extends JsonResource
             'id' => $this->id,
             'company' => $this->company->name,
             'company_slug' => $this->company->slug,
+            'supervisor' => optional($this->supervisor)->full_name,
+            'supervisor_user_id' => optional($this->supervisor)->id,
             'department' => ucwords($this->department),
             'job_title' => ucwords($this->job_title),
             'employment_status' => ucwords($this->employment_status),
-            'date_of_hire' => $this->date_of_hire,
+            'date_of_hire' => [$this->date_of_hire, $this->formatForHumans($this->date_of_hire)],
             'date_of_termination' => $this->date_of_termination,
             'date_of_birth' => $this->date_of_birth,
             'address_line' => ucwords($this->address_line),
@@ -34,8 +36,8 @@ class EmployeeResource extends JsonResource
             'full_name' => $this->full_name,
             'username' => optional($this->user)->username,
             'email_address' => optional($this->user)->email_address,
-            'profile_picture' => $this->profile_picture ? $employeeUploadPath.'/'.$this->profile_picture : null,
             'email' => optional($this->user)->email,
+            'profile_picture' => $this->profile_picture ? $employeeUploadPath.'/'.$this->profile_picture : null,
             'employment_type' => ucwords($this->employment_type),
             'employment_status' => ucwords($this->employment_status),
             'mobile_number' => $this->mobile_number,
@@ -46,15 +48,7 @@ class EmployeeResource extends JsonResource
             'bank_name' => $this->bank_name,
             'bank_account_name' => $this->bank_account_name,
             'bank_account_number' => $this->bank_account_number,
-            'user' => $this->user ? [
-                'email' => $this->user->email,
-                'email_address' => $this->user->email_address,
-                'username' => $this->user->username,
-                'first_name' => $this->user->first_name,
-                'last_name' => $this->user->last_name,
-                'status' => $this->user->status,
-                'temporary_password' => $this->user->temporary_password,
-            ] : null,
+            'role' => optional(optional(optional($this->user)->roles)->first())->name,
             'work_schedule_start_date' => optional($latestSchedule)->start_date,
             'work_schedule_name' => optional(optional($latestSchedule)->workSchedule)->name,
             'salary_package' => $this->getSalaryPackage(),

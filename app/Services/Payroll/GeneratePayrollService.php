@@ -2,11 +2,11 @@
 
 namespace App\Services\Payroll;
 
+use App\Enumerators\LeaveEnumerator;
 use App\Enumerators\PayrollEnumerator;
 use App\Exceptions\InvalidPayrollGenerationException;
 use App\Models\Company;
 use App\Models\Employee;
-use App\Models\Leave;
 use App\Models\Payroll;
 use App\Models\Period;
 use App\Repositories\HolidayRepository;
@@ -51,11 +51,12 @@ class GeneratePayrollService
 
     public function generate(Company $company, Period $period, Employee $employee): Payroll
     {
-        $this->init($company, $employee, $period);
         try {
+            $this->init($company, $employee, $period);
             DB::beginTransaction();
             $this->calculateBasicSalary();
             $this->calculateEarnings();
+            $this->calculateDeductions();
             $this->calculateHoliday();
             $this->calculateAttendanceEarnings();
             $this->calculateLeaves();
@@ -66,6 +67,9 @@ class GeneratePayrollService
             return $this->payroll;
         } catch (Exception $e) {
             DB::rollBack();
+            $this->payroll->status = PayrollEnumerator::STATUS_FAILED;
+            $this->payroll->error = $e->getMessage();
+            $this->payroll->save();
             throw new InvalidPayrollGenerationException($e);
         }
     }
@@ -102,17 +106,9 @@ class GeneratePayrollService
         $this->payroll->payroll_number = $this->generatePayrollNumber();
 
         if (! $this->salaryComputation) {
-            $this->payroll->status = PayrollEnumerator::STATUS_FAILED;
-            $this->payroll->save();
-            throw new InvalidPayrollGenerationException(
-                "Payroll {$this->payroll->id} generation encountered an error. No salary data found."
-            );
+            throw new InvalidPayrollGenerationException(PayrollEnumerator::ERROR_NO_SALARY_DATA);
         } elseif (! $this->companySettings) {
-            $this->payroll->status = PayrollEnumerator::STATUS_FAILED;
-            $this->payroll->save();
-            throw new InvalidPayrollGenerationException(
-                "Payroll {$this->payroll->id} generation encountered an error. No company settings found."
-            );
+            throw new InvalidPayrollGenerationException(PayrollEnumerator::ERROR_NO_COMPANY_SETTINGS);
         }
 
         $this->salaryComputation->is_clock_required = true;
@@ -128,6 +124,11 @@ class GeneratePayrollService
     {
         $this->payroll->taxable_earnings = $this->salaryComputation->taxable_earnings;
         $this->payroll->non_taxable_earnings = $this->salaryComputation->non_taxable_earnings;
+    }
+
+    protected function calculateDeductions(): void
+    {
+        $this->payroll->other_deductions = $this->salaryComputation->other_deductions;
     }
 
     protected function calculateAttendanceEarnings(): void
@@ -194,9 +195,7 @@ class GeneratePayrollService
             $this->payroll->basic_salary = $this->salaryComputation->basic_salary
                 / self::CYCLE_DIVISOR[$this->period->subtype];
         } else {
-            throw new InvalidPayrollGenerationException(
-                'Invalid payroll type. Please contact the Easeweldo administrator.'
-            );
+            throw new InvalidPayrollGenerationException('Invalid payroll type.');
         }
     }
 
@@ -253,7 +252,7 @@ class GeneratePayrollService
         $leaves = $this->payroll->employee->leaves()->where([
             ['date', '>=', $this->period->start_date],
             ['date', '<=', $this->period->end_date],
-            ['status', '=', Leave::APPROVED],
+            ['status', '=', LeaveEnumerator::APPROVED],
         ])->get();
 
         if ($leaves->isNotEmpty()) {
@@ -282,7 +281,7 @@ class GeneratePayrollService
             ->compute($this->payroll->gross_income);
         $this->payroll->withheld_tax = $this->contributionsService
             ->taxCalculatorService
-            ->compute($this->payroll->gross_income, $this->period->type);
+            ->compute($this->payroll->taxable_income, $this->period->subtype);
     }
 
     private function generatePayrollNumber(): string

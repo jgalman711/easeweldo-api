@@ -22,12 +22,10 @@ class AuthService
 
     public function temporaryPasswordReset(User $user): User
     {
-        [$temporaryPassword, $temporaryPasswordExpiresAt] = $this->generateTemporaryPassword();
-        $user->temporary_password = $temporaryPassword;
-        $user->temporary_password_expires_at = $temporaryPasswordExpiresAt;
+        $user->temporary_password = $this->generateTemporaryPassword();
+        $user->temporary_password_expires_at = now()->addMinutes(60);
         $user->save();
         Mail::to($user->email_address)->send(new ResetTemporaryPassword($user));
-
         return $user;
     }
 }

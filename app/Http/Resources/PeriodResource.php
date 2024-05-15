@@ -19,6 +19,7 @@ class PeriodResource extends BaseResource
             'end_date' => $this->end_date,
             'duration' => $this->getDuration(),
             'pay_day' => $this->formatDate($this->salary_date),
+            'pay_day_for_humans' => $this->formatForHumans($this->salary_date),
             'salary_date' => $this->salary_date,
             'status' => $this->status,
             'employees_count' => $this->employees_count,
@@ -38,7 +39,6 @@ class PeriodResource extends BaseResource
         if ($this->start_date && $this->end_date) {
             return $this->formatCompactDate($this->start_date).' - '.$this->formatDate($this->end_date);
         }
-
         return null;
     }
 }
