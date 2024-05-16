@@ -17,9 +17,10 @@ class LeaveService
         $this->timeRecordService = $timeRecordService;
     }
 
-    public function apply(Employee $employee, array $data): array
+    public function apply(array $data): array
     {
         $leaves = [];
+        $employee = Employee::findOrFail($data['employee_id']);
         $fromDate = Carbon::parse($data['from_date']);
         $toDate = Carbon::parse($data['to_date']);
         $days = $fromDate->diffInDays($toDate) + 1;

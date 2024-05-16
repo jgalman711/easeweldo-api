@@ -143,7 +143,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::group(['middleware' => ['role:super-admin|business-admin|approver', 'valid.company.user']], function () {
         Route::prefix('companies/{company}')->group(function () {
-            Route::apiResource('leaves', LeaveController::class)->only('index', 'show');
+            Route::apiResource('leaves', LeaveController::class);
             Route::prefix('leaves/{leave}')->group(function () {
                 Route::post('approve', ApproveLeaveController::class);
                 Route::post('decline', DeclineLeaveController::class);
