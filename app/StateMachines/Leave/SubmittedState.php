@@ -1,9 +1,8 @@
-'<?php
+<?php
 
 namespace App\StateMachines\Leave;
 
 use App\Enumerators\LeaveEnumerator;
-use App\Models\Leave;
 
 class SubmittedState extends BaseState
 {

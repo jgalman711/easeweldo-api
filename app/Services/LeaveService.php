@@ -51,6 +51,7 @@ class LeaveService
             ];
             $fromDate->addDay();
         }
+        Leave::insert($leaves);
         return collect($leaves);
     }
 
