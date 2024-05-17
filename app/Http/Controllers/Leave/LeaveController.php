@@ -7,6 +7,7 @@ use App\Http\Requests\LeaveRequest;
 use App\Http\Resources\LeaveResource;
 use App\Http\Resources\V2\LeaveResource as V2LeaveResource;
 use App\Models\Company;
+use App\Models\Employee;
 use App\Models\Leave;
 use App\Services\LeaveService;
 use Illuminate\Http\JsonResponse;
@@ -37,7 +38,15 @@ class LeaveController extends Controller
     public function store(LeaveRequest $request, Company $company)
     {
         $input = $request->validated();
-        $leaves = $this->leaveService->apply($input);
-        return $this->sendResponse(V2LeaveResource::collection($leaves), 'Leave created successfully.');
+        $employee = Employee::findOrFail($input['employee_id']);
+        $leaves = $this->leaveService->apply($employee, $input);
+        return $this->sendResponse(V2LeaveResource::collection($leaves), 'Leaves created successfully.');
+    }
+
+    public function update(LeaveRequest $request, Company $company, Leave $leave)
+    {
+        $input = $request->validated();
+        $leave->update($input);
+        return $this->sendResponse(new V2LeaveResource($leave), 'Leave updated successfully.');
     }
 }

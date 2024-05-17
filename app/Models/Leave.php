@@ -9,13 +9,10 @@ use App\StateMachines\Leave\SubmittedState;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use RingleSoft\LaravelProcessApproval\Contracts\ApprovableModel;
-use RingleSoft\LaravelProcessApproval\Models\ProcessApproval;
-use RingleSoft\LaravelProcessApproval\Traits\Approvable;
 
-class Leave extends Model implements ApprovableModel
+class Leave extends Model
 {
-    use HasFactory, SoftDeletes, Approvable;
+    use HasFactory, SoftDeletes;
 
     public bool $autoSubmit = true;
 
@@ -44,10 +41,5 @@ class Leave extends Model implements ApprovableModel
     public function employee()
     {
         return $this->belongsTo(Employee::class);
-    }
-
-    public function onApprovalCompleted(ProcessApproval $approval): bool
-    {
-        return true;
     }
 }

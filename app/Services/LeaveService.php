@@ -7,6 +7,8 @@ use App\Models\Employee;
 use App\Models\Leave;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class LeaveService
 {
@@ -17,10 +19,9 @@ class LeaveService
         $this->timeRecordService = $timeRecordService;
     }
 
-    public function apply(array $data): array
+    public function apply(Employee $employee, array $data): Collection
     {
         $leaves = [];
-        $employee = Employee::findOrFail($data['employee_id']);
         $fromDate = Carbon::parse($data['from_date']);
         $toDate = Carbon::parse($data['to_date']);
         $days = $fromDate->diffInDays($toDate) + 1;
@@ -35,10 +36,10 @@ class LeaveService
         }
         $date = Carbon::now()->toDateString();
         while ($fromDate->lte($toDate)) {
-            $leave = Leave::create([
+            $leaves[] = [
                 'company_id' => $employee->company->id,
                 'employee_id' => $employee->id,
-                'created_by' => $employee->user->id,
+                'created_by' => Auth::id(),
                 'title' => self::generateTitle($data['type'], $date),
                 'type' => $data['type'],
                 'description' => $data['description'],
@@ -47,11 +48,10 @@ class LeaveService
                 'submitted_date' => $date,
                 'remarks' => $data['remarks'] ?? null,
                 'status' => LeaveEnumerator::SUBMITTED
-            ]);
-            array_push($leaves, $leave);
+            ];
             $fromDate->addDay();
         }
-        return $leaves;
+        return collect($leaves);
     }
 
     private function generateTitle(string $type, string $date): string

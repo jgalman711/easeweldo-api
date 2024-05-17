@@ -27,8 +27,6 @@ class LeaveFactory extends Factory
             'description' => $this->faker->sentence,
             'hours' => $this->faker->randomFloat(2, 1, 8),
             'date' => $this->faker->dateTimeBetween('-1 year', 'now')->format('Y-m-d'),
-            'approved_by' => null,
-            'approved_date' => null,
             'submitted_date' => $this->faker->dateTimeBetween('-1 year', 'now'),
             'remarks' => $this->faker->sentence,
             'status' => $this->faker->randomElement(['submitted','approved','declined','discarded']),
