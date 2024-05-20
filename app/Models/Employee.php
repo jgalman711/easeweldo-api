@@ -103,6 +103,18 @@ class Employee extends Model
         'full_name',
     ];
 
+    public function approvals()
+    {
+        return $this->belongsToMany(Employee::class, 'approvers', 'employee_id', 'requester_employee_id')
+                    ->withTimestamps();
+    }
+
+    public function approvers()
+    {
+        return $this->belongsToMany(Employee::class, 'approvers', 'requester_employee_id', 'employee_id')
+                    ->withTimestamps();
+    }
+
     public function company(): BelongsTo
     {
         return $this->BelongsTo(Company::class);

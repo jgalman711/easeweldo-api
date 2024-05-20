@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('request_approver', function (Blueprint $table) {
+        Schema::create('request_approvers', function (Blueprint $table) {
             $table->id();
             $table->string('request_model');
             $table->unsignedBigInteger('request_id');
@@ -25,6 +25,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('request_approver');
+        Schema::dropIfExists('request_approvers');
     }
 };
