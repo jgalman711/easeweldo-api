@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\LeaveRequest;
+use App\Http\Requests\V2\EmployeeLeaveRequest;
 use App\Http\Resources\V2\LeaveResource;
 use App\Models\Company;
 use App\Models\Employee;
@@ -35,10 +35,18 @@ class LeaveController extends Controller
         return $this->sendResponse(new LeaveResource($leave), 'Employee leave retrieved successfully.');
     }
 
-    public function store(LeaveRequest $request, Company $company, Employee $employee): JsonResponse
+    public function store(EmployeeLeaveRequest $request, Company $company, Employee $employee): JsonResponse
     {
         $input = $request->validated();
         $this->leaveService->apply($employee, $input);
         return $this->sendMessage('Leaves created successfully.');
+    }
+
+    public function update(EmployeeLeaveRequest $request, Company $company, Employee $employee, int $leaveId): JsonResponse
+    {
+        $input = $request->validated();
+        $leave = $employee->leaves()->findOrFail($leaveId);
+        $leave->update($input);
+        return $this->sendResponse(new LeaveResource($leave), 'Leave updated successfully.');
     }
 }

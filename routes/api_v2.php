@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'companies/{company}', 'middleware' => ['auth:sanctum', 'valid.company.user']], function () {
     Route::apiResource('employees.approvers', ApproverController::class);
-    Route::apiResource('employees.leaves', LeaveController::class);
+    Route::apiResource('employees.leaves', LeaveController::class)->except('destroy');
     Route::apiResource('employees.salary-computation', SalaryComputationController::class)->only('index');
     Route::apiResource('employees.time-corrections', TimeCorrectionController::class)->only('index', 'show');
 });
