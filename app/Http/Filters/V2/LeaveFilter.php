@@ -6,9 +6,20 @@ use Illuminate\Contracts\Database\Query\Builder;
 
 class LeaveFilter extends Filter
 {
-    public function status(string $value): Builder
+    protected $sortable = [
+        'date',
+        'status',
+        'type'
+    ];
+
+    public function status(string $status): Builder
     {
-        return $this->builder->whereIn('status', explode(',', $value));
+        return $this->builder->whereIn('status', explode(',', $status));
+    }
+
+    public function type(string $type): Builder
+    {
+        return $this->builder->whereIn('type', explode(',', $type));
     }
 
     public function date(string $date): Builder

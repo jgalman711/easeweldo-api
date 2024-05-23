@@ -11,6 +11,10 @@ abstract class Filter
 
     protected $request;
 
+    protected $sortable = [];
+
+    protected $searchable = [];
+
     public function __construct(Request $request)
     {
         $this->request = $request;
@@ -34,6 +38,27 @@ abstract class Filter
                 $this->$key($value);
             }
         }
+        return $this->builder;
+    }
+
+    public function sort(string $sort): Builder
+    {
+        $sortDirection = 'asc';
+        if (strpos($sort, '-') === 0) {
+            $sortDirection = 'desc';
+            $sort = ltrim($sort, '-');
+        }
+
+        if (!in_array($sort, $this->sortable)) {
+            return $this->builder;
+        }
+
+        return $this->builder->orderBy($sort, $sortDirection);
+    }
+
+    public function search(string $search): Builder
+    {
+        // do the searching next
         return $this->builder;
     }
 
