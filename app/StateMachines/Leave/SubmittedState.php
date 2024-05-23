@@ -3,14 +3,20 @@
 namespace App\StateMachines\Leave;
 
 use App\Enumerators\LeaveEnumerator;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class SubmittedState extends BaseState
 {
     public function approve(string $reason = null): void
     {
+        $user = Auth::user();
+        throw_unless($user->hasRole('business-admin') || $user->hasRole('approver'), 'User is not authorized.');
         $this->leave->update([
             'status' => LeaveEnumerator::APPROVED,
-            'remarks' => $reason
+            'remarks' => $reason,
+            'processed_by' => $user->id,
+            'processed_at' => Carbon::now()
         ]);
     
         if ($this->leave->type !== LeaveEnumerator::TYPE_WITHOUT_PAY) {
@@ -27,9 +33,13 @@ class SubmittedState extends BaseState
 
     public function decline(string $reason = null): void
     {
+        $user = Auth::user();
+        throw_unless($user->hasRole('business-admin') || $user->hasRole('approver'), 'User is not authorized.');
         $this->leave->update([
             'status' => LeaveEnumerator::DECLINED,
-            'remarks' => $reason
+            'remarks' => $reason,
+            'processed_by' => $user->id,
+            'processed_at' => Carbon::now()
         ]);
     }
 

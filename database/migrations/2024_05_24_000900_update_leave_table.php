@@ -10,14 +10,17 @@ return new class extends Migration
     {
         Schema::table('leaves', function (Blueprint $table) {
             $table->dropColumn(['approved_by', 'approved_date']);
+            $table->unsignedBigInteger('processed_by')->after('submitted_date')->nullable();
+            $table->timestamp('processed_at')->after('processed_by')->nullable();
         });
     }
 
     public function down(): void
     {
-        Schema::table('leaves', function (Blueprint $table) {
+        Schema::table('your_table_name', function (Blueprint $table) {
             $table->unsignedBigInteger('approved_by')->after('submitted_date')->nullable();
             $table->timestamp('approved_date')->after('approved_by')->nullable();
+            $table->dropColumn(['processed_by', 'processed_at']);
         });
     }
 };

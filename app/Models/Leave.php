@@ -26,6 +26,8 @@ class Leave extends Model
         'hours',
         'date',
         'submitted_date',
+        'processed_by',
+        'processed_at',
         'remarks',
         'status',
     ];
