@@ -41,8 +41,6 @@ use App\Http\Controllers\Qr\EmployeeQrController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalaryComputationController;
 use App\Http\Controllers\SettingController;
-use App\Http\Controllers\SubscriptionController;
-use App\Http\Controllers\SubscriptionPricesController;
 use App\Http\Controllers\SynchBiometricsController;
 use App\Http\Controllers\TimeRecordController;
 use App\Http\Controllers\TimesheetUploadController;
@@ -79,8 +77,6 @@ Route::post('personal/login', [PersonalLoginController::class, 'login']);
 Route::post('reset-password', PasswordResetController::class);
 Route::post('forgot-password', ForgotPasswordController::class);
 
-Route::apiResource('/subscriptions', SubscriptionController::class)->only('index', 'show');
-Route::apiResource('/subscription-prices', SubscriptionPricesController::class)->only('index');
 Route::apiResource('/payment-methods', PaymentMethodController::class)->only('index');
 
 Route::get('payrolls/{payroll}/download', DownloadPayrollController::class);

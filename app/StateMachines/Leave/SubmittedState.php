@@ -11,7 +11,7 @@ class SubmittedState extends BaseState
     public function approve(string $reason = null): void
     {
         $user = Auth::user();
-        throw_unless($user->hasRole('business-admin') || $user->hasRole('approver'), 'User is not authorized.');
+        throw_unless($user->hasRole('business-admin') || $user->hasRole('approver'), 'User is not authorized to approve this leave request.');
         $this->leave->update([
             'status' => LeaveEnumerator::APPROVED,
             'remarks' => $reason,
@@ -34,7 +34,7 @@ class SubmittedState extends BaseState
     public function decline(string $reason = null): void
     {
         $user = Auth::user();
-        throw_unless($user->hasRole('business-admin') || $user->hasRole('approver'), 'User is not authorized.');
+        throw_unless($user->hasRole('business-admin') || $user->hasRole('approver'), 'User is not authorized to decline this leave request.');
         $this->leave->update([
             'status' => LeaveEnumerator::DECLINED,
             'remarks' => $reason,
@@ -47,7 +47,9 @@ class SubmittedState extends BaseState
     {
         $this->leave->update([
             'status' => LeaveEnumerator::DISCARDED,
-            'remarks' => $reason
+            'remarks' => $reason,
+            'processed_by' => Auth::id(),
+            'processed_at' => Carbon::now()
         ]);
     }
 }
