@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Controller;
+use App\Http\Filters\V2\LeaveFilter;
 use App\Http\Requests\V2\EmployeeLeaveRequest;
 use App\Http\Resources\V2\LeaveResource;
 use App\Models\Company;
@@ -19,9 +20,9 @@ class LeaveController extends Controller
         $this->leaveService = $leaveService;
     }
 
-    public function index(Company $company, Employee $employee): JsonResponse
+    public function index(LeaveFilter $filter, Company $company, Employee $employee): JsonResponse
     {
-        $leaves = $employee->load('supervisor')->leaves()->paginate();
+        $leaves = $employee->load('supervisor')->leaves()->filter($filter)->paginate();
         $leaves->getCollection()->each->setRelation('employee', $employee);
         $leaves->getCollection()->each->setRelation('company', $company);
         return $this->sendResponse(LeaveResource::collection($leaves), 'Employee leaves retrieved successfully.');

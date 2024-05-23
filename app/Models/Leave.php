@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Enumerators\LeaveEnumerator;
+use App\Http\Filters\V2\Filter;
 use App\StateMachines\Contracts\LeaveStateContract;
 use App\StateMachines\Leave\BaseState;
 use App\StateMachines\Leave\SubmittedState;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -43,5 +45,10 @@ class Leave extends Model
     public function employee()
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    public function scopeFilter(Builder $builder, Filter $filters)
+    {
+        return $filters->apply($builder);
     }
 }

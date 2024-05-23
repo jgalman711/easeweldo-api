@@ -13,21 +13,6 @@ class Controller
 {
     use AuthorizesRequests, Cache, CompanyEmployee, Filter, ValidatesRequests;
 
-    public const ADMIN_CACHE_KEY = 'admin';
-
-    /**
-     * @OA\Info(
-     *    title="Easeweldo API Documentation",
-     *    version="1.0.0",
-     * )
-     *
-     * @OA\SecurityScheme(
-     *     type="http",
-     *     securityScheme="bearerAuth",
-     *     scheme="bearer",
-     *     bearerFormat="JWT"
-     * )
-     */
     public function sendResponse($result, $message): JsonResponse
     {
         $data = is_array($result) ? $result : $result->response()->getData(true);
