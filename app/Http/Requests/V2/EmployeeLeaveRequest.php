@@ -10,9 +10,10 @@ class EmployeeLeaveRequest extends BaseRequest
     public function rules(): array
     {
         $rules = [
-            'type' => 'required|in:'.implode(',', LeaveEnumerator::TYPES),
+            'title' => self::REQUIRED_STRING,
             'hours' => self::REQUIRED_NUMERIC,
-            'description' => self::REQUIRED_STRING
+            'description' => self::NULLABLE_STRING,
+            'type' => 'required|in:'.implode(',', LeaveEnumerator::TYPES)
         ];
 
         if ($this->method() === "POST") {

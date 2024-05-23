@@ -34,30 +34,27 @@ class LeaveService
                 new Exception('No available leaves left for this type.')
             );
         }
-        $date = Carbon::now()->toDateString();
+        $now = Carbon::now();
+        $date = $now->toDateString();
         while ($fromDate->lte($toDate)) {
             $leaves[] = [
                 'company_id' => $employee->company->id,
                 'employee_id' => $employee->id,
                 'created_by' => Auth::id(),
-                'title' => self::generateTitle($data['type'], $date),
+                'title' => $data['title'],
                 'type' => $data['type'],
                 'description' => $data['description'],
                 'hours' => $data['hours'],
-                'date' => $fromDate,
+                'date' => $fromDate->toDateString(),
                 'submitted_date' => $date,
                 'remarks' => $data['remarks'] ?? null,
-                'status' => LeaveEnumerator::SUBMITTED
+                'status' => LeaveEnumerator::SUBMITTED,
+                'created_at' => $now,
+                'updated_at' => $now
             ];
             $fromDate->addDay();
         }
         Leave::insert($leaves);
         return collect($leaves);
-    }
-
-    private function generateTitle(string $type, string $date): string
-    {
-        $type = ucwords(str_replace("_", " ", $type));
-        return "$type: $date";
     }
 }
